@@ -1,0 +1,4 @@
+*.min.js binary
+*.min.css binary
+build binary
+dist binary
