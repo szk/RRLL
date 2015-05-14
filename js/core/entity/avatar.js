@@ -14,7 +14,8 @@ Avatar.prototype.init = function(eid_, type_, sprite_, x_, y_)
     this.entity.set_next_tick.call(this, 0);
 
     // refer type.js
-    this.cmd_table = [this.cmd_wait, this.cmd_move, this.cmd_use, this.cmd_pickup, this.cmd_talk];
+    this.cmd_table = [this.cmd_wait, this.cmd_move, this.cmd_use, this.cmd_pickup, this.cmd_talk,
+                      this.cmd_menu, this.cmd_automation];
     this.cmd_move_target = [this.entity.up,
                             this.entity.down,
                             this.entity.right,
@@ -47,3 +48,5 @@ Avatar.prototype.cmd_move = function(target_) { this.cmd_move_target[target_].ca
 Avatar.prototype.cmd_use = function(target_) { console.log('use'); };
 Avatar.prototype.cmd_pickup = function(target_) { console.log('pickup'); };
 Avatar.prototype.cmd_talk = function(target_) { console.log('talk'); };
+Avatar.prototype.cmd_menu = function(target_) { console.log('menu'); };
+Avatar.prototype.cmd_automation = function(target_) { console.log('automation'); };

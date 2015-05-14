@@ -26,14 +26,13 @@ SpriteBuilder.prototype.ui = function(resource_) {
         var menu_res = resource_[i];
         var menu_sprite = new UISprite(menu_res.get_global_command());
         menu_sprite.init_as_menu(menu_res.get_x(), menu_res.get_y(), menu_res.get_texture());
+
         this.ui_container.addChild(menu_sprite.get_sprite());
 
         for (var j in menu_res.items)
         {
             var item = menu_res.items[j];
-
             var item_sprite = new UISprite(menu_res.get_global_command());
-            console.log(item);
             item_sprite.init_as_button(item.get_label(), item.get_command(),
                                        item.get_x(), item.get_y(),
                                        item.get_width(), item.get_height(), item.get_texture());

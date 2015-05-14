@@ -17,7 +17,6 @@ UISprite.prototype.init_as_menu = function(x_, y_, texture_)
 UISprite.prototype.init_as_button = function(label_, command_, x_, y_, width_, height_,
                                              texture_)
 {
-    console.log(arguments);
     this.sprite = new PIXI.Sprite(texture_);
     this.x = x_;
     this.y = y_;

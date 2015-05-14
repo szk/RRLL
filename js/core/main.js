@@ -73,8 +73,7 @@ RRLL.prototype.scene_check = function (scene_result_) {
         case RC.NEXT_SCENE.LOADING: break;
         case RC.NEXT_SCENE.PLAYING: break;
         case RC.NEXT_SCENE.RANKING: break;
-        case RC.NEXT_SCENE.INFO: break;
+        case RC.NEXT_SCENE.INFO: console.log('config info'); break;
         case RC.NEXT_SCENE.RETURN: break;
     }
-
 };

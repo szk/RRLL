@@ -52,7 +52,7 @@ RC.NEXT_SCENE = {
     RETURN: 8
 };
 
-/// bitmask test (not working)
+/// bitmask test (not using)
 RC.CMD_TYPE = {
     ACTOR:    0x10000000,
     CLIENT:   0x20000000,
@@ -67,8 +67,13 @@ RC.CMD_ACTOR_ACT = {
     PICKUP: 3,
     TALK: 4,
     MENU: 5,
-    RESERVED1: 6,
+    AUTOMATION: 6,
     RESERVED2: 7
+};
+
+RC.CMD_ACTOR_AUTOMATION = {
+    STATUS: 0,
+    EXPLORING: 1
 };
 
 RC.CMD_ACTOR_DIR = {
@@ -84,7 +89,8 @@ RC.CMD_ACTOR_DIR = {
 
 RC.CMD_MENU_TYPE = {
     CONFIG: 0,
-    INFO: 1
+    INFO: 1,
+    INVENTRY: 1
 };
 
 //

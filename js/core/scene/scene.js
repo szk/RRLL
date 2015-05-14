@@ -39,7 +39,6 @@ Scene.prototype.update = function(ui_) {
         case RC.CMD_MENU_TYPE.CONFIG:
             console.log('config menu');
             break;
-
         case RC.CMD_MENU_TYPE.INFO:
             console.log('info menu');
             break;
