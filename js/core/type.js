@@ -40,18 +40,38 @@ RC.TEXTURE_CATEGORY = {
     TOOL:9
 };
 
-RC.ACTOR_CMD = {
+RC.NEXT_SCENE = {
+    CONTINUE: 0,
+    CONFIG: 1,
+    GAMEOVER: 2,
+    INTRO: 3,
+    LOADING: 4,
+    PLAYING: 5,
+    RANKING: 6,
+    INFO: 7,
+    RETURN: 8
+};
+
+/// bitmask test (not working)
+RC.CMD_TYPE = {
+    ACTOR:    0x10000000,
+    CLIENT:   0x20000000,
+    NETWORK:  0x40000000,
+    RESERVED: 0x80000000
+};
+
+RC.CMD_ACTOR_ACT = {
     WAIT: 0,
     MOVE: 1,
     USE: 2,
     PICKUP: 3,
     TALK: 4,
-    RESERVED0: 5,
+    MENU: 5,
     RESERVED1: 6,
     RESERVED2: 7
 };
 
-RC.ACTOR_DIR = {
+RC.CMD_ACTOR_DIR = {
     UP: 0,
     DOWN: 1,
     RIGHT: 2,
@@ -60,6 +80,11 @@ RC.ACTOR_DIR = {
     UPLEFT: 5,
     DOWNRIGHT: 6,
     DOWNLEFT: 7
+};
+
+RC.CMD_MENU_TYPE = {
+    CONFIG: 0,
+    INFO: 1
 };
 
 //

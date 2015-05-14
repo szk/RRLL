@@ -7,6 +7,7 @@ function SpriteBuilder() {
 
 SpriteBuilder.prototype.init = function(map_container_, entity_container_,
                                         fx_container_, ui_container_) {
+    this.asset = this.asset_;
     this.map_container = map_container_;
     this.entity_container = entity_container_;
     this.fx_container = fx_container_;
@@ -23,50 +24,41 @@ SpriteBuilder.prototype.ui = function(resource_) {
     for (var i in resource_)
     {
         var menu_res = resource_[i];
-        var test_menu = new Menu;
-        test_menu.init(this.ui_container, menu_res.get_global_command(), 100, 200);
-
-        console.log(menu_res.items);
+        var menu_sprite = new UISprite(menu_res.get_global_command());
+        menu_sprite.init_as_menu(menu_res.get_x(), menu_res.get_y(), menu_res.get_texture());
+        this.ui_container.addChild(menu_sprite.get_sprite());
 
         for (var j in menu_res.items)
         {
             var item = menu_res.items[j];
-             test_menu.add_testbutton(item.label,
-                                      item.command,
-                                      item.x,
-                                      item.y);
-/*
-            menu_res[j].label;
-            menu_res[j].command;
-            menu_res[j].x;
-            menu_res[j].y;
-            menu_res[j].width;
-            menu_res[j].height;
 
-            var item_x = this.x + x_,
-                item_y = this.y + y_;
-
-            this.testmenu = new PIXI.Graphics();
-            this.testmenu.beginFill(0xFF0000, 1);
-            this.testmenu.drawRect(item_x, item_y, 50, 50);
-
-            this.testmenu.hitArea = new PIXI.Rectangle(item_x, item_y, 50, 50);
-            this.testmenu.interactive = true;
-
-            this.testmenu.mousedown = (function()
-                                       { this.global_command.add(command_); }).bind(this);
-
-            var textobj = new PIXI.Text(label_, {font:'bold 13pt Arial', fill:'white'});
-            textobj.position.x = item_x;
-            textobj.position.y = item_y;
-            this.testmenu.addChild(textobj);
-
-            this.container.addChild(this.testmenu);
-*/
+            var item_sprite = new UISprite(menu_res.get_global_command());
+            console.log(item);
+            item_sprite.init_as_button(item.get_label(), item.get_command(),
+                                       item.get_x(), item.get_y(),
+                                       item.get_width(), item.get_height(), item.get_texture());
+            var sprite = menu_sprite.get_sprite();
+            sprite.addChild(item_sprite.get_sprite());
         }
-
-
-
-        console.log();
     }
 };
+/*
+SpriteBuilder.prototype.dom = function(resource_) {
+    var input = new PIXI.DOM.Sprite( '<input type="text" placeholder="enter message" />',
+                                     { x: 10, y: 10 } );
+    this.ui_container.addChild(input);
+
+    var button = new PIXI.DOM.Sprite( '<button style="font-size: 150%; color: red;" onclick="console.log(this);">oohoho</button>',
+                                     { x: 100, y: 40 } );
+    this.ui_container.addChild(button);
+
+    console.log(input.domElement);
+    console.log(input.domElement);// check 'value'
+
+    var iframe = new PIXI.DOM.Sprite( '<iframe>', { src: "http://www.pixijs.com" } );
+    iframe.position.x = 100; iframe.position.y = 100;
+    this.ui_container.addChild(iframe);
+
+//     input.destroy(); input = null; iframe.destroy(); iframe = null;
+};
+*/

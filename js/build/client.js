@@ -30127,7 +30127,8 @@ module.exports = {
 	var generateFakeTexture = function(w, h) {
 		return {
 			baseTexture: { hasLoaded: true },
-			frame: { width: w, height: h }
+			frame: { width: w, height: h },
+			_frame: { width: w, height: h } // szk added it for Pixi v3
 		};
 	};
 
@@ -30187,8 +30188,11 @@ module.exports = {
 	};
 
 	/* pixi.js doesn't render / touch children of hidden sprites at all, so we have to go all the way up to find out if we are invisible or not */
+// 	var invisbilityCheck = function(displayObject) { return false; // szk added it for Pixi v3
+// // 		return !displayObject.visible || displayObject.alpha <= 0 || (displayObject.stage !== displayObject && (!displayObject.parent || invisbilityCheck(displayObject.parent)));
+// 	};
 	var invisbilityCheck = function(displayObject) {
-		return !displayObject.visible || displayObject.alpha <= 0 || (displayObject.stage !== displayObject && (!displayObject.parent || invisbilityCheck(displayObject.parent)));
+ 	    return !displayObject.visible || displayObject.alpha <= 0; // szk added it for Pixi v3
 	};
 
 	//
@@ -30660,18 +30664,38 @@ RC.TEXTURE_CATEGORY = {
     TOOL:9
 };
 
-RC.ACTOR_CMD = {
+RC.NEXT_SCENE = {
+    CONTINUE: 0,
+    CONFIG: 1,
+    GAMEOVER: 2,
+    INTRO: 3,
+    LOADING: 4,
+    PLAYING: 5,
+    RANKING: 6,
+    INFO: 7,
+    RETURN: 8
+};
+
+/// bitmask test (not working)
+RC.CMD_TYPE = {
+    ACTOR:    0x10000000,
+    CLIENT:   0x20000000,
+    NETWORK:  0x40000000,
+    RESERVED: 0x80000000
+};
+
+RC.CMD_ACTOR_ACT = {
     WAIT: 0,
     MOVE: 1,
     USE: 2,
     PICKUP: 3,
     TALK: 4,
-    RESERVED0: 5,
+    MENU: 5,
     RESERVED1: 6,
     RESERVED2: 7
 };
 
-RC.ACTOR_DIR = {
+RC.CMD_ACTOR_DIR = {
     UP: 0,
     DOWN: 1,
     RIGHT: 2,
@@ -30680,6 +30704,11 @@ RC.ACTOR_DIR = {
     UPLEFT: 5,
     DOWNRIGHT: 6,
     DOWNLEFT: 7
+};
+
+RC.CMD_MENU_TYPE = {
+    CONFIG: 0,
+    INFO: 1
 };
 
 //
@@ -31216,6 +31245,8 @@ function MenuItem()
     this.width = 0;
     this.height = 0;
 
+    this.texture = null;
+
     this.label = null;
     this.color = 0x000000;
     this.outline = 0x00000;
@@ -31224,15 +31255,16 @@ function MenuItem()
 }
 
 MenuItem.prototype.get_label = function() { return this.label; };
-MenuItem.prototype.get_color = function() { return this.label; };
-MenuItem.prototype.get_outline = function() { return this.label; };
-MenuItem.prototype.get_x = function() { return this.label; };
-MenuItem.prototype.get_y = function() { return this.label; };
-MenuItem.prototype.get_width = function() { return this.label; };
-MenuItem.prototype.get_height = function() { return this.label; };
+MenuItem.prototype.get_color = function() { return this.color; };
+MenuItem.prototype.get_outline = function() { return this.outline; };
+MenuItem.prototype.get_x = function() { return this.x; };
+MenuItem.prototype.get_y = function() { return this.y; };
+MenuItem.prototype.get_width = function() { return this.width; };
+MenuItem.prototype.get_height = function() { return this.height; };
 MenuItem.prototype.get_command = function() { return this.command; };
+MenuItem.prototype.get_texture = function() { return this.texture; };
 
-MenuItem.prototype.init = function(label_, command_, x_, y_, width_, height_)
+MenuItem.prototype.init = function(label_, command_, x_, y_, width_, height_, texture_)
 {
     this.label = label_;
     this.command = command_; /// XXX
@@ -31240,6 +31272,8 @@ MenuItem.prototype.init = function(label_, command_, x_, y_, width_, height_)
     this.y = y_;
     this.width = width_;
     this.height = height_;
+
+    this.texture = texture_;
 };
 
 MenuItem.prototype.set_appearance = function()
@@ -31248,16 +31282,15 @@ MenuItem.prototype.set_appearance = function()
 
 
 function Menu() {
-    this.container = null;
     this.global_command = null;
+    this.texture = null;
     this.x = this.y = 0;
     this.items = [];
 }
 
-Menu.prototype.init = function(container_, command_, x_, y_) {
-    this.container = container_;
+Menu.prototype.init = function(command_, texture_, x_, y_) {
     this.global_command = command_;
-
+    this.texture = texture_;
     this.x = x_;
     this.y = y_;
 };
@@ -31267,69 +31300,73 @@ Menu.prototype.add_item = function(menu_item_) {
 };
 
 Menu.prototype.get_global_command = function() { return this.global_command; };
-
-Menu.prototype.add_testbutton = function(label_, command_, x_, y_) {
-    var item_x = this.x + x_,
-        item_y = this.y + y_;
-
-    this.testmenu = new PIXI.Graphics();
-    this.testmenu.beginFill(0xFF0000, 1);
-    this.testmenu.drawRect(item_x, item_y, 50, 50);
-
-    this.testmenu.hitArea = new PIXI.Rectangle(item_x, item_y, 50, 50);
-    this.testmenu.interactive = true;
-
-    this.testmenu.mousedown = (function()
-    { console.log(command_); this.global_command.add(command_); }).bind(this);
-
-    var textobj = new PIXI.Text(label_, {font:'bold 13pt Arial', fill:'white'});
-    textobj.position.x = item_x;
-    textobj.position.y = item_y;
-    this.testmenu.addChild(textobj);
-
-    this.container.addChild(this.testmenu);
-};
+Menu.prototype.get_texture = function() { return this.texture; };
+Menu.prototype.get_x = function() { return this.x; };
+Menu.prototype.get_y = function() { return this.y; };
 
 function UI() {
     this.listener = new window.keypress.Listener();
     this.menu = [];
-    this.move_controller = new Menu();
+    this.asset = null;
+    this.move_panel = new Menu();
+    this.config_panel = new Menu();
     this.command_queue = new buckets.Queue();
 }
 
-UI.prototype.init = function(container_)
+UI.prototype.init = function(asset_, container_)
 {
+    this.asset = asset_;
     // make panel for moving
-    this.move_controller.init(container_, this.command_queue, 100, 200);
+    this.move_panel.init(this.command_queue, this.asset.get_texture(1), 100, 200);
 
-    var move_menu = [['.', [RC.ACTOR_CMD.WAIT, RC.ACTOR_DIR.LEFT], 0, 300, 50, 50],
-                     ['h', [RC.ACTOR_CMD.MOVE, RC.ACTOR_DIR.LEFT], 60, 300, 50, 50],
-                     ['j', [RC.ACTOR_CMD.MOVE, RC.ACTOR_DIR.DOWN], 120, 300, 50, 50],
-                     ['k', [RC.ACTOR_CMD.MOVE, RC.ACTOR_DIR.UP], 180, 300, 50, 50],
-                     ['l', [RC.ACTOR_CMD.MOVE, RC.ACTOR_DIR.RIGHT], 240, 300, 50, 50],
-                     ['y', [RC.ACTOR_CMD.MOVE, RC.ACTOR_DIR.UPLEFT], 300, 300, 50, 50],
-                     ['u', [RC.ACTOR_CMD.MOVE, RC.ACTOR_DIR.UPRIGHT], 360, 300, 50, 50],
-                     ['b', [RC.ACTOR_CMD.MOVE, RC.ACTOR_DIR.DOWNLEFT], 420, 300, 50, 50],
-                     ['n', [RC.ACTOR_CMD.MOVE, RC.ACTOR_DIR.DOWNRIGHT], 480, 300, 50, 50]];
-
+    var move_menu = [['s', [RC.CMD_ACTOR_ACT.WAIT, RC.CMD_ACTOR_DIR.LEFT], 0, 0, 50, 50,
+                      this.asset.get_texture(3)],
+                     ['a', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.LEFT], 60, 0, 50, 50,
+                      this.asset.get_texture(3)],
+                     ['x', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWN], 120, 0, 50, 50,
+                      this.asset.get_texture(3)],
+                     ['w', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UP], 180, 0, 50, 50,
+                      this.asset.get_texture(3)],
+                     ['d', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.RIGHT], 240, 0, 50, 50,
+                      this.asset.get_texture(3)],
+                     ['s', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPLEFT], 300, 0, 50, 50,
+                      this.asset.get_texture(3)],
+                     ['e', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPRIGHT], 360, 0, 50, 50,
+                      this.asset.get_texture(3)],
+                     ['z', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNLEFT], 420, 0, 50, 50,
+                      this.asset.get_texture(3)],
+                     ['c', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNRIGHT], 480, 0, 50, 50,
+                      this.asset.get_texture(3)]];
+/*
+ * qwe aqw
+ * asd zse
+ * zxc xcd
+ */
+    // should be simpler
     for (var i in move_menu)
     {
         var menuitem = new MenuItem();
         menuitem.init.apply(menuitem, move_menu[i]);
-        this.move_controller.add_item(menuitem);
+        this.move_panel.add_item(menuitem);
     }
-    this.add_menu(this.move_controller);
+    this.add_menu(this.move_panel);
+
+    // make panel for configuration
+    this.config_panel.init(this.command_queue, this.asset.get_texture(1), 0, 0);
+    var config_button = new MenuItem();
+    config_button.init('esc', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CONFIG], 0, 0, 50, 50,
+                       this.asset.get_texture(3));
+    this.config_panel.add_item(config_button);
+    this.add_menu(this.config_panel);
 
     return true;
 };
 
 UI.prototype.is_command_queued = function() { return !(this.command_queue.isEmpty()); };
 UI.prototype.get_command_queue = function() { return this.command_queue; };
-UI.prototype.get_menu = function() { return this.menu; };
-UI.prototype.set_debug_console = function(asset_) {};
+UI.prototype.clear_command_queue = function() { this.command_queue.clear(); };
 
-UI.prototype.set_asset = function(asset_) {
-};
+UI.prototype.get_menu = function() { return this.menu; };
 
 UI.prototype.set_entity = function(entity_) {
     this.set_keybinding(entity_);
@@ -31343,33 +31380,33 @@ UI.prototype.set_keybinding = function(entity_) {
     var my_scope = this;
     var my_combos = this.listener.register_many([
         // wait
-        {   "keys"          : ".",
-            "on_keydown"    : function() { this.command_queue.add([RC.ACTOR_CMD.WAIT, RC.ACTOR_DIR.LEFT]); },
+        {   "keys"          : "s",
+            "on_keydown"    : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.WAIT, RC.CMD_ACTOR_DIR.LEFT]); },
             "this"          : my_scope },
         // move
-        {   "keys"          : "h",
-            "on_keydown"    : function() { this.command_queue.add([RC.ACTOR_CMD.MOVE, RC.ACTOR_DIR.LEFT]); },
+        {   "keys"          : "a",
+            "on_keydown"    : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.LEFT]); },
             "this"          : my_scope },
-        {   "keys"          : "j",
-            "on_keydown"    : function() { this.command_queue.add([RC.ACTOR_CMD.MOVE, RC.ACTOR_DIR.DOWN]); },
+        {   "keys"          : "x",
+            "on_keydown"    : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWN]); },
             "this"          : my_scope },
-        {   "keys"          : "k",
-            "on_keydown"    : function() { this.command_queue.add([RC.ACTOR_CMD.MOVE, RC.ACTOR_DIR.UP]); },
+        {   "keys"          : "w",
+            "on_keydown"    : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UP]); },
             "this"          : my_scope },
-        {   "keys"          : "l",
-            "on_keydown"    : function() { this.command_queue.add([RC.ACTOR_CMD.MOVE, RC.ACTOR_DIR.RIGHT]); },
+        {   "keys"          : "d",
+            "on_keydown"    : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.RIGHT]); },
             "this"          : my_scope },
-        {   "keys"          : "y",
-            "on_keydown"    : function() { this.command_queue.add([RC.ACTOR_CMD.MOVE, RC.ACTOR_DIR.UPLEFT]); },
+        {   "keys"          : "q",
+            "on_keydown"    : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPLEFT]); },
             "this"          : my_scope },
-        {   "keys"          : "u",
-            "on_keydown"    : function() { this.command_queue.add([RC.ACTOR_CMD.MOVE, RC.ACTOR_DIR.UPRIGHT]); },
+        {   "keys"          : "e",
+            "on_keydown"    : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPRIGHT]); },
             "this"          : my_scope },
-        {   "keys"          : "b",
-            "on_keydown"    : function() { this.command_queue.add([RC.ACTOR_CMD.MOVE, RC.ACTOR_DIR.DOWNLEFT]); },
+        {   "keys"          : "z",
+            "on_keydown"    : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNLEFT]); },
             "this"          : my_scope },
-        {   "keys"          : "n",
-            "on_keydown"    : function() { this.command_queue.add([RC.ACTOR_CMD.MOVE, RC.ACTOR_DIR.DOWNRIGHT]); },
+        {   "keys"          : "c",
+            "on_keydown"    : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNRIGHT]); },
             "this"          : my_scope }
     ]);
 };
@@ -32238,36 +32275,50 @@ EntitySprite.prototype.init = function(texture_, dir_, tile_x_, tile_y_)
 {
 };
 
-function UISprite() {
+function UISprite(global_command_)
+{
+    this.global_command = global_command_;
+    this.sprite = null;
 };
 
-UISprite.prototype = Object.create(PIXI.Sprite.prototype);
-UISprite.prototype.constructor = UISprite;
-
-UISprite.prototype.init = function(label_, command_, x_, y_)
+UISprite.prototype.init_as_menu = function(x_, y_, texture_)
 {
-    var item_x = this.x + x_,
-        item_y = this.y + y_;
+    this.sprite = new PIXI.Sprite(texture_);
+    this.x = x_;
+    this.y = y_;
 
-    this.testmenu = new PIXI.Graphics();
-    this.testmenu.beginFill(0xFF0000, 1);
-    this.testmenu.drawRect(item_x, item_y, 50, 50);
+    this.sprite.position.x = this.x;
+    this.sprite.position.y = this.y;
+};
 
-    this.testmenu.hitArea = new PIXI.Rectangle(item_x, item_y, 50, 50);
-    this.testmenu.interactive = true;
+UISprite.prototype.init_as_button = function(label_, command_, x_, y_, width_, height_,
+                                             texture_)
+{
+    console.log(arguments);
+    this.sprite = new PIXI.Sprite(texture_);
+    this.x = x_;
+    this.y = y_;
+    this.command = command_;
 
-    this.testmenu.mousedown = (function()
+    this.sprite.position.x = this.x;
+    this.sprite.position.y = this.y;
+
+    this.sprite.width = width_;
+    this.sprite.height = height_;
+
+    this.sprite.interactive = true;
+    this.sprite.buttonMode = true;
+
+    this.sprite.touchstart = this.sprite.mousedown = (function()
     { this.global_command.add(command_); }).bind(this);
 
     var textobj = new PIXI.Text(label_, {font:'bold 13pt Arial', fill:'white'});
-    textobj.position.x = item_x;
-    textobj.position.y = item_y;
-    this.testmenu.addChild(textobj);
-
-    this.container.addChild(this.testmenu);
-
+    this.sprite.addChild(textobj);
 };
 
+UISprite.prototype.get_sprite = function() {
+    return this.sprite;
+};
 
 
 /*
@@ -32291,6 +32342,7 @@ function SpriteBuilder() {
 
 SpriteBuilder.prototype.init = function(map_container_, entity_container_,
                                         fx_container_, ui_container_) {
+    this.asset = this.asset_;
     this.map_container = map_container_;
     this.entity_container = entity_container_;
     this.fx_container = fx_container_;
@@ -32307,53 +32359,44 @@ SpriteBuilder.prototype.ui = function(resource_) {
     for (var i in resource_)
     {
         var menu_res = resource_[i];
-        var test_menu = new Menu;
-        test_menu.init(this.ui_container, menu_res.get_global_command(), 100, 200);
-
-        console.log(menu_res.items);
+        var menu_sprite = new UISprite(menu_res.get_global_command());
+        menu_sprite.init_as_menu(menu_res.get_x(), menu_res.get_y(), menu_res.get_texture());
+        this.ui_container.addChild(menu_sprite.get_sprite());
 
         for (var j in menu_res.items)
         {
             var item = menu_res.items[j];
-             test_menu.add_testbutton(item.label,
-                                      item.command,
-                                      item.x,
-                                      item.y);
-/*
-            menu_res[j].label;
-            menu_res[j].command;
-            menu_res[j].x;
-            menu_res[j].y;
-            menu_res[j].width;
-            menu_res[j].height;
 
-            var item_x = this.x + x_,
-                item_y = this.y + y_;
-
-            this.testmenu = new PIXI.Graphics();
-            this.testmenu.beginFill(0xFF0000, 1);
-            this.testmenu.drawRect(item_x, item_y, 50, 50);
-
-            this.testmenu.hitArea = new PIXI.Rectangle(item_x, item_y, 50, 50);
-            this.testmenu.interactive = true;
-
-            this.testmenu.mousedown = (function()
-                                       { this.global_command.add(command_); }).bind(this);
-
-            var textobj = new PIXI.Text(label_, {font:'bold 13pt Arial', fill:'white'});
-            textobj.position.x = item_x;
-            textobj.position.y = item_y;
-            this.testmenu.addChild(textobj);
-
-            this.container.addChild(this.testmenu);
-*/
+            var item_sprite = new UISprite(menu_res.get_global_command());
+            console.log(item);
+            item_sprite.init_as_button(item.get_label(), item.get_command(),
+                                       item.get_x(), item.get_y(),
+                                       item.get_width(), item.get_height(), item.get_texture());
+            var sprite = menu_sprite.get_sprite();
+            sprite.addChild(item_sprite.get_sprite());
         }
-
-
-
-        console.log();
     }
 };
+/*
+SpriteBuilder.prototype.dom = function(resource_) {
+    var input = new PIXI.DOM.Sprite( '<input type="text" placeholder="enter message" />',
+                                     { x: 10, y: 10 } );
+    this.ui_container.addChild(input);
+
+    var button = new PIXI.DOM.Sprite( '<button style="font-size: 150%; color: red;" onclick="console.log(this);">oohoho</button>',
+                                     { x: 100, y: 40 } );
+    this.ui_container.addChild(button);
+
+    console.log(input.domElement);
+    console.log(input.domElement);// check 'value'
+
+    var iframe = new PIXI.DOM.Sprite( '<iframe>', { src: "http://www.pixijs.com" } );
+    iframe.position.x = 100; iframe.position.y = 100;
+    this.ui_container.addChild(iframe);
+
+//     input.destroy(); input = null; iframe.destroy(); iframe = null;
+};
+*/
 
 function Overlay() {
     this.brush = new PIXI.Graphics();
@@ -32634,7 +32677,7 @@ Map.prototype.iso_to_screen = function(x_, y_)
             (((x_ * this.tile_height) + (y_ * this.tile_height)) / 2) + this.y_start];
 };
 
-function Gfx(max_x_, max_y_, aspect_, root_texture_) {
+function Gfx() {
     this.bg = new PIXI.Graphics();
     this.root = new PIXI.Container;
 
@@ -32643,7 +32686,7 @@ function Gfx(max_x_, max_y_, aspect_, root_texture_) {
 
 Gfx.prototype.get_root = function() { return this.root; };
 
-Gfx.prototype.init = function() {
+Gfx.prototype.init = function(asset_) {
     this.bg.beginFill(RC.BG, 1);
     this.bg.drawRect(0, 0, RC.SCREEN_WIDTH, RC.SCREEN_HEIGHT);
     this.root.addChild(this.bg);
@@ -32683,6 +32726,8 @@ Gfx.prototype.get_uicontainer = function() {
 
 Gfx.prototype.build_sprite = function(resource_) {
     this.sprite_builder.ui(resource_);
+
+//     this.sprite_builder.dom();
 };
 
 function Sound() {
@@ -32742,6 +32787,30 @@ Scene.prototype.init = function(asset_) {
 };
 
 Scene.prototype.update = function(ui_) {
+    // what type of command in command queue?
+    var cmd = ui_.get_command_queue().peek();
+    if (!cmd && !cmd[0] && !cmd[1])
+    {
+        ui_.clear_command_queue();
+        return;
+    }
+
+    if (cmd[0] == RC.CMD_ACTOR_ACT.MENU)
+    {
+        switch (cmd[1])
+        {
+        case RC.CMD_MENU_TYPE.CONFIG:
+            console.log('config menu');
+            break;
+
+        case RC.CMD_MENU_TYPE.INFO:
+            console.log('info menu');
+            break;
+        }
+        ui_.clear_command_queue();
+        return;
+    }
+
     this.level.update(ui_.get_command_queue());
 };
 
@@ -32754,11 +32823,51 @@ function Playing() {
 Playing.prototype = Object.create(Scene.prototype);
 Playing.prototype.constructor = Playing;
 
-Playing.prototype.init = function(asset_) {
+Playing.prototype.get_avatar = function() {
+    return this.avatar;
 };
 
-Playing.prototype.update = function() {
-    ;
+Playing.prototype.get_level = function() {
+    return this.level;
+};
+
+Playing.prototype.init = function(asset_) {
+    // initialize terrain
+    this.terrain = asset_.get_terrain("defaultmap");
+    this.terrain.init();
+    // initialize level
+    this.level = asset_.get_level("defaultlevel");
+    this.level.init(this.terrain);
+    this.avatar = this.level.get_avatar();
+
+    return true;
+};
+
+Playing.prototype.update = function(ui_) {
+    // what type of command in command queue?
+    var cmd = ui_.get_command_queue().peek();
+    if (!cmd && !cmd[0] && !cmd[1])
+    {
+        ui_.clear_command_queue();
+        return RC.NEXT_SCENE.CONTINUE;
+    }
+
+    if (cmd[0] == RC.CMD_ACTOR_ACT.MENU)
+    {
+        ui_.clear_command_queue();
+        switch (cmd[1])
+        {
+        case RC.CMD_MENU_TYPE.CONFIG:
+            return RC.NEXT_SCENE.CONFIG;
+
+        case RC.CMD_MENU_TYPE.INFO:
+            return RC.NEXT_SCENE.INFO;
+        }
+        return RC.NEXT_SCENE.CONTINUE;
+    }
+
+    this.level.update(ui_.get_command_queue());
+    return RC.NEXT_SCENE.CONTINUE;
 };
 
 
@@ -32769,15 +32878,19 @@ function RRLL(asset_location_) {
 
     this.gfx = new Gfx();
     this.sound = new Sound();
-    this.scene = new Scene();
+    this.scene = new Playing();
+//     this.playing_scene = new Playing();
     this.asset = new Asset("img/texture.png");
     this.ui = new UI();
+
+    this.scene_stack = [];
+    this.scene_stack.push(this.scene);
 
     // create a renderer instance.
     this.renderer = PIXI.autoDetectRenderer(RC.SCREEN_WIDTH, RC.SCREEN_HEIGHT);
     // add the renderer view element to the DOM
     document.body.appendChild(this.renderer.view);
-    PIXI.DOM.Setup(this.renderer, true );
+    PIXI.DOM.Setup(this.renderer, true);
 }
 
 RRLL.prototype.start = function()
@@ -32800,25 +32913,42 @@ RRLL.prototype.start = function()
 };
 
 RRLL.prototype.init_scene = function() {
-    this.scene.init(this.asset);
+    this.scene_stack[this.scene_stack.length - 1].init(this.asset);
 
-    this.ui.init(this.gfx.get_uicontainer());
-    this.ui.set_entity(this.scene.get_avatar());
-    this.ui.set_asset(this.asset);
+    this.ui.init(this.asset, this.gfx.get_uicontainer());
+    this.ui.set_entity(this.scene_stack[this.scene_stack.length - 1].get_avatar());
 
+    // initialize overlay menu
     this.gfx.build_sprite(this.ui.get_menu());
 };
 
 RRLL.prototype.animate = function me() {
+    var current_scene = this.scene_stack[this.scene_stack.length - 1];
     requestAnimationFrame(me.bind(this));
 
     if (this.ui.is_command_queued())
     {
         if (this.gfx.is_animating()) { ; }
-        else { this.scene.update(this.ui); }
+        else { this.scene_check(current_scene.update(this.ui)); }
     }
-    this.gfx.update(this.scene.get_avatar(), this.scene.get_level());
+    this.gfx.update(current_scene.get_avatar(), current_scene.get_level());
 
     // render the stage
     this.renderer.render(this.gfx.get_root());
+};
+
+RRLL.prototype.scene_check = function (scene_result_) {
+    if (scene_result_ == RC.NEXT_SCENE.CONTINUE) { return; }
+    switch (scene_result_)
+    {
+        case RC.NEXT_SCENE.CONFIG: console.log('config scene'); break;
+        case RC.NEXT_SCENE.GAMEOVER: break;
+        case RC.NEXT_SCENE.INTRO: break;
+        case RC.NEXT_SCENE.LOADING: break;
+        case RC.NEXT_SCENE.PLAYING: break;
+        case RC.NEXT_SCENE.RANKING: break;
+        case RC.NEXT_SCENE.INFO: break;
+        case RC.NEXT_SCENE.RETURN: break;
+    }
+
 };
