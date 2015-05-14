@@ -31279,7 +31279,7 @@ Menu.prototype.add_testbutton = function(label_, command_, x_, y_) {
     this.testmenu.hitArea = new PIXI.Rectangle(item_x, item_y, 50, 50);
     this.testmenu.interactive = true;
 
-    this.testmenu.mousedown = (function()
+    this.testmenu.touchstart = this.testmenu.mousedown = (function()
     { console.log(command_); this.global_command.add(command_); }).bind(this);
 
     var textobj = new PIXI.Text(label_, {font:'bold 13pt Arial', fill:'white'});
@@ -32256,7 +32256,7 @@ UISprite.prototype.init = function(label_, command_, x_, y_)
     this.testmenu.hitArea = new PIXI.Rectangle(item_x, item_y, 50, 50);
     this.testmenu.interactive = true;
 
-    this.testmenu.mousedown = (function()
+    this.testmenu.touchstart = this.testmenu.mousedown = (function()
     { this.global_command.add(command_); }).bind(this);
 
     var textobj = new PIXI.Text(label_, {font:'bold 13pt Arial', fill:'white'});
@@ -32265,7 +32265,6 @@ UISprite.prototype.init = function(label_, command_, x_, y_)
     this.testmenu.addChild(textobj);
 
     this.container.addChild(this.testmenu);
-
 };
 
 
