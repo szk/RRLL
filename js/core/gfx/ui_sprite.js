@@ -1,32 +1,46 @@
-function UISprite() {
+function UISprite(global_command_)
+{
+    this.global_command = global_command_;
+    this.sprite = null;
 };
 
-UISprite.prototype = Object.create(PIXI.Sprite.prototype);
-UISprite.prototype.constructor = UISprite;
-
-UISprite.prototype.init = function(label_, command_, x_, y_)
+UISprite.prototype.init_as_menu = function(x_, y_, texture_)
 {
-    var item_x = this.x + x_,
-        item_y = this.y + y_;
+    this.sprite = new PIXI.Sprite(texture_);
+    this.x = x_;
+    this.y = y_;
 
-    this.testmenu = new PIXI.Graphics();
-    this.testmenu.beginFill(0xFF0000, 1);
-    this.testmenu.drawRect(item_x, item_y, 50, 50);
+    this.sprite.position.x = this.x;
+    this.sprite.position.y = this.y;
+};
 
-    this.testmenu.hitArea = new PIXI.Rectangle(item_x, item_y, 50, 50);
-    this.testmenu.interactive = true;
+UISprite.prototype.init_as_button = function(label_, command_, x_, y_, width_, height_,
+                                             texture_)
+{
+    this.sprite = new PIXI.Sprite(texture_);
+    this.x = x_;
+    this.y = y_;
+    this.command = command_;
 
-    this.testmenu.touchstart = this.testmenu.mousedown = (function()
+    this.sprite.position.x = this.x;
+    this.sprite.position.y = this.y;
+
+    this.sprite.width = width_;
+    this.sprite.height = height_;
+
+    this.sprite.interactive = true;
+    this.sprite.buttonMode = true;
+
+    this.sprite.touchstart = this.sprite.mousedown = (function()
     { this.global_command.add(command_); }).bind(this);
 
     var textobj = new PIXI.Text(label_, {font:'bold 13pt Arial', fill:'white'});
-    textobj.position.x = item_x;
-    textobj.position.y = item_y;
-    this.testmenu.addChild(textobj);
-
-    this.container.addChild(this.testmenu);
+    this.sprite.addChild(textobj);
 };
 
+UISprite.prototype.get_sprite = function() {
+    return this.sprite;
+};
 
 
 /*

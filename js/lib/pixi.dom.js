@@ -101,7 +101,8 @@
 	var generateFakeTexture = function(w, h) {
 		return {
 			baseTexture: { hasLoaded: true },
-			frame: { width: w, height: h }
+			frame: { width: w, height: h },
+			_frame: { width: w, height: h } // szk added it for Pixi v3
 		};
 	};
 
@@ -161,8 +162,11 @@
 	};
 
 	/* pixi.js doesn't render / touch children of hidden sprites at all, so we have to go all the way up to find out if we are invisible or not */
+// 	var invisbilityCheck = function(displayObject) { return false; // szk added it for Pixi v3
+// // 		return !displayObject.visible || displayObject.alpha <= 0 || (displayObject.stage !== displayObject && (!displayObject.parent || invisbilityCheck(displayObject.parent)));
+// 	};
 	var invisbilityCheck = function(displayObject) {
-		return !displayObject.visible || displayObject.alpha <= 0 || (displayObject.stage !== displayObject && (!displayObject.parent || invisbilityCheck(displayObject.parent)));
+ 	    return !displayObject.visible || displayObject.alpha <= 0; // szk added it for Pixi v3
 	};
 
 	//

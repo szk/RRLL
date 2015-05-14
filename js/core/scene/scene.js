@@ -24,5 +24,28 @@ Scene.prototype.init = function(asset_) {
 };
 
 Scene.prototype.update = function(ui_) {
+    // what type of command in command queue?
+    var cmd = ui_.get_command_queue().peek();
+    if (!cmd && !cmd[0] && !cmd[1])
+    {
+        ui_.clear_command_queue();
+        return;
+    }
+
+    if (cmd[0] == RC.CMD_ACTOR_ACT.MENU)
+    {
+        switch (cmd[1])
+        {
+        case RC.CMD_MENU_TYPE.CONFIG:
+            console.log('config menu');
+            break;
+        case RC.CMD_MENU_TYPE.INFO:
+            console.log('info menu');
+            break;
+        }
+        ui_.clear_command_queue();
+        return;
+    }
+
     this.level.update(ui_.get_command_queue());
 };

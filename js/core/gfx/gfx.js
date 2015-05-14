@@ -1,4 +1,4 @@
-function Gfx(max_x_, max_y_, aspect_, root_texture_) {
+function Gfx() {
     this.bg = new PIXI.Graphics();
     this.root = new PIXI.Container;
 
@@ -7,7 +7,7 @@ function Gfx(max_x_, max_y_, aspect_, root_texture_) {
 
 Gfx.prototype.get_root = function() { return this.root; };
 
-Gfx.prototype.init = function() {
+Gfx.prototype.init = function(asset_) {
     this.bg.beginFill(RC.BG, 1);
     this.bg.drawRect(0, 0, RC.SCREEN_WIDTH, RC.SCREEN_HEIGHT);
     this.root.addChild(this.bg);
@@ -47,4 +47,6 @@ Gfx.prototype.get_uicontainer = function() {
 
 Gfx.prototype.build_sprite = function(resource_) {
     this.sprite_builder.ui(resource_);
+
+//     this.sprite_builder.dom();
 };
