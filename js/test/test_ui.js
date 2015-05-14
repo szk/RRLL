@@ -10,4 +10,9 @@ describe('UI', function() {
     it('initialization', function() {
         expect(this.ui.init()).toBe(true);
     });
+
+    it('build menu', function() {
+        expect(this.ui.init()).toBe(true);
+        //
+    });
 });
