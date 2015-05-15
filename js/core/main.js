@@ -8,7 +8,6 @@ function RRLL(asset_location_) {
     this.ui = new UI();
 
     this.scene_stack = new SceneStack();
-    this.scene_stack.init();
 
     // create a renderer instance.
     this.renderer = PIXI.autoDetectRenderer(RC.SCREEN_WIDTH, RC.SCREEN_HEIGHT);
@@ -38,9 +37,7 @@ RRLL.prototype.start = function()
 
 RRLL.prototype.init_scene = function() {
     this.ui.init(this.asset, this.gfx.get_uicontainer());
-    this.scene_stack.init_top(this.asset, this.ui);
-
-//     this.ui.set_entity(this.scene_stack.get_top_avatar());
+    this.scene_stack.init(this.asset, this.ui);
 
     // initialize overlay menu
     this.gfx.build_sprite(this.ui.get_menu());
@@ -54,6 +51,16 @@ RRLL.prototype.animate = function me() {
         if (this.gfx.is_animating()) { ; }
         else { this.scene_stack.update_top(this.ui); }
     }
+
+    // XXX FIXME
+/*
+    var top_scene = this.scene_stack.get_top();
+    if (!top_scene.is_initialized())
+    {
+        top_scene.init(this.asset);
+        this.gfx.build_sprite(top_scene.get_menus());
+    }
+*/
     this.gfx.update(this.scene_stack.get_top_level());
 
     // render the stage

@@ -31206,7 +31206,6 @@ Level.prototype.update_tile_stat = function()
 };
 
 Level.prototype.add_entity_tick = function(entity_) {
-
     var next_tick = new TickNode(entity_.get_next_tick());
     if (this.tick_bst.contains(next_tick))
     {
@@ -32799,7 +32798,19 @@ Sound.prototype.get_audio = function() { return this.audio; };
 function Scene() {
     this.avatar = null;
     this.level = null;
+    this.initialized = false;
 }
+
+Scene.prototype.init = function(asset_) {
+    return true;
+};
+
+Scene.prototype.update = function(ui_) {
+};
+
+Scene.prototype.is_initialized = function() {
+    return this.initialized;
+};
 
 Scene.prototype.get_avatar = function() {
     return this.avatar;
@@ -32809,15 +32820,7 @@ Scene.prototype.get_level = function() {
     return this.level;
 };
 
-Scene.prototype.has_own_level = function() {
-    return false;
-};
-
-Scene.prototype.init = function(asset_) {
-    return true;
-};
-
-Scene.prototype.update = function(ui_) {
+Scene.prototype.get_menus = function() {
 };
 
 
@@ -32876,10 +32879,16 @@ ConfigScene.prototype = Object.create(Scene.prototype);
 ConfigScene.prototype.constructor = ConfigScene;
 
 ConfigScene.prototype.init = function(asset_) {
+    console.log('config scene initializing');
+    this.initialized = true;
     return true;
 };
 
 ConfigScene.prototype.update = function(ui_) {
+};
+
+ConfigScene.prototype.get_menus = function() {
+    return [];
 };
 
 function InfoScene() {
@@ -32900,10 +32909,10 @@ InfoScene.prototype.update = function(ui_) {
 
 function SceneStack() {
     this.stack = [];
+    this.top = null;
 }
 
-SceneStack.prototype.init = function() {
-
+SceneStack.prototype.init = function(asset_, ui_) {
 //     this.loading_scene = new LoadingScene();
 //     this.intro_scene = new IntroScene();
     this.playing_scene = new PlayingScene();
@@ -32913,28 +32922,35 @@ SceneStack.prototype.init = function() {
 //     this.ranking_scene = new RankingScene();
 
     this.push_(this.playing_scene);
-};
-
-SceneStack.prototype.init_top = function(asset_, ui_) {
-    this.stack[this.stack.length - 1].init(asset_);
+    this.top.init(asset_);
     ui_.set_keybinding();
 };
 
 SceneStack.prototype.update_top = function(ui_) {
-    var result = this.stack[this.stack.length - 1].update(ui_);
+    var result = this.top.update(ui_);
     this.result_check_(result, ui_);
 };
 
-SceneStack.prototype.get_top_avatar = function() {
-    return this.stack[this.stack.length - 1].get_avatar();
+SceneStack.prototype.get_top = function() {
+    return this.top;
 };
 
 SceneStack.prototype.get_top_level = function() {
-    return this.stack[this.stack.length - 1].get_level();
+    if (this.top.get_level()) { return this.top.get_level(); }
+
+    var i = this.stack.length - 1;
+    while (this.stack[i])
+    {
+        if (this.stack[i].get_level() != null)
+        { return this.stack[i].get_level(); }
+        --i;
+    }
+    return null;
 };
 
 SceneStack.prototype.push_ = function(scene_) {
     this.stack.push(scene_);
+    this.top = scene_;
 };
 
 SceneStack.prototype.result_check_ = function (result_, ui_) {
@@ -32942,14 +32958,18 @@ SceneStack.prototype.result_check_ = function (result_, ui_) {
 
     switch (result_)
     {
-        case RC.NEXT_SCENE.CONFIG: console.log('config scene'); break;
-        case RC.NEXT_SCENE.GAMEOVER: break;
-        case RC.NEXT_SCENE.INTRO: break;
-        case RC.NEXT_SCENE.LOADING: break;
-        case RC.NEXT_SCENE.PLAYING: break;
-        case RC.NEXT_SCENE.RANKING: break;
-        case RC.NEXT_SCENE.INFO: console.log('info scene'); break;
-        case RC.NEXT_SCENE.RETURN: break;
+    case RC.NEXT_SCENE.CONFIG:
+        this.push_(this.config_scene);
+        break;
+    case RC.NEXT_SCENE.GAMEOVER: break;
+    case RC.NEXT_SCENE.INTRO: break;
+    case RC.NEXT_SCENE.LOADING: break;
+    case RC.NEXT_SCENE.PLAYING: break;
+    case RC.NEXT_SCENE.RANKING: break;
+    case RC.NEXT_SCENE.INFO:
+        this.push_(this.info_scene);
+        break;
+    case RC.NEXT_SCENE.RETURN: break;
     }
 };
 
@@ -32963,7 +32983,6 @@ function RRLL(asset_location_) {
     this.ui = new UI();
 
     this.scene_stack = new SceneStack();
-    this.scene_stack.init();
 
     // create a renderer instance.
     this.renderer = PIXI.autoDetectRenderer(RC.SCREEN_WIDTH, RC.SCREEN_HEIGHT);
@@ -32993,9 +33012,7 @@ RRLL.prototype.start = function()
 
 RRLL.prototype.init_scene = function() {
     this.ui.init(this.asset, this.gfx.get_uicontainer());
-    this.scene_stack.init_top(this.asset, this.ui);
-
-//     this.ui.set_entity(this.scene_stack.get_top_avatar());
+    this.scene_stack.init(this.asset, this.ui);
 
     // initialize overlay menu
     this.gfx.build_sprite(this.ui.get_menu());
@@ -33009,6 +33026,16 @@ RRLL.prototype.animate = function me() {
         if (this.gfx.is_animating()) { ; }
         else { this.scene_stack.update_top(this.ui); }
     }
+
+    // XXX FIXME
+/*
+    var top_scene = this.scene_stack.get_top();
+    if (!top_scene.is_initialized())
+    {
+        top_scene.init(this.asset);
+        this.gfx.build_sprite(top_scene.get_menus());
+    }
+*/
     this.gfx.update(this.scene_stack.get_top_level());
 
     // render the stage
