@@ -155,7 +155,6 @@ Level.prototype.update_tile_stat = function()
 };
 
 Level.prototype.add_entity_tick = function(entity_) {
-
     var next_tick = new TickNode(entity_.get_next_tick());
     if (this.tick_bst.contains(next_tick))
     {

@@ -30,10 +30,9 @@ Gfx.prototype.init = function(asset_) {
                              this.overlay.get_uicontainer());
 
     return true;
-;};
+};
 
-Gfx.prototype.update = function(avatar_, level_) {
-    this.map.update_avatar_pos(avatar_.get_x(), avatar_.get_y());
+Gfx.prototype.update = function(level_) {
     this.map.update_fov(level_);
 };
 

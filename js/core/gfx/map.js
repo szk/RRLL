@@ -33,7 +33,7 @@ Map.prototype.init = function() {
     this.gen_dpys(RC.MAP_RADIUS, RC.MAP_RADIUS, RC.MAP_RADIUS);
 };
 
-Map.prototype.update_avatar_pos = function(x_, y_)
+Map.prototype.update_avatar_pos_ = function(x_, y_)
 {
     this.avatar_x = x_;
     this.avatar_y = y_;
@@ -78,6 +78,8 @@ Map.prototype.is_animating = function()
 Map.prototype.update_fov = function(level_)
 {
     var avatar = level_.get_avatar();
+    this.update_avatar_pos_(avatar.get_x(), avatar.get_y());
+
     if (this.scroll_wait > 0)
     {
         var scroll_step_x = this.scroll_pos[0] / RC.SCROLL_FRAME;
