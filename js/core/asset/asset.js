@@ -8,10 +8,9 @@ function Asset(image_atlas_url_) {
 
     this.eid_pool = new IdPool();
 
+    this.terrain = {};
+    this.level = {};
     this.avatar_template = {};
-    this.terrain_template = {};
-    this.terrain_template_bak = {};
-    this.level_template = {};
     this.actor_template = {};
     this.item_template = {};
 
@@ -47,11 +46,11 @@ Asset.prototype.get_texture = function(id_)
     return this.texture_array[id_];
 };
 
-Asset.prototype.get_avatar = function(name_) { return this.avatar_template[name_]; };
-Asset.prototype.get_level = function(name_) { return this.level_template[name_]; };
-Asset.prototype.get_terrain = function(name_) { return this.terrain_template[name_]; };
-Asset.prototype.get_actor = function(name_) { return this.actor_template[name_]; }; // should duplicate
-Asset.prototype.get_item = function(name_) { return this.item_template[name_]; }; // should duplicate
+Asset.prototype.find_level = function(name_) { return this.level[name_]; };
+Asset.prototype.find_terrain = function(name_) { return this.terrain[name_]; };
+Asset.prototype.find_avatar_ = function(name_) { return this.avatar_template[name_]; };
+Asset.prototype.find_actor_ = function(name_) { return this.actor_template[name_]; };
+Asset.prototype.find_item_ = function(name_) { return this.item_template[name_]; };
 
 Asset.prototype.init = function(level_url_)
 {
@@ -176,13 +175,13 @@ Asset.prototype.gen_terrain = function(entry_)
 
     for (var i = 0; i < entry_.length; ++i)
     {
-        this.terrain_template[entry_[i].name] = new Terrain(51, 51,
-                                                            this.get_texture(parseInt(entry_[i].blank_texture_id)));
-        this.terrain_template[entry_[i].name].load(entry_[i].chip,
-                                                   this.get_texture(parseInt(entry_[i].fg_texture_id)),
-                                                   this.get_texture(parseInt(entry_[i].bg_texture_id)));
+        this.terrain[entry_[i].name] = new Terrain(51, 51,
+                                                   this.get_texture(parseInt(entry_[i].blank_texture_id)));
+        this.terrain[entry_[i].name].load(entry_[i].chip,
+                                          this.get_texture(parseInt(entry_[i].fg_texture_id)),
+                                          this.get_texture(parseInt(entry_[i].bg_texture_id)));
     }
-    return this.terrain_template.length;
+    return this.terrain.length;
 };
 
 Asset.prototype.gen_avatar = function(entry_)
@@ -219,13 +218,13 @@ Asset.prototype.gen_level = function(entry_)
     {
         var level = new Level(parseInt(entry_[i].width), parseInt(entry_[i].height),
                               this.get_texture(parseInt(entry_[i].texture_id)));
-        this.level_template[entry_[i].name] = level;
+        this.level[entry_[i].name] = level;
 
         for (var avatar_type in entry_[i].avatar)
         {
             for (var avtr in entry_[i].avatar[avatar_type])
             {
-                var newavatar = clone(this.get_avatar(avatar_type));
+                var newavatar = clone(this.find_avatar_(avatar_type));
                 newavatar.init(this.eid_pool.get_id(), avatar_type,
                                new PIXI.Sprite(this.get_texture(131)),
                                parseInt(entry_[i].avatar[avatar_type][avtr].x),
@@ -237,7 +236,7 @@ Asset.prototype.gen_level = function(entry_)
         {
             for (var actr in entry_[i].actor[actor_type])
             {
-                var newactor = clone(this.get_actor(actor_type));
+                var newactor = clone(this.find_actor_(actor_type));
                 newactor.init(this.eid_pool.get_id(), actor_type,
                               new PIXI.Sprite(this.get_texture(128)),
                               parseInt(entry_[i].actor[actor_type][actr].x),
@@ -249,7 +248,7 @@ Asset.prototype.gen_level = function(entry_)
         {
             for (var itm in entry_[i].item[item_type])
             {
-                var newitem = clone(this.get_item(item_type));
+                var newitem = clone(this.find_item_(item_type));
                 newitem.init(this.eid_pool.get_id(), item_type,
                              new PIXI.Sprite(this.get_texture(130)),
                              parseInt(entry_[i].item[item_type][itm].x),
@@ -259,5 +258,5 @@ Asset.prototype.gen_level = function(entry_)
         }
 
     }
-    return this.level_template.length;
+    return this.level.length;
 };

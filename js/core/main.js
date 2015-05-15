@@ -4,13 +4,10 @@ function RRLL(asset_location_) {
 
     this.gfx = new Gfx();
     this.sound = new Sound();
-    this.scene = new Playing();
-//     this.playing_scene = new Playing();
     this.asset = new Asset("img/texture.png");
     this.ui = new UI();
 
-    this.scene_stack = [];
-    this.scene_stack.push(this.scene);
+    this.scene_stack = new SceneStack();
 
     // create a renderer instance.
     this.renderer = PIXI.autoDetectRenderer(RC.SCREEN_WIDTH, RC.SCREEN_HEIGHT);
@@ -39,41 +36,33 @@ RRLL.prototype.start = function()
 };
 
 RRLL.prototype.init_scene = function() {
-    this.scene_stack[this.scene_stack.length - 1].init(this.asset);
-
     this.ui.init(this.asset, this.gfx.get_uicontainer());
-    this.ui.set_entity(this.scene_stack[this.scene_stack.length - 1].get_avatar());
+    this.scene_stack.init(this.asset, this.ui);
 
     // initialize overlay menu
     this.gfx.build_sprite(this.ui.get_menu());
 };
 
 RRLL.prototype.animate = function me() {
-    var current_scene = this.scene_stack[this.scene_stack.length - 1];
     requestAnimationFrame(me.bind(this));
 
     if (this.ui.is_command_queued())
     {
         if (this.gfx.is_animating()) { ; }
-        else { this.scene_check(current_scene.update(this.ui)); }
+        else { this.scene_stack.update_top(this.ui); }
     }
-    this.gfx.update(current_scene.get_avatar(), current_scene.get_level());
+
+    // XXX FIXME
+/*
+    var top_scene = this.scene_stack.get_top();
+    if (!top_scene.is_initialized())
+    {
+        top_scene.init(this.asset);
+        this.gfx.build_sprite(top_scene.get_menus());
+    }
+*/
+    this.gfx.update(this.scene_stack.get_top_level());
 
     // render the stage
     this.renderer.render(this.gfx.get_root());
-};
-
-RRLL.prototype.scene_check = function (scene_result_) {
-    if (scene_result_ == RC.NEXT_SCENE.CONTINUE) { return; }
-    switch (scene_result_)
-    {
-        case RC.NEXT_SCENE.CONFIG: console.log('config scene'); break;
-        case RC.NEXT_SCENE.GAMEOVER: break;
-        case RC.NEXT_SCENE.INTRO: break;
-        case RC.NEXT_SCENE.LOADING: break;
-        case RC.NEXT_SCENE.PLAYING: break;
-        case RC.NEXT_SCENE.RANKING: break;
-        case RC.NEXT_SCENE.INFO: console.log('config info'); break;
-        case RC.NEXT_SCENE.RETURN: break;
-    }
 };

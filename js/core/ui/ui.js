@@ -87,16 +87,11 @@ UI.prototype.build_menu = function(panel_, menu_array_) {
 };
 
 UI.prototype.get_menu = function() { return this.menu; };
-
-UI.prototype.set_entity = function(entity_) {
-    this.set_keybinding(entity_);
-};
-
 UI.prototype.add_menu = function(menu_) {
     this.menu.push(menu_);
 };
 
-UI.prototype.set_keybinding = function(entity_) {
+UI.prototype.set_keybinding = function() {
     var my_scope = this;
     var my_combos = this.listener.register_many([
         // wait
