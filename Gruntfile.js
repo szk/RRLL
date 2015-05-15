@@ -50,8 +50,11 @@ module.exports = function(grunt) {
                       'js/core/scene/loading.js',
                       'js/core/scene/intro.js',
                       'js/core/scene/playing.js',
+                      'js/core/scene/config.js',
+                      'js/core/scene/info.js',
                       'js/core/scene/gameover.js',
                       'js/core/scene/ranking.js',
+                      'js/core/scene/scene_stack.js',
                       // main
                       'js/core/main.js'],
                 dest: 'js/build/client.js'

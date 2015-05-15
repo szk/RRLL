@@ -31402,16 +31402,11 @@ UI.prototype.build_menu = function(panel_, menu_array_) {
 };
 
 UI.prototype.get_menu = function() { return this.menu; };
-
-UI.prototype.set_entity = function(entity_) {
-    this.set_keybinding(entity_);
-};
-
 UI.prototype.add_menu = function(menu_) {
     this.menu.push(menu_);
 };
 
-UI.prototype.set_keybinding = function(entity_) {
+UI.prototype.set_keybinding = function() {
     var my_scope = this;
     var my_combos = this.listener.register_many([
         // wait
@@ -31557,10 +31552,9 @@ function Asset(image_atlas_url_) {
 
     this.eid_pool = new IdPool();
 
+    this.terrain = {};
+    this.level = {};
     this.avatar_template = {};
-    this.terrain_template = {};
-    this.terrain_template_bak = {};
-    this.level_template = {};
     this.actor_template = {};
     this.item_template = {};
 
@@ -31596,11 +31590,11 @@ Asset.prototype.get_texture = function(id_)
     return this.texture_array[id_];
 };
 
-Asset.prototype.get_avatar = function(name_) { return this.avatar_template[name_]; };
-Asset.prototype.get_level = function(name_) { return this.level_template[name_]; };
-Asset.prototype.get_terrain = function(name_) { return this.terrain_template[name_]; };
-Asset.prototype.get_actor = function(name_) { return this.actor_template[name_]; }; // should duplicate
-Asset.prototype.get_item = function(name_) { return this.item_template[name_]; }; // should duplicate
+Asset.prototype.find_level = function(name_) { return this.level[name_]; };
+Asset.prototype.find_terrain = function(name_) { return this.terrain[name_]; };
+Asset.prototype.find_avatar_ = function(name_) { return this.avatar_template[name_]; };
+Asset.prototype.find_actor_ = function(name_) { return this.actor_template[name_]; };
+Asset.prototype.find_item_ = function(name_) { return this.item_template[name_]; };
 
 Asset.prototype.init = function(level_url_)
 {
@@ -31725,13 +31719,13 @@ Asset.prototype.gen_terrain = function(entry_)
 
     for (var i = 0; i < entry_.length; ++i)
     {
-        this.terrain_template[entry_[i].name] = new Terrain(51, 51,
-                                                            this.get_texture(parseInt(entry_[i].blank_texture_id)));
-        this.terrain_template[entry_[i].name].load(entry_[i].chip,
-                                                   this.get_texture(parseInt(entry_[i].fg_texture_id)),
-                                                   this.get_texture(parseInt(entry_[i].bg_texture_id)));
+        this.terrain[entry_[i].name] = new Terrain(51, 51,
+                                                   this.get_texture(parseInt(entry_[i].blank_texture_id)));
+        this.terrain[entry_[i].name].load(entry_[i].chip,
+                                          this.get_texture(parseInt(entry_[i].fg_texture_id)),
+                                          this.get_texture(parseInt(entry_[i].bg_texture_id)));
     }
-    return this.terrain_template.length;
+    return this.terrain.length;
 };
 
 Asset.prototype.gen_avatar = function(entry_)
@@ -31768,13 +31762,13 @@ Asset.prototype.gen_level = function(entry_)
     {
         var level = new Level(parseInt(entry_[i].width), parseInt(entry_[i].height),
                               this.get_texture(parseInt(entry_[i].texture_id)));
-        this.level_template[entry_[i].name] = level;
+        this.level[entry_[i].name] = level;
 
         for (var avatar_type in entry_[i].avatar)
         {
             for (var avtr in entry_[i].avatar[avatar_type])
             {
-                var newavatar = clone(this.get_avatar(avatar_type));
+                var newavatar = clone(this.find_avatar_(avatar_type));
                 newavatar.init(this.eid_pool.get_id(), avatar_type,
                                new PIXI.Sprite(this.get_texture(131)),
                                parseInt(entry_[i].avatar[avatar_type][avtr].x),
@@ -31786,7 +31780,7 @@ Asset.prototype.gen_level = function(entry_)
         {
             for (var actr in entry_[i].actor[actor_type])
             {
-                var newactor = clone(this.get_actor(actor_type));
+                var newactor = clone(this.find_actor_(actor_type));
                 newactor.init(this.eid_pool.get_id(), actor_type,
                               new PIXI.Sprite(this.get_texture(128)),
                               parseInt(entry_[i].actor[actor_type][actr].x),
@@ -31798,7 +31792,7 @@ Asset.prototype.gen_level = function(entry_)
         {
             for (var itm in entry_[i].item[item_type])
             {
-                var newitem = clone(this.get_item(item_type));
+                var newitem = clone(this.find_item_(item_type));
                 newitem.init(this.eid_pool.get_id(), item_type,
                              new PIXI.Sprite(this.get_texture(130)),
                              parseInt(entry_[i].item[item_type][itm].x),
@@ -31808,7 +31802,7 @@ Asset.prototype.gen_level = function(entry_)
         }
 
     }
-    return this.level_template.length;
+    return this.level.length;
 };
 
 function TileSprite(texture_, tile_x_, tile_y_) {
@@ -32494,7 +32488,7 @@ Map.prototype.init = function() {
     this.gen_dpys(RC.MAP_RADIUS, RC.MAP_RADIUS, RC.MAP_RADIUS);
 };
 
-Map.prototype.update_avatar_pos = function(x_, y_)
+Map.prototype.update_avatar_pos_ = function(x_, y_)
 {
     this.avatar_x = x_;
     this.avatar_y = y_;
@@ -32539,6 +32533,8 @@ Map.prototype.is_animating = function()
 Map.prototype.update_fov = function(level_)
 {
     var avatar = level_.get_avatar();
+    this.update_avatar_pos_(avatar.get_x(), avatar.get_y());
+
     if (this.scroll_wait > 0)
     {
         var scroll_step_x = this.scroll_pos[0] / RC.SCROLL_FRAME;
@@ -32749,10 +32745,9 @@ Gfx.prototype.init = function(asset_) {
                              this.overlay.get_uicontainer());
 
     return true;
-;};
+};
 
-Gfx.prototype.update = function(avatar_, level_) {
-    this.map.update_avatar_pos(avatar_.get_x(), avatar_.get_y());
+Gfx.prototype.update = function(level_) {
     this.map.update_fov(level_);
 };
 
@@ -32814,75 +32809,39 @@ Scene.prototype.get_level = function() {
     return this.level;
 };
 
-Scene.prototype.init = function(asset_) {
-    // initialize terrain
-    this.terrain = asset_.get_terrain("defaultmap");
-    this.terrain.init();
-    // initialize level
-    this.level = asset_.get_level("defaultlevel");
-    this.level.init(this.terrain);
-    this.avatar = this.level.get_avatar();
+Scene.prototype.has_own_level = function() {
+    return false;
+};
 
+Scene.prototype.init = function(asset_) {
     return true;
 };
 
 Scene.prototype.update = function(ui_) {
-    // what type of command in command queue?
-    var cmd = ui_.get_command_queue().peek();
-    if (!cmd && !cmd[0] && !cmd[1])
-    {
-        ui_.clear_command_queue();
-        return;
-    }
-
-    if (cmd[0] == RC.CMD_ACTOR_ACT.MENU)
-    {
-        switch (cmd[1])
-        {
-        case RC.CMD_MENU_TYPE.CONFIG:
-            console.log('config menu');
-            break;
-        case RC.CMD_MENU_TYPE.INFO:
-            console.log('info menu');
-            break;
-        }
-        ui_.clear_command_queue();
-        return;
-    }
-
-    this.level.update(ui_.get_command_queue());
 };
 
 
 
-function Playing() {
+function PlayingScene() {
     Scene.apply(this, arguments);
 }
 
-Playing.prototype = Object.create(Scene.prototype);
-Playing.prototype.constructor = Playing;
+PlayingScene.prototype = Object.create(Scene.prototype);
+PlayingScene.prototype.constructor = PlayingScene;
 
-Playing.prototype.get_avatar = function() {
-    return this.avatar;
-};
-
-Playing.prototype.get_level = function() {
-    return this.level;
-};
-
-Playing.prototype.init = function(asset_) {
+PlayingScene.prototype.init = function(asset_) {
     // initialize terrain
-    this.terrain = asset_.get_terrain("defaultmap");
+    this.terrain = asset_.find_terrain("defaultmap");
     this.terrain.init();
     // initialize level
-    this.level = asset_.get_level("defaultlevel");
+    this.level = asset_.find_level("defaultlevel");
     this.level.init(this.terrain);
     this.avatar = this.level.get_avatar();
 
     return true;
 };
 
-Playing.prototype.update = function(ui_) {
+PlayingScene.prototype.update = function(ui_) {
     // what type of command in command queue?
     var cmd = ui_.get_command_queue().peek();
     if (!cmd && !cmd[0] && !cmd[1])
@@ -32909,7 +32868,90 @@ Playing.prototype.update = function(ui_) {
     return RC.NEXT_SCENE.CONTINUE;
 };
 
+function ConfigScene() {
+    Scene.apply(this, arguments);
+}
 
+ConfigScene.prototype = Object.create(Scene.prototype);
+ConfigScene.prototype.constructor = ConfigScene;
+
+ConfigScene.prototype.init = function(asset_) {
+    return true;
+};
+
+ConfigScene.prototype.update = function(ui_) {
+};
+
+function InfoScene() {
+    Scene.apply(this, arguments);
+}
+
+InfoScene.prototype = Object.create(Scene.prototype);
+InfoScene.prototype.constructor = InfoScene;
+
+InfoScene.prototype.init = function(asset_) {
+    return true;
+};
+
+InfoScene.prototype.update = function(ui_) {
+};
+
+
+
+function SceneStack() {
+    this.stack = [];
+}
+
+SceneStack.prototype.init = function() {
+
+//     this.loading_scene = new LoadingScene();
+//     this.intro_scene = new IntroScene();
+    this.playing_scene = new PlayingScene();
+    this.config_scene = new ConfigScene();
+//     this.info_scene = new InfoScene();
+//     this.gameover_scene = new GameoverScene();
+//     this.ranking_scene = new RankingScene();
+
+    this.push_(this.playing_scene);
+};
+
+SceneStack.prototype.init_top = function(asset_, ui_) {
+    this.stack[this.stack.length - 1].init(asset_);
+    ui_.set_keybinding();
+};
+
+SceneStack.prototype.update_top = function(ui_) {
+    var result = this.stack[this.stack.length - 1].update(ui_);
+    this.result_check_(result, ui_);
+};
+
+SceneStack.prototype.get_top_avatar = function() {
+    return this.stack[this.stack.length - 1].get_avatar();
+};
+
+SceneStack.prototype.get_top_level = function() {
+    return this.stack[this.stack.length - 1].get_level();
+};
+
+SceneStack.prototype.push_ = function(scene_) {
+    this.stack.push(scene_);
+};
+
+SceneStack.prototype.result_check_ = function (result_, ui_) {
+    if (result_ == RC.NEXT_SCENE.CONTINUE) { return; }
+
+    switch (result_)
+    {
+        case RC.NEXT_SCENE.CONFIG: console.log('config scene'); break;
+        case RC.NEXT_SCENE.GAMEOVER: break;
+        case RC.NEXT_SCENE.INTRO: break;
+        case RC.NEXT_SCENE.LOADING: break;
+        case RC.NEXT_SCENE.PLAYING: break;
+        case RC.NEXT_SCENE.RANKING: break;
+        case RC.NEXT_SCENE.INFO: console.log('info scene'); break;
+        case RC.NEXT_SCENE.RETURN: break;
+    }
+};
 
 function RRLL(asset_location_) {
     this.asset_location = asset_location_;
@@ -32917,13 +32959,11 @@ function RRLL(asset_location_) {
 
     this.gfx = new Gfx();
     this.sound = new Sound();
-    this.scene = new Playing();
-//     this.playing_scene = new Playing();
     this.asset = new Asset("img/texture.png");
     this.ui = new UI();
 
-    this.scene_stack = [];
-    this.scene_stack.push(this.scene);
+    this.scene_stack = new SceneStack();
+    this.scene_stack.init();
 
     // create a renderer instance.
     this.renderer = PIXI.autoDetectRenderer(RC.SCREEN_WIDTH, RC.SCREEN_HEIGHT);
@@ -32952,41 +32992,25 @@ RRLL.prototype.start = function()
 };
 
 RRLL.prototype.init_scene = function() {
-    this.scene_stack[this.scene_stack.length - 1].init(this.asset);
-
     this.ui.init(this.asset, this.gfx.get_uicontainer());
-    this.ui.set_entity(this.scene_stack[this.scene_stack.length - 1].get_avatar());
+    this.scene_stack.init_top(this.asset, this.ui);
+
+//     this.ui.set_entity(this.scene_stack.get_top_avatar());
 
     // initialize overlay menu
     this.gfx.build_sprite(this.ui.get_menu());
 };
 
 RRLL.prototype.animate = function me() {
-    var current_scene = this.scene_stack[this.scene_stack.length - 1];
     requestAnimationFrame(me.bind(this));
 
     if (this.ui.is_command_queued())
     {
         if (this.gfx.is_animating()) { ; }
-        else { this.scene_check(current_scene.update(this.ui)); }
+        else { this.scene_stack.update_top(this.ui); }
     }
-    this.gfx.update(current_scene.get_avatar(), current_scene.get_level());
+    this.gfx.update(this.scene_stack.get_top_level());
 
     // render the stage
     this.renderer.render(this.gfx.get_root());
-};
-
-RRLL.prototype.scene_check = function (scene_result_) {
-    if (scene_result_ == RC.NEXT_SCENE.CONTINUE) { return; }
-    switch (scene_result_)
-    {
-        case RC.NEXT_SCENE.CONFIG: console.log('config scene'); break;
-        case RC.NEXT_SCENE.GAMEOVER: break;
-        case RC.NEXT_SCENE.INTRO: break;
-        case RC.NEXT_SCENE.LOADING: break;
-        case RC.NEXT_SCENE.PLAYING: break;
-        case RC.NEXT_SCENE.RANKING: break;
-        case RC.NEXT_SCENE.INFO: console.log('config info'); break;
-        case RC.NEXT_SCENE.RETURN: break;
-    }
 };

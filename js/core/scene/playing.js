@@ -1,31 +1,23 @@
-function Playing() {
+function PlayingScene() {
     Scene.apply(this, arguments);
 }
 
-Playing.prototype = Object.create(Scene.prototype);
-Playing.prototype.constructor = Playing;
+PlayingScene.prototype = Object.create(Scene.prototype);
+PlayingScene.prototype.constructor = PlayingScene;
 
-Playing.prototype.get_avatar = function() {
-    return this.avatar;
-};
-
-Playing.prototype.get_level = function() {
-    return this.level;
-};
-
-Playing.prototype.init = function(asset_) {
+PlayingScene.prototype.init = function(asset_) {
     // initialize terrain
-    this.terrain = asset_.get_terrain("defaultmap");
+    this.terrain = asset_.find_terrain("defaultmap");
     this.terrain.init();
     // initialize level
-    this.level = asset_.get_level("defaultlevel");
+    this.level = asset_.find_level("defaultlevel");
     this.level.init(this.terrain);
     this.avatar = this.level.get_avatar();
 
     return true;
 };
 
-Playing.prototype.update = function(ui_) {
+PlayingScene.prototype.update = function(ui_) {
     // what type of command in command queue?
     var cmd = ui_.get_command_queue().peek();
     if (!cmd && !cmd[0] && !cmd[1])
