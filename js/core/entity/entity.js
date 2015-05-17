@@ -1,9 +1,9 @@
 function Entity() {
 }
 
-Entity.prototype.init = function(eid_, type_, sprite_, x_, y_)
+Entity.prototype.init = function(id_, type_, sprite_, x_, y_)
 {
-    this.eid = eid_;
+    this.id = id_;
     this.next_tick = RC.MAX_TICK;
     this.live = true;
 
@@ -25,7 +25,7 @@ Entity.prototype.init = function(eid_, type_, sprite_, x_, y_)
 };
 
 Entity.prototype.is_live = function() { return this.live; };
-Entity.prototype.get_eid = function() { return this.eid; };
+Entity.prototype.get_id = function() { return this.id; };
 Entity.prototype.get_next_tick = function() { return this.next_tick; };
 Entity.prototype.get_displayobject = function() { return this.sprite; };
 

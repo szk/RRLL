@@ -26,7 +26,7 @@ SceneStack.prototype.init_top = function(asset_, ui_) {
     return this.top.init(asset_, ui_);
 };
 
-SceneStack.prototype.top_is_initialized = function(asset_, ui_) {
+SceneStack.prototype.top_is_initialized = function() {
     return this.top.is_initialized();
 };
 
@@ -53,7 +53,7 @@ SceneStack.prototype.push_ = function(scene_) {
 };
 
 SceneStack.prototype.pop_ = function() {
-    this.top.teminate();
+    this.top.terminate();
     this.stack.pop();
     this.top = this.stack[this.stack.length - 1];
 };

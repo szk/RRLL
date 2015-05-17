@@ -30737,9 +30737,9 @@ RC.BG = 0x888888;
 function Entity() {
 }
 
-Entity.prototype.init = function(eid_, type_, sprite_, x_, y_)
+Entity.prototype.init = function(id_, type_, sprite_, x_, y_)
 {
-    this.eid = eid_;
+    this.id = id_;
     this.next_tick = RC.MAX_TICK;
     this.live = true;
 
@@ -30761,7 +30761,7 @@ Entity.prototype.init = function(eid_, type_, sprite_, x_, y_)
 };
 
 Entity.prototype.is_live = function() { return this.live; };
-Entity.prototype.get_eid = function() { return this.eid; };
+Entity.prototype.get_id = function() { return this.id; };
 Entity.prototype.get_next_tick = function() { return this.next_tick; };
 Entity.prototype.get_displayobject = function() { return this.sprite; };
 
@@ -31524,6 +31524,10 @@ function Asset(image_atlas_url_) {
     this.gen_texture(image_atlas_url_);
 
     this.id_pool = new IdPool();
+    this.id_bst = new buckets.BSTree(function(l_, r_)
+                                     { if (l_.get_id() < r_.get_id()) { return -1; }
+                                       else if (l_.get_id() === r_.get_id()) { return 0; }
+                                       return 1; });
 
     this.terrain = {};
     this.level = {};
@@ -31659,14 +31663,13 @@ Asset.prototype.build_default = function(src_)
     return true;
 };
 
-Asset.prototype.gen_id = function()
+Asset.prototype.free = function(entry_)
 {
-    return this.id_pool.get_id();
-};
+    console.log('freeing' + entry_.get_id());
+    entry_.get_sprite().renderable = false;
 
-Asset.prototype.remove_id = function(id_)
-{
-    this.id_pool.free_id(id_);
+//     entry_.get_id();
+//     this.id_pool.free_id(id_);
 };
 
 Asset.prototype.gen_texture = function(image_)
@@ -31681,10 +31684,18 @@ Asset.prototype.gen_texture = function(image_)
 };
 
 // basically, generate by inside of scene
-Asset.prototype.gen_menu = function(cmd_queue_, texture_id_, x_, y_, item_array_)
+Asset.prototype.gen_menu = function(cmd_queue_, texture_, x_, y_, item_array_)
 {
     var menu_sprite = new UISprite(this.id_pool.get_id(), cmd_queue_);
-    menu_sprite.init_as_menu(x_, y_, this.get_texture(texture_id_));
+    this.id_bst.add(menu_sprite);
+
+    if (this.is_url(item_array_[0]))
+    {
+        menu_sprite.init_as_html(x_, y_, item_array_[0]);
+        return menu_sprite;
+    }
+    else
+    { menu_sprite.init_as_menu(x_, y_, this.get_texture(texture_)); }
 
     for (var i in item_array_)
     {
@@ -31697,10 +31708,27 @@ Asset.prototype.gen_menu = function(cmd_queue_, texture_id_, x_, y_, item_array_
                                    item_array_[i][4], // width
                                    item_array_[i][5], // height
                                    item_array_[i][6]); // texture
-        menu_sprite.sprite.addChild(item_sprite.get_sprite());
+        menu_sprite.get_sprite().addChild(item_sprite.get_sprite());
     }
     return menu_sprite;
 };
+
+Asset.prototype.is_url = function(url_)
+{
+    if (url_.match == undefined) { return false; }
+    return url_.match( /^https?:\/\// );
+    /*
+    var div, elm;
+    div = document.getElementById( "info" );
+    elm = document.createElement( "a" );
+    elm.setAttribute( "href", url_);
+    if( elm.protocol.match( /^https?:$/ ) || elm.protocol === ":" || elm.protocol === "" ){
+        elm.appendChild(document.createTextNode(url_));
+        div.appendChild(elm);
+    }
+    */
+};
+
 
 /*
 SpriteBuilder.prototype.dom = function(resource_) {
@@ -31802,6 +31830,7 @@ Asset.prototype.gen_level = function(entry_)
                                parseInt(entry_[i].avatar[avatar_type][avtr].x),
                                parseInt(entry_[i].avatar[avatar_type][avtr].y));
                 level.set_avatar(newavatar);
+                this.id_bst.add(newavatar);
             }
         }
         for (var actor_type in entry_[i].actor)
@@ -31814,6 +31843,7 @@ Asset.prototype.gen_level = function(entry_)
                               parseInt(entry_[i].actor[actor_type][actr].x),
                               parseInt(entry_[i].actor[actor_type][actr].y), 3);
                 level.add_actor(newactor);
+                this.id_bst.add(newactor);
             }
         }
         for (var item_type in entry_[i].item)
@@ -31826,6 +31856,7 @@ Asset.prototype.gen_level = function(entry_)
                              parseInt(entry_[i].item[item_type][itm].x),
                              parseInt(entry_[i].item[item_type][itm].y));
                 level.add_item(newitem);
+                this.id_bst.add(newitem);
             }
         }
 
@@ -32356,6 +32387,13 @@ UISprite.prototype.init_as_menu = function(x_, y_, texture_)
     this.sprite.position.y = this.y;
 };
 
+UISprite.prototype.init_as_html = function(x_, y_, url_)
+{
+    this.sprite = new PIXI.DOM.Sprite( '<iframe>', { src: url_ } );
+    this.sprite.position.x = x_;
+    this.sprite.position.y = y_;
+};
+
 UISprite.prototype.init_as_button = function(label_, command_, x_, y_, width_, height_,
                                              texture_)
 {
@@ -32768,6 +32806,7 @@ Scene.prototype.init = function(asset_, ui_) {
 };
 
 Scene.prototype.terminate = function() {
+    console.log('terminate of base class is called');
 };
 
 Scene.prototype.update = function(ui_) {
@@ -32909,6 +32948,7 @@ function ConfigScene() {
     this.transition_panel = new Menu();
 
     this.menus = [];
+    this.asset = null;
     this.ui = null;
 }
 
@@ -32916,14 +32956,22 @@ ConfigScene.prototype = Object.create(Scene.prototype);
 ConfigScene.prototype.constructor = ConfigScene;
 
 ConfigScene.prototype.init = function(asset_, ui_) {
+    this.asset = asset_;
     this.ui = ui_;
-    var menu = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 512, 300,
-                               [['Cancel', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL],
-                                 0, 0, 100, 50, asset_.get_texture(3)],
-                                ['OK', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.OK],
-                                 210, 0, 100, 50, asset_.get_texture(3)]]);
-    this.ui.add_sprite(menu.get_sprite());
-    this.menus.push(menu);
+
+    var result_btn = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 512, 300,
+                                     [['Cancel', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL],
+                                       0, 0, 100, 50, asset_.get_texture(3)],
+                                      ['OK', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.OK],
+                                       210, 0, 100, 50, asset_.get_texture(3)]]);
+    this.ui.add_sprite(result_btn.get_sprite());
+    this.menus.push(result_btn);
+
+    var config_panel = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 512, 0,
+                                       ["http://www.pixijs.com"]);
+    this.ui.add_sprite(config_panel.get_sprite());
+    this.menus.push(config_panel);
+
     this.initialized = true;
     return true;
 };
@@ -32931,7 +32979,8 @@ ConfigScene.prototype.init = function(asset_, ui_) {
 ConfigScene.prototype.terminate = function() {
     for (var i in this.menus)
     {
-        console.log(this.menus[i].get_id());
+        this.asset.free(this.menus[i]);
+//         console.log(this.menus[i].get_id());
     }
 };
 
@@ -33011,7 +33060,7 @@ SceneStack.prototype.init_top = function(asset_, ui_) {
     return this.top.init(asset_, ui_);
 };
 
-SceneStack.prototype.top_is_initialized = function(asset_, ui_) {
+SceneStack.prototype.top_is_initialized = function() {
     return this.top.is_initialized();
 };
 
@@ -33038,7 +33087,7 @@ SceneStack.prototype.push_ = function(scene_) {
 };
 
 SceneStack.prototype.pop_ = function() {
-    this.top.teminate();
+    this.top.terminate();
     this.stack.pop();
     this.top = this.stack[this.stack.length - 1];
 };
