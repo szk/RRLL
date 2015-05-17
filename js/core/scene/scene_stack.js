@@ -13,7 +13,7 @@ SceneStack.prototype.init = function(asset_, ui_) {
 //     this.ranking_scene = new RankingScene();
 
     this.push_(this.playing_scene);
-    this.top.init(asset_);
+    this.top.init(asset_, ui_);
     ui_.set_keybinding();
 };
 
@@ -22,8 +22,12 @@ SceneStack.prototype.update_top = function(ui_) {
     this.result_check_(result, ui_);
 };
 
-SceneStack.prototype.get_top = function() {
-    return this.top;
+SceneStack.prototype.init_top = function(asset_, ui_) {
+    return this.top.init(asset_, ui_);
+};
+
+SceneStack.prototype.top_is_initialized = function(asset_, ui_) {
+    return this.top.is_initialized();
 };
 
 SceneStack.prototype.get_top_level = function() {
@@ -39,9 +43,19 @@ SceneStack.prototype.get_top_level = function() {
     return null;
 };
 
+SceneStack.prototype.get_top_menus = function() {
+    return this.top.get_menus();
+};
+
 SceneStack.prototype.push_ = function(scene_) {
     this.stack.push(scene_);
     this.top = scene_;
+};
+
+SceneStack.prototype.pop_ = function() {
+    this.top.teminate();
+    this.stack.pop();
+    this.top = this.stack[this.stack.length - 1];
 };
 
 SceneStack.prototype.result_check_ = function (result_, ui_) {
@@ -50,6 +64,7 @@ SceneStack.prototype.result_check_ = function (result_, ui_) {
     switch (result_)
     {
     case RC.NEXT_SCENE.CONFIG:
+        console.log("result check says next is config");
         this.push_(this.config_scene);
         break;
     case RC.NEXT_SCENE.GAMEOVER: break;
@@ -60,6 +75,8 @@ SceneStack.prototype.result_check_ = function (result_, ui_) {
     case RC.NEXT_SCENE.INFO:
         this.push_(this.info_scene);
         break;
-    case RC.NEXT_SCENE.RETURN: break;
+    case RC.NEXT_SCENE.RETURN:
+        this.pop_();
+        break;
     }
 };

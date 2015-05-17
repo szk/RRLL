@@ -20,11 +20,12 @@ SpriteBuilder.prototype.entity = function() {
 SpriteBuilder.prototype.tile = function() {
 };
 
-SpriteBuilder.prototype.ui = function(resource_) {
-    for (var i in resource_)
+SpriteBuilder.prototype.ui = function(res_) {
+    return;
+    for (var i in res_)
     {
-        var menu_res = resource_[i];
-        var menu_sprite = new UISprite(menu_res.get_global_command());
+        var menu_res = res_[i];
+        var menu_sprite = new UISprite(this.id_pool.get_id(), menu_res.get_global_command());
         menu_sprite.init_as_menu(menu_res.get_x(), menu_res.get_y(), menu_res.get_texture());
 
         this.ui_container.addChild(menu_sprite.get_sprite());
@@ -32,7 +33,7 @@ SpriteBuilder.prototype.ui = function(resource_) {
         for (var j in menu_res.items)
         {
             var item = menu_res.items[j];
-            var item_sprite = new UISprite(menu_res.get_global_command());
+            var item_sprite = new UISprite(this.id_pool.get_id(), menu_res.get_global_command());
             item_sprite.init_as_button(item.get_label(), item.get_command(),
                                        item.get_x(), item.get_y(),
                                        item.get_width(), item.get_height(), item.get_texture());
@@ -41,6 +42,7 @@ SpriteBuilder.prototype.ui = function(resource_) {
         }
     }
 };
+
 /*
 SpriteBuilder.prototype.dom = function(resource_) {
     var input = new PIXI.DOM.Sprite( '<input type="text" placeholder="enter message" />',
