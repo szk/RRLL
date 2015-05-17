@@ -1,12 +1,15 @@
-function UISprite(global_command_)
+function UISprite(id_, global_command_)
 {
     this.global_command = global_command_;
     this.sprite = null;
+    this.id = id_;
 };
 
 UISprite.prototype.init_as_menu = function(x_, y_, texture_)
 {
     this.sprite = new PIXI.Sprite(texture_);
+
+    console.log('init_as_menu: ' + this.sprite);
     this.x = x_;
     this.y = y_;
 
@@ -18,6 +21,7 @@ UISprite.prototype.init_as_button = function(label_, command_, x_, y_, width_, h
                                              texture_)
 {
     this.sprite = new PIXI.Sprite(texture_);
+    console.log('init_as_button: ' + this.sprite);
     this.x = x_;
     this.y = y_;
     this.command = command_;
@@ -42,6 +46,9 @@ UISprite.prototype.get_sprite = function() {
     return this.sprite;
 };
 
+UISprite.prototype.get_id = function() {
+    return this.id;
+};
 
 /*
  var input = new PIXI.DOM.Sprite( '<input type="text" placeholder="enter message" />',
@@ -55,3 +62,6 @@ UISprite.prototype.get_sprite = function() {
 
  input.destroy(); input = null; iframe.destroy(); iframe = null;
  */
+
+
+

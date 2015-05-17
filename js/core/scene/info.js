@@ -5,7 +5,7 @@ function InfoScene() {
 InfoScene.prototype = Object.create(Scene.prototype);
 InfoScene.prototype.constructor = InfoScene;
 
-InfoScene.prototype.init = function(asset_) {
+InfoScene.prototype.init = function(asset_, ui_) {
     return true;
 };
 
