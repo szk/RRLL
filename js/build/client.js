@@ -31702,6 +31702,29 @@ Asset.prototype.gen_menu = function(cmd_queue_, texture_id_, x_, y_, item_array_
     return menu_sprite;
 };
 
+/*
+SpriteBuilder.prototype.dom = function(resource_) {
+    var input = new PIXI.DOM.Sprite( '<input type="text" placeholder="enter message" />',
+                                     { x: 10, y: 10 } );
+    this.ui_container.addChild(input);
+
+    var button = new PIXI.DOM.Sprite( '<button style="font-size: 150%; color: red;" onclick="console.log(this);">oohoho</button>',
+                                     { x: 100, y: 40 } );
+    this.ui_container.addChild(button);
+
+    console.log(input.domElement);
+    console.log(input.domElement);// check 'value'
+
+    var iframe = new PIXI.DOM.Sprite( '<iframe>', { src: "http://www.pixijs.com" } );
+    iframe.position.x = 100; iframe.position.y = 100;
+    this.ui_container.addChild(iframe);
+
+//     input.destroy(); input = null; iframe.destroy(); iframe = null;
+};
+*/
+
+
+
 // need validation
 Asset.prototype.gen_item = function(entry_)
 {
@@ -32326,8 +32349,6 @@ function UISprite(id_, global_command_)
 UISprite.prototype.init_as_menu = function(x_, y_, texture_)
 {
     this.sprite = new PIXI.Sprite(texture_);
-
-    console.log('init_as_menu: ' + this.sprite);
     this.x = x_;
     this.y = y_;
 
@@ -32339,7 +32360,6 @@ UISprite.prototype.init_as_button = function(label_, command_, x_, y_, width_, h
                                              texture_)
 {
     this.sprite = new PIXI.Sprite(texture_);
-    console.log('init_as_button: ' + this.sprite);
     this.x = x_;
     this.y = y_;
     this.command = command_;
@@ -32383,72 +32403,6 @@ UISprite.prototype.get_id = function() {
 
 
 
-
-function SpriteBuilder() {
-    this.map_container = null;
-    this.entity_container = null;
-    this.fx_container = null;
-    this.ui_container = null;
-}
-
-SpriteBuilder.prototype.init = function(map_container_, entity_container_,
-                                        fx_container_, ui_container_) {
-    this.asset = this.asset_;
-    this.map_container = map_container_;
-    this.entity_container = entity_container_;
-    this.fx_container = fx_container_;
-    this.ui_container = ui_container_;
-};
-
-SpriteBuilder.prototype.entity = function() {
-};
-
-SpriteBuilder.prototype.tile = function() {
-};
-
-SpriteBuilder.prototype.ui = function(res_) {
-    return;
-    for (var i in res_)
-    {
-        var menu_res = res_[i];
-        var menu_sprite = new UISprite(this.id_pool.get_id(), menu_res.get_global_command());
-        menu_sprite.init_as_menu(menu_res.get_x(), menu_res.get_y(), menu_res.get_texture());
-
-        this.ui_container.addChild(menu_sprite.get_sprite());
-
-        for (var j in menu_res.items)
-        {
-            var item = menu_res.items[j];
-            var item_sprite = new UISprite(this.id_pool.get_id(), menu_res.get_global_command());
-            item_sprite.init_as_button(item.get_label(), item.get_command(),
-                                       item.get_x(), item.get_y(),
-                                       item.get_width(), item.get_height(), item.get_texture());
-            var sprite = menu_sprite.get_sprite();
-            sprite.addChild(item_sprite.get_sprite());
-        }
-    }
-};
-
-/*
-SpriteBuilder.prototype.dom = function(resource_) {
-    var input = new PIXI.DOM.Sprite( '<input type="text" placeholder="enter message" />',
-                                     { x: 10, y: 10 } );
-    this.ui_container.addChild(input);
-
-    var button = new PIXI.DOM.Sprite( '<button style="font-size: 150%; color: red;" onclick="console.log(this);">oohoho</button>',
-                                     { x: 100, y: 40 } );
-    this.ui_container.addChild(button);
-
-    console.log(input.domElement);
-    console.log(input.domElement);// check 'value'
-
-    var iframe = new PIXI.DOM.Sprite( '<iframe>', { src: "http://www.pixijs.com" } );
-    iframe.position.x = 100; iframe.position.y = 100;
-    this.ui_container.addChild(iframe);
-
-//     input.destroy(); input = null; iframe.destroy(); iframe = null;
-};
-*/
 
 function Overlay() {
     this.brush = new PIXI.Graphics();
@@ -32734,8 +32688,6 @@ Map.prototype.iso_to_screen = function(x_, y_)
 function Gfx() {
     this.bg = new PIXI.Graphics();
     this.root = new PIXI.Container;
-
-    this.sprite_builder = new SpriteBuilder;
 }
 
 Gfx.prototype.get_root = function() { return this.root; };
@@ -32757,11 +32709,6 @@ Gfx.prototype.init = function(asset_) {
     this.root.addChild(this.overlay.get_fxcontainer());
     this.root.addChild(this.overlay.get_uicontainer());
 
-    this.sprite_builder.init(this.map.get_mapcontainer(),
-                             this.map.get_entitycontainer(),
-                             this.overlay.get_fxcontainer(),
-                             this.overlay.get_uicontainer());
-
     return true;
 };
 
@@ -32775,12 +32722,6 @@ Gfx.prototype.is_animating = function() {
 
 Gfx.prototype.get_uicontainer = function() {
     return this.overlay.get_uicontainer();
-};
-
-Gfx.prototype.build_sprite = function(resource_) {
-    this.sprite_builder.ui(resource_);
-
-//     this.sprite_builder.dom();
 };
 
 function Sound() {
@@ -32858,8 +32799,6 @@ PlayingScene.prototype = Object.create(Scene.prototype);
 PlayingScene.prototype.constructor = PlayingScene;
 
 PlayingScene.prototype.init = function(asset_, ui_) {
-    console.log('init in playing scene');
-
     // initialize terrain
     this.terrain = asset_.find_terrain("defaultmap");
     this.terrain.init();
@@ -32927,6 +32866,11 @@ PlayingScene.prototype.init = function(asset_, ui_) {
     return true;
 };
 
+PlayingScene.prototype.terminate = function()
+{
+    console.log('terminate');
+};
+
 PlayingScene.prototype.update = function(ui_) {
     console.log('update in playing scene');
 
@@ -32979,7 +32923,7 @@ ConfigScene.prototype.init = function(asset_, ui_) {
                                 ['OK', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.OK],
                                  210, 0, 100, 50, asset_.get_texture(3)]]);
     this.ui.add_sprite(menu.get_sprite());
-    this.menus.add(menu);
+    this.menus.push(menu);
     this.initialized = true;
     return true;
 };
@@ -33162,9 +33106,6 @@ RRLL.prototype.start = function()
 RRLL.prototype.init_scene = function() {
     this.ui.init(this.asset, this.gfx.get_uicontainer());
     this.scene_stack.init(this.asset, this.ui);
-
-    // initialize overlay menu
-    this.gfx.build_sprite(this.ui.get_menu());
 };
 
 RRLL.prototype.animate = function me() {
@@ -33174,7 +33115,6 @@ RRLL.prototype.animate = function me() {
     if (this.scene_stack.top_is_initialized() == false)
     {
         this.scene_stack.init_top(this.asset, this.ui);
-        this.gfx.build_sprite(this.scene_stack.get_top_menus());
     }
 
     // normal tick

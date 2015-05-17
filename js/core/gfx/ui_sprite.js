@@ -8,8 +8,6 @@ function UISprite(id_, global_command_)
 UISprite.prototype.init_as_menu = function(x_, y_, texture_)
 {
     this.sprite = new PIXI.Sprite(texture_);
-
-    console.log('init_as_menu: ' + this.sprite);
     this.x = x_;
     this.y = y_;
 
@@ -21,7 +19,6 @@ UISprite.prototype.init_as_button = function(label_, command_, x_, y_, width_, h
                                              texture_)
 {
     this.sprite = new PIXI.Sprite(texture_);
-    console.log('init_as_button: ' + this.sprite);
     this.x = x_;
     this.y = y_;
     this.command = command_;

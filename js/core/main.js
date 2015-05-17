@@ -38,9 +38,6 @@ RRLL.prototype.start = function()
 RRLL.prototype.init_scene = function() {
     this.ui.init(this.asset, this.gfx.get_uicontainer());
     this.scene_stack.init(this.asset, this.ui);
-
-    // initialize overlay menu
-    this.gfx.build_sprite(this.ui.get_menu());
 };
 
 RRLL.prototype.animate = function me() {
@@ -50,7 +47,6 @@ RRLL.prototype.animate = function me() {
     if (this.scene_stack.top_is_initialized() == false)
     {
         this.scene_stack.init_top(this.asset, this.ui);
-        this.gfx.build_sprite(this.scene_stack.get_top_menus());
     }
 
     // normal tick

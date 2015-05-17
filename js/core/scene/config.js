@@ -19,7 +19,7 @@ ConfigScene.prototype.init = function(asset_, ui_) {
                                 ['OK', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.OK],
                                  210, 0, 100, 50, asset_.get_texture(3)]]);
     this.ui.add_sprite(menu.get_sprite());
-    this.menus.add(menu);
+    this.menus.push(menu);
     this.initialized = true;
     return true;
 };

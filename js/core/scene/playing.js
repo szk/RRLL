@@ -7,8 +7,6 @@ PlayingScene.prototype = Object.create(Scene.prototype);
 PlayingScene.prototype.constructor = PlayingScene;
 
 PlayingScene.prototype.init = function(asset_, ui_) {
-    console.log('init in playing scene');
-
     // initialize terrain
     this.terrain = asset_.find_terrain("defaultmap");
     this.terrain.init();
@@ -74,6 +72,11 @@ PlayingScene.prototype.init = function(asset_, ui_) {
     this.initialized = true;
 
     return true;
+};
+
+PlayingScene.prototype.terminate = function()
+{
+    console.log('terminate');
 };
 
 PlayingScene.prototype.update = function(ui_) {
