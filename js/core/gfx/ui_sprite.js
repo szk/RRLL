@@ -1,7 +1,8 @@
-function UISprite(global_command_)
+function UISprite(id_, global_command_)
 {
     this.global_command = global_command_;
     this.sprite = null;
+    this.id = id_;
 };
 
 UISprite.prototype.init_as_menu = function(x_, y_, texture_)
@@ -42,6 +43,9 @@ UISprite.prototype.get_sprite = function() {
     return this.sprite;
 };
 
+UISprite.prototype.get_id = function() {
+    return this.id;
+};
 
 /*
  var input = new PIXI.DOM.Sprite( '<input type="text" placeholder="enter message" />',
@@ -55,3 +59,6 @@ UISprite.prototype.get_sprite = function() {
 
  input.destroy(); input = null; iframe.destroy(); iframe = null;
  */
+
+
+

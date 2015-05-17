@@ -38,29 +38,24 @@ RRLL.prototype.start = function()
 RRLL.prototype.init_scene = function() {
     this.ui.init(this.asset, this.gfx.get_uicontainer());
     this.scene_stack.init(this.asset, this.ui);
-
-    // initialize overlay menu
-    this.gfx.build_sprite(this.ui.get_menu());
 };
 
 RRLL.prototype.animate = function me() {
     requestAnimationFrame(me.bind(this));
 
+    // when top scene is changed
+    if (this.scene_stack.top_is_initialized() == false)
+    {
+        this.scene_stack.init_top(this.asset, this.ui);
+    }
+
+    // normal tick
     if (this.ui.is_command_queued())
     {
         if (this.gfx.is_animating()) { ; }
         else { this.scene_stack.update_top(this.ui); }
     }
 
-    // XXX FIXME
-/*
-    var top_scene = this.scene_stack.get_top();
-    if (!top_scene.is_initialized())
-    {
-        top_scene.init(this.asset);
-        this.gfx.build_sprite(top_scene.get_menus());
-    }
-*/
     this.gfx.update(this.scene_stack.get_top_level());
 
     // render the stage

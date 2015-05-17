@@ -1,5 +1,6 @@
 function UI() {
     this.listener = new window.keypress.Listener();
+    this.uicontainer = null;
     this.menu = [];
     this.asset = null;
 
@@ -15,61 +16,14 @@ function UI() {
 UI.prototype.init = function(asset_, container_)
 {
     this.asset = asset_;
-    // make panel for moving
-    this.move_panel.init(this.command_queue, this.asset.get_texture(1), 10, 400);
-
-    /*
-     * qwe wed
-     * asd qsc
-     * zxc azx
-     */
-    this.build_menu(this.move_panel,
-                    [['s', [RC.CMD_ACTOR_ACT.WAIT, RC.CMD_ACTOR_DIR.LEFT], 60, 60, 50, 50,
-                      this.asset.get_texture(3)],
-                     ['q', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.LEFT], 0, 0, 50, 50,
-                      this.asset.get_texture(3)],
-                     ['z', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWN], 0, 120, 50, 50,
-                      this.asset.get_texture(3)],
-                     ['e', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UP], 120, 0, 50, 50,
-                      this.asset.get_texture(3)],
-                     ['c', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.RIGHT], 120, 120, 50, 50,
-                      this.asset.get_texture(3)],
-                     ['w', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPLEFT], 60, 0, 50, 50,
-                      this.asset.get_texture(3)],
-                     ['d', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPRIGHT], 120, 60, 50, 50,
-                      this.asset.get_texture(3)],
-                     ['a', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNLEFT], 0, 60, 50, 50,
-                      this.asset.get_texture(3)],
-                     ['x', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNRIGHT], 60, 120, 50, 50,
-                      this.asset.get_texture(3)]]);
-
-    // make panel for inventry
-    this.inventry_panel.init(this.command_queue, this.asset.get_texture(1), 824, 400);
-    this.build_menu(this.inventry_panel,
-                    [['inv', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.INVENTRY], 0, 0, 200, 200,
-                      this.asset.get_texture(3)]]);
-
-    // make panel for automation
-    this.automation_panel.init(this.command_queue, this.asset.get_texture(1), 320, 550);
-    this.build_menu(this.automation_panel,
-                    [['stat', [RC.CMD_ACTOR_ACT.AUTOMATION, RC.CMD_ACTOR_AUTOMATION.STATUS],
-                      0, 0, 100, 50, this.asset.get_texture(3)],
-                     ['expl', [RC.CMD_ACTOR_ACT.AUTOMATION, RC.CMD_ACTOR_AUTOMATION.EXPLORING],
-                      210, 0, 100, 50, this.asset.get_texture(3)]]);
-
-    // make panel for configuration
-    this.config_panel.init(this.command_queue, this.asset.get_texture(1), 0, 0);
-    this.build_menu(this.config_panel,
-                    [['config', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CONFIG], 0, 0, 50, 50,
-                      this.asset.get_texture(3)]]);
-
-    // make panel for information
-    this.info_panel.init(this.command_queue, this.asset.get_texture(1), 974, 0);
-    this.build_menu(this.info_panel,
-                    [['i', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.INFO], 0, 0, 50, 50,
-                      this.asset.get_texture(3)]]);
+    this.uicontainer = container_;
 
     return true;
+};
+
+UI.prototype.add_sprite = function(sprite_)
+{
+    this.uicontainer.addChild(sprite_);
 };
 
 UI.prototype.is_command_queued = function() { return !(this.command_queue.isEmpty()); };

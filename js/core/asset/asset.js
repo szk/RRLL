@@ -6,7 +6,7 @@ function Asset(image_atlas_url_) {
     this.texture_array = new Array(16385);
     this.gen_texture(image_atlas_url_);
 
-    this.eid_pool = new IdPool();
+    this.id_pool = new IdPool();
 
     this.terrain = {};
     this.level = {};
@@ -142,6 +142,16 @@ Asset.prototype.build_default = function(src_)
     return true;
 };
 
+Asset.prototype.gen_id = function()
+{
+    return this.id_pool.get_id();
+};
+
+Asset.prototype.remove_id = function(id_)
+{
+    this.id_pool.free_id(id_);
+};
+
 Asset.prototype.gen_texture = function(image_)
 {
     var atras_image = PIXI.BaseTexture.fromImage(image_);
@@ -152,6 +162,51 @@ Asset.prototype.gen_texture = function(image_)
                                                                     16, 16));
     }
 };
+
+// basically, generate by inside of scene
+Asset.prototype.gen_menu = function(cmd_queue_, texture_id_, x_, y_, item_array_)
+{
+    var menu_sprite = new UISprite(this.id_pool.get_id(), cmd_queue_);
+    menu_sprite.init_as_menu(x_, y_, this.get_texture(texture_id_));
+
+    for (var i in item_array_)
+    {
+        var item_sprite = new UISprite(this.id_pool.get_id(), cmd_queue_);
+
+        item_sprite.init_as_button(item_array_[i][0], // label
+                                   item_array_[i][1], // command
+                                   item_array_[i][2], // x
+                                   item_array_[i][3], // y
+                                   item_array_[i][4], // width
+                                   item_array_[i][5], // height
+                                   item_array_[i][6]); // texture
+        menu_sprite.sprite.addChild(item_sprite.get_sprite());
+    }
+    return menu_sprite;
+};
+
+/*
+SpriteBuilder.prototype.dom = function(resource_) {
+    var input = new PIXI.DOM.Sprite( '<input type="text" placeholder="enter message" />',
+                                     { x: 10, y: 10 } );
+    this.ui_container.addChild(input);
+
+    var button = new PIXI.DOM.Sprite( '<button style="font-size: 150%; color: red;" onclick="console.log(this);">oohoho</button>',
+                                     { x: 100, y: 40 } );
+    this.ui_container.addChild(button);
+
+    console.log(input.domElement);
+    console.log(input.domElement);// check 'value'
+
+    var iframe = new PIXI.DOM.Sprite( '<iframe>', { src: "http://www.pixijs.com" } );
+    iframe.position.x = 100; iframe.position.y = 100;
+    this.ui_container.addChild(iframe);
+
+//     input.destroy(); input = null; iframe.destroy(); iframe = null;
+};
+*/
+
+
 
 // need validation
 Asset.prototype.gen_item = function(entry_)
@@ -225,7 +280,7 @@ Asset.prototype.gen_level = function(entry_)
             for (var avtr in entry_[i].avatar[avatar_type])
             {
                 var newavatar = clone(this.find_avatar_(avatar_type));
-                newavatar.init(this.eid_pool.get_id(), avatar_type,
+                newavatar.init(this.id_pool.get_id(), avatar_type,
                                new PIXI.Sprite(this.get_texture(131)),
                                parseInt(entry_[i].avatar[avatar_type][avtr].x),
                                parseInt(entry_[i].avatar[avatar_type][avtr].y));
@@ -237,7 +292,7 @@ Asset.prototype.gen_level = function(entry_)
             for (var actr in entry_[i].actor[actor_type])
             {
                 var newactor = clone(this.find_actor_(actor_type));
-                newactor.init(this.eid_pool.get_id(), actor_type,
+                newactor.init(this.id_pool.get_id(), actor_type,
                               new PIXI.Sprite(this.get_texture(128)),
                               parseInt(entry_[i].actor[actor_type][actr].x),
                               parseInt(entry_[i].actor[actor_type][actr].y), 3);
@@ -249,7 +304,7 @@ Asset.prototype.gen_level = function(entry_)
             for (var itm in entry_[i].item[item_type])
             {
                 var newitem = clone(this.find_item_(item_type));
-                newitem.init(this.eid_pool.get_id(), item_type,
+                newitem.init(this.id_pool.get_id(), item_type,
                              new PIXI.Sprite(this.get_texture(130)),
                              parseInt(entry_[i].item[item_type][itm].x),
                              parseInt(entry_[i].item[item_type][itm].y));

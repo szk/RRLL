@@ -4,8 +4,13 @@ function Scene() {
     this.initialized = false;
 }
 
-Scene.prototype.init = function(asset_) {
+Scene.prototype.init = function(asset_, ui_) {
+    this.initialized = true;
+    this.ui = ui_;
     return true;
+};
+
+Scene.prototype.terminate = function() {
 };
 
 Scene.prototype.update = function(ui_) {

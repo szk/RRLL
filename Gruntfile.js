@@ -39,7 +39,6 @@ module.exports = function(grunt) {
                       'js/core/gfx/wall_sprite.js',
                       'js/core/gfx/entity_sprite.js',
                       'js/core/gfx/ui_sprite.js',
-                      'js/core/gfx/sprite_builder.js',
                       'js/core/gfx/overlay.js',
                       'js/core/gfx/map.js',
                       'js/core/gfx/gfx.js',

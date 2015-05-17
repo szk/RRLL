@@ -90,7 +90,9 @@ RC.CMD_ACTOR_DIR = {
 RC.CMD_MENU_TYPE = {
     CONFIG: 0,
     INFO: 1,
-    INVENTRY: 1
+    INVENTRY: 2,
+    CANCEL: 3,
+    OK: 4
 };
 
 //

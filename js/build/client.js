@@ -30714,7 +30714,9 @@ RC.CMD_ACTOR_DIR = {
 RC.CMD_MENU_TYPE = {
     CONFIG: 0,
     INFO: 1,
-    INVENTRY: 1
+    INVENTRY: 2,
+    CANCEL: 3,
+    OK: 4
 };
 
 //
@@ -31294,13 +31296,30 @@ function Menu() {
     this.texture = null;
     this.x = this.y = 0;
     this.items = [];
+
+    this.mid = null;
 }
 
-Menu.prototype.init = function(command_, texture_, x_, y_) {
+Menu.prototype.init = function(id_, command_, texture_, x_, y_) {
     this.global_command = command_;
     this.texture = texture_;
+    this.url = null;
     this.x = x_;
     this.y = y_;
+    this.id = id_;
+
+    return this.id;
+};
+
+Menu.prototype.init_html = function(id_, command_, url_, x_, y_) {
+    this.global_command = command_;
+    this.texture = null;
+    this.url = url_;
+    this.x = x_;
+    this.y = y_;
+    this.id = id_;
+
+    return this.id;
 };
 
 Menu.prototype.add_item = function(menu_item_) {
@@ -31311,9 +31330,11 @@ Menu.prototype.get_global_command = function() { return this.global_command; };
 Menu.prototype.get_texture = function() { return this.texture; };
 Menu.prototype.get_x = function() { return this.x; };
 Menu.prototype.get_y = function() { return this.y; };
+Menu.prototype.get_url = function() { return this.url; };
 
 function UI() {
     this.listener = new window.keypress.Listener();
+    this.uicontainer = null;
     this.menu = [];
     this.asset = null;
 
@@ -31329,61 +31350,14 @@ function UI() {
 UI.prototype.init = function(asset_, container_)
 {
     this.asset = asset_;
-    // make panel for moving
-    this.move_panel.init(this.command_queue, this.asset.get_texture(1), 10, 400);
-
-    /*
-     * qwe wed
-     * asd qsc
-     * zxc azx
-     */
-    this.build_menu(this.move_panel,
-                    [['s', [RC.CMD_ACTOR_ACT.WAIT, RC.CMD_ACTOR_DIR.LEFT], 60, 60, 50, 50,
-                      this.asset.get_texture(3)],
-                     ['q', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.LEFT], 0, 0, 50, 50,
-                      this.asset.get_texture(3)],
-                     ['z', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWN], 0, 120, 50, 50,
-                      this.asset.get_texture(3)],
-                     ['e', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UP], 120, 0, 50, 50,
-                      this.asset.get_texture(3)],
-                     ['c', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.RIGHT], 120, 120, 50, 50,
-                      this.asset.get_texture(3)],
-                     ['w', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPLEFT], 60, 0, 50, 50,
-                      this.asset.get_texture(3)],
-                     ['d', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPRIGHT], 120, 60, 50, 50,
-                      this.asset.get_texture(3)],
-                     ['a', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNLEFT], 0, 60, 50, 50,
-                      this.asset.get_texture(3)],
-                     ['x', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNRIGHT], 60, 120, 50, 50,
-                      this.asset.get_texture(3)]]);
-
-    // make panel for inventry
-    this.inventry_panel.init(this.command_queue, this.asset.get_texture(1), 824, 400);
-    this.build_menu(this.inventry_panel,
-                    [['inv', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.INVENTRY], 0, 0, 200, 200,
-                      this.asset.get_texture(3)]]);
-
-    // make panel for automation
-    this.automation_panel.init(this.command_queue, this.asset.get_texture(1), 320, 550);
-    this.build_menu(this.automation_panel,
-                    [['stat', [RC.CMD_ACTOR_ACT.AUTOMATION, RC.CMD_ACTOR_AUTOMATION.STATUS],
-                      0, 0, 100, 50, this.asset.get_texture(3)],
-                     ['expl', [RC.CMD_ACTOR_ACT.AUTOMATION, RC.CMD_ACTOR_AUTOMATION.EXPLORING],
-                      210, 0, 100, 50, this.asset.get_texture(3)]]);
-
-    // make panel for configuration
-    this.config_panel.init(this.command_queue, this.asset.get_texture(1), 0, 0);
-    this.build_menu(this.config_panel,
-                    [['config', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CONFIG], 0, 0, 50, 50,
-                      this.asset.get_texture(3)]]);
-
-    // make panel for information
-    this.info_panel.init(this.command_queue, this.asset.get_texture(1), 974, 0);
-    this.build_menu(this.info_panel,
-                    [['i', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.INFO], 0, 0, 50, 50,
-                      this.asset.get_texture(3)]]);
+    this.uicontainer = container_;
 
     return true;
+};
+
+UI.prototype.add_sprite = function(sprite_)
+{
+    this.uicontainer.addChild(sprite_);
 };
 
 UI.prototype.is_command_queued = function() { return !(this.command_queue.isEmpty()); };
@@ -31549,7 +31523,7 @@ function Asset(image_atlas_url_) {
     this.texture_array = new Array(16385);
     this.gen_texture(image_atlas_url_);
 
-    this.eid_pool = new IdPool();
+    this.id_pool = new IdPool();
 
     this.terrain = {};
     this.level = {};
@@ -31685,6 +31659,16 @@ Asset.prototype.build_default = function(src_)
     return true;
 };
 
+Asset.prototype.gen_id = function()
+{
+    return this.id_pool.get_id();
+};
+
+Asset.prototype.remove_id = function(id_)
+{
+    this.id_pool.free_id(id_);
+};
+
 Asset.prototype.gen_texture = function(image_)
 {
     var atras_image = PIXI.BaseTexture.fromImage(image_);
@@ -31695,6 +31679,51 @@ Asset.prototype.gen_texture = function(image_)
                                                                     16, 16));
     }
 };
+
+// basically, generate by inside of scene
+Asset.prototype.gen_menu = function(cmd_queue_, texture_id_, x_, y_, item_array_)
+{
+    var menu_sprite = new UISprite(this.id_pool.get_id(), cmd_queue_);
+    menu_sprite.init_as_menu(x_, y_, this.get_texture(texture_id_));
+
+    for (var i in item_array_)
+    {
+        var item_sprite = new UISprite(this.id_pool.get_id(), cmd_queue_);
+
+        item_sprite.init_as_button(item_array_[i][0], // label
+                                   item_array_[i][1], // command
+                                   item_array_[i][2], // x
+                                   item_array_[i][3], // y
+                                   item_array_[i][4], // width
+                                   item_array_[i][5], // height
+                                   item_array_[i][6]); // texture
+        menu_sprite.sprite.addChild(item_sprite.get_sprite());
+    }
+    return menu_sprite;
+};
+
+/*
+SpriteBuilder.prototype.dom = function(resource_) {
+    var input = new PIXI.DOM.Sprite( '<input type="text" placeholder="enter message" />',
+                                     { x: 10, y: 10 } );
+    this.ui_container.addChild(input);
+
+    var button = new PIXI.DOM.Sprite( '<button style="font-size: 150%; color: red;" onclick="console.log(this);">oohoho</button>',
+                                     { x: 100, y: 40 } );
+    this.ui_container.addChild(button);
+
+    console.log(input.domElement);
+    console.log(input.domElement);// check 'value'
+
+    var iframe = new PIXI.DOM.Sprite( '<iframe>', { src: "http://www.pixijs.com" } );
+    iframe.position.x = 100; iframe.position.y = 100;
+    this.ui_container.addChild(iframe);
+
+//     input.destroy(); input = null; iframe.destroy(); iframe = null;
+};
+*/
+
+
 
 // need validation
 Asset.prototype.gen_item = function(entry_)
@@ -31768,7 +31797,7 @@ Asset.prototype.gen_level = function(entry_)
             for (var avtr in entry_[i].avatar[avatar_type])
             {
                 var newavatar = clone(this.find_avatar_(avatar_type));
-                newavatar.init(this.eid_pool.get_id(), avatar_type,
+                newavatar.init(this.id_pool.get_id(), avatar_type,
                                new PIXI.Sprite(this.get_texture(131)),
                                parseInt(entry_[i].avatar[avatar_type][avtr].x),
                                parseInt(entry_[i].avatar[avatar_type][avtr].y));
@@ -31780,7 +31809,7 @@ Asset.prototype.gen_level = function(entry_)
             for (var actr in entry_[i].actor[actor_type])
             {
                 var newactor = clone(this.find_actor_(actor_type));
-                newactor.init(this.eid_pool.get_id(), actor_type,
+                newactor.init(this.id_pool.get_id(), actor_type,
                               new PIXI.Sprite(this.get_texture(128)),
                               parseInt(entry_[i].actor[actor_type][actr].x),
                               parseInt(entry_[i].actor[actor_type][actr].y), 3);
@@ -31792,7 +31821,7 @@ Asset.prototype.gen_level = function(entry_)
             for (var itm in entry_[i].item[item_type])
             {
                 var newitem = clone(this.find_item_(item_type));
-                newitem.init(this.eid_pool.get_id(), item_type,
+                newitem.init(this.id_pool.get_id(), item_type,
                              new PIXI.Sprite(this.get_texture(130)),
                              parseInt(entry_[i].item[item_type][itm].x),
                              parseInt(entry_[i].item[item_type][itm].y));
@@ -32310,10 +32339,11 @@ EntitySprite.prototype.init = function(texture_, dir_, tile_x_, tile_y_)
 {
 };
 
-function UISprite(global_command_)
+function UISprite(id_, global_command_)
 {
     this.global_command = global_command_;
     this.sprite = null;
+    this.id = id_;
 };
 
 UISprite.prototype.init_as_menu = function(x_, y_, texture_)
@@ -32354,6 +32384,9 @@ UISprite.prototype.get_sprite = function() {
     return this.sprite;
 };
 
+UISprite.prototype.get_id = function() {
+    return this.id;
+};
 
 /*
  var input = new PIXI.DOM.Sprite( '<input type="text" placeholder="enter message" />',
@@ -32367,69 +32400,9 @@ UISprite.prototype.get_sprite = function() {
 
  input.destroy(); input = null; iframe.destroy(); iframe = null;
  */
-function SpriteBuilder() {
-    this.map_container = null;
-    this.entity_container = null;
-    this.fx_container = null;
-    this.ui_container = null;
-}
 
-SpriteBuilder.prototype.init = function(map_container_, entity_container_,
-                                        fx_container_, ui_container_) {
-    this.asset = this.asset_;
-    this.map_container = map_container_;
-    this.entity_container = entity_container_;
-    this.fx_container = fx_container_;
-    this.ui_container = ui_container_;
-};
 
-SpriteBuilder.prototype.entity = function() {
-};
 
-SpriteBuilder.prototype.tile = function() {
-};
-
-SpriteBuilder.prototype.ui = function(resource_) {
-    for (var i in resource_)
-    {
-        var menu_res = resource_[i];
-        var menu_sprite = new UISprite(menu_res.get_global_command());
-        menu_sprite.init_as_menu(menu_res.get_x(), menu_res.get_y(), menu_res.get_texture());
-
-        this.ui_container.addChild(menu_sprite.get_sprite());
-
-        for (var j in menu_res.items)
-        {
-            var item = menu_res.items[j];
-            var item_sprite = new UISprite(menu_res.get_global_command());
-            item_sprite.init_as_button(item.get_label(), item.get_command(),
-                                       item.get_x(), item.get_y(),
-                                       item.get_width(), item.get_height(), item.get_texture());
-            var sprite = menu_sprite.get_sprite();
-            sprite.addChild(item_sprite.get_sprite());
-        }
-    }
-};
-/*
-SpriteBuilder.prototype.dom = function(resource_) {
-    var input = new PIXI.DOM.Sprite( '<input type="text" placeholder="enter message" />',
-                                     { x: 10, y: 10 } );
-    this.ui_container.addChild(input);
-
-    var button = new PIXI.DOM.Sprite( '<button style="font-size: 150%; color: red;" onclick="console.log(this);">oohoho</button>',
-                                     { x: 100, y: 40 } );
-    this.ui_container.addChild(button);
-
-    console.log(input.domElement);
-    console.log(input.domElement);// check 'value'
-
-    var iframe = new PIXI.DOM.Sprite( '<iframe>', { src: "http://www.pixijs.com" } );
-    iframe.position.x = 100; iframe.position.y = 100;
-    this.ui_container.addChild(iframe);
-
-//     input.destroy(); input = null; iframe.destroy(); iframe = null;
-};
-*/
 
 function Overlay() {
     this.brush = new PIXI.Graphics();
@@ -32715,8 +32688,6 @@ Map.prototype.iso_to_screen = function(x_, y_)
 function Gfx() {
     this.bg = new PIXI.Graphics();
     this.root = new PIXI.Container;
-
-    this.sprite_builder = new SpriteBuilder;
 }
 
 Gfx.prototype.get_root = function() { return this.root; };
@@ -32738,11 +32709,6 @@ Gfx.prototype.init = function(asset_) {
     this.root.addChild(this.overlay.get_fxcontainer());
     this.root.addChild(this.overlay.get_uicontainer());
 
-    this.sprite_builder.init(this.map.get_mapcontainer(),
-                             this.map.get_entitycontainer(),
-                             this.overlay.get_fxcontainer(),
-                             this.overlay.get_uicontainer());
-
     return true;
 };
 
@@ -32756,12 +32722,6 @@ Gfx.prototype.is_animating = function() {
 
 Gfx.prototype.get_uicontainer = function() {
     return this.overlay.get_uicontainer();
-};
-
-Gfx.prototype.build_sprite = function(resource_) {
-    this.sprite_builder.ui(resource_);
-
-//     this.sprite_builder.dom();
 };
 
 function Sound() {
@@ -32801,8 +32761,13 @@ function Scene() {
     this.initialized = false;
 }
 
-Scene.prototype.init = function(asset_) {
+Scene.prototype.init = function(asset_, ui_) {
+    this.initialized = true;
+    this.ui = ui_;
     return true;
+};
+
+Scene.prototype.terminate = function() {
 };
 
 Scene.prototype.update = function(ui_) {
@@ -32827,12 +32792,13 @@ Scene.prototype.get_menus = function() {
 
 function PlayingScene() {
     Scene.apply(this, arguments);
+    this.menus = [];
 }
 
 PlayingScene.prototype = Object.create(Scene.prototype);
 PlayingScene.prototype.constructor = PlayingScene;
 
-PlayingScene.prototype.init = function(asset_) {
+PlayingScene.prototype.init = function(asset_, ui_) {
     // initialize terrain
     this.terrain = asset_.find_terrain("defaultmap");
     this.terrain.init();
@@ -32841,10 +32807,73 @@ PlayingScene.prototype.init = function(asset_) {
     this.level.init(this.terrain);
     this.avatar = this.level.get_avatar();
 
+    /*
+     * qwe wed
+     * asd qsc
+     * zxc azx
+     */
+    var move_menu = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 10, 400,
+                                    [['s', [RC.CMD_ACTOR_ACT.WAIT, RC.CMD_ACTOR_DIR.LEFT], 60, 60, 50, 50,
+                                      asset_.get_texture(3)],
+                                     ['q', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.LEFT], 0, 0, 50, 50,
+                                      asset_.get_texture(3)],
+                                     ['z', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWN], 0, 120, 50, 50,
+                                      asset_.get_texture(3)],
+                                     ['e', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UP], 120, 0, 50, 50,
+                                      asset_.get_texture(3)],
+                                     ['c', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.RIGHT], 120, 120, 50, 50,
+                                      asset_.get_texture(3)],
+                                     ['w', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPLEFT], 60, 0, 50, 50,
+                                      asset_.get_texture(3)],
+                                     ['d', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPRIGHT], 120, 60, 50, 50,
+                                      asset_.get_texture(3)],
+                                     ['a', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNLEFT], 0, 60, 50, 50,
+                                      asset_.get_texture(3)],
+                                     ['x', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNRIGHT], 60, 120, 50, 50,
+                                      asset_.get_texture(3)]]);
+
+    ui_.add_sprite(move_menu.get_sprite());
+    this.menus.push(move_menu);
+
+    var inventry_menu = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 824, 400,
+                                        [['inv', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.INVENTRY], 0, 0, 200, 200,
+                                          asset_.get_texture(3)]]);
+    ui_.add_sprite(inventry_menu.get_sprite());
+    this.menus.push(inventry_menu);
+
+    var automation_menu = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 320, 550,
+                                        [['stat', [RC.CMD_ACTOR_ACT.AUTOMATION, RC.CMD_ACTOR_AUTOMATION.STATUS],
+                      0, 0, 100, 50, asset_.get_texture(3)],
+                                         ['expl', [RC.CMD_ACTOR_ACT.AUTOMATION, RC.CMD_ACTOR_AUTOMATION.EXPLORING],
+                                          210, 0, 100, 50, asset_.get_texture(3)]]);
+    ui_.add_sprite(automation_menu.get_sprite());
+    this.menus.push(automation_menu);
+
+    var config_menu = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 0, 0,
+                                     [['config', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CONFIG], 0, 0, 50, 50,
+                                       asset_.get_texture(3)]]);
+    ui_.add_sprite(config_menu.get_sprite());
+    this.menus.push(config_menu);
+
+    var info_menu = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 974, 0,
+                                    [['i', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.INFO], 0, 0, 50, 50,
+                                      asset_.get_texture(3)]]);
+    ui_.add_sprite(info_menu.get_sprite());
+    this.menus.push(info_menu);
+
+    this.initialized = true;
+
     return true;
 };
 
+PlayingScene.prototype.terminate = function()
+{
+    console.log('terminate');
+};
+
 PlayingScene.prototype.update = function(ui_) {
+    console.log('update in playing scene');
+
     // what type of command in command queue?
     var cmd = ui_.get_command_queue().peek();
     if (!cmd && !cmd[0] && !cmd[1])
@@ -32855,10 +32884,12 @@ PlayingScene.prototype.update = function(ui_) {
 
     if (cmd[0] == RC.CMD_ACTOR_ACT.MENU)
     {
+        var next_menu = cmd[1];
         ui_.clear_command_queue();
-        switch (cmd[1])
+        switch (next_menu)
         {
         case RC.CMD_MENU_TYPE.CONFIG:
+            console.log('next scene is config menu');
             return RC.NEXT_SCENE.CONFIG;
 
         case RC.CMD_MENU_TYPE.INFO:
@@ -32873,22 +32904,67 @@ PlayingScene.prototype.update = function(ui_) {
 
 function ConfigScene() {
     Scene.apply(this, arguments);
+
+    this.main_panel = new Menu();
+    this.transition_panel = new Menu();
+
+    this.menus = [];
+    this.ui = null;
 }
 
 ConfigScene.prototype = Object.create(Scene.prototype);
 ConfigScene.prototype.constructor = ConfigScene;
 
-ConfigScene.prototype.init = function(asset_) {
-    console.log('config scene initializing');
+ConfigScene.prototype.init = function(asset_, ui_) {
+    this.ui = ui_;
+    var menu = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 512, 300,
+                               [['Cancel', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL],
+                                 0, 0, 100, 50, asset_.get_texture(3)],
+                                ['OK', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.OK],
+                                 210, 0, 100, 50, asset_.get_texture(3)]]);
+    this.ui.add_sprite(menu.get_sprite());
+    this.menus.push(menu);
     this.initialized = true;
     return true;
 };
 
+ConfigScene.prototype.terminate = function() {
+    for (var i in this.menus)
+    {
+        console.log(this.menus[i].get_id());
+    }
+};
+
 ConfigScene.prototype.update = function(ui_) {
+    var cmd = ui_.get_command_queue().peek();
+    if (!cmd && !cmd[0] && !cmd[1])
+    {
+        ui_.clear_command_queue();
+        return RC.NEXT_SCENE.CONTINUE;
+    }
+
+    if (cmd[0] == RC.CMD_ACTOR_ACT.MENU)
+    {
+        var pressed_button = cmd[1];
+        ui_.clear_command_queue();
+        switch (pressed_button)
+        {
+            case RC.CMD_MENU_TYPE.CANCEL:
+            console.log('cancel clicked'); break;
+            case RC.CMD_MENU_TYPE.OK:
+            console.log('ok clicked'); break;
+        }
+        return RC.NEXT_SCENE.RETURN;
+    }
+    return RC.NEXT_SCENE.CONTINUE;
+};
+
+ConfigScene.prototype.is_initialized = function() {
+    return this.initialized;
 };
 
 ConfigScene.prototype.get_menus = function() {
-    return [];
+    return [this.transition_panel];
 };
 
 function InfoScene() {
@@ -32898,7 +32974,7 @@ function InfoScene() {
 InfoScene.prototype = Object.create(Scene.prototype);
 InfoScene.prototype.constructor = InfoScene;
 
-InfoScene.prototype.init = function(asset_) {
+InfoScene.prototype.init = function(asset_, ui_) {
     return true;
 };
 
@@ -32922,7 +32998,7 @@ SceneStack.prototype.init = function(asset_, ui_) {
 //     this.ranking_scene = new RankingScene();
 
     this.push_(this.playing_scene);
-    this.top.init(asset_);
+    this.top.init(asset_, ui_);
     ui_.set_keybinding();
 };
 
@@ -32931,8 +33007,12 @@ SceneStack.prototype.update_top = function(ui_) {
     this.result_check_(result, ui_);
 };
 
-SceneStack.prototype.get_top = function() {
-    return this.top;
+SceneStack.prototype.init_top = function(asset_, ui_) {
+    return this.top.init(asset_, ui_);
+};
+
+SceneStack.prototype.top_is_initialized = function(asset_, ui_) {
+    return this.top.is_initialized();
 };
 
 SceneStack.prototype.get_top_level = function() {
@@ -32948,9 +33028,19 @@ SceneStack.prototype.get_top_level = function() {
     return null;
 };
 
+SceneStack.prototype.get_top_menus = function() {
+    return this.top.get_menus();
+};
+
 SceneStack.prototype.push_ = function(scene_) {
     this.stack.push(scene_);
     this.top = scene_;
+};
+
+SceneStack.prototype.pop_ = function() {
+    this.top.teminate();
+    this.stack.pop();
+    this.top = this.stack[this.stack.length - 1];
 };
 
 SceneStack.prototype.result_check_ = function (result_, ui_) {
@@ -32959,6 +33049,7 @@ SceneStack.prototype.result_check_ = function (result_, ui_) {
     switch (result_)
     {
     case RC.NEXT_SCENE.CONFIG:
+        console.log("result check says next is config");
         this.push_(this.config_scene);
         break;
     case RC.NEXT_SCENE.GAMEOVER: break;
@@ -32969,7 +33060,9 @@ SceneStack.prototype.result_check_ = function (result_, ui_) {
     case RC.NEXT_SCENE.INFO:
         this.push_(this.info_scene);
         break;
-    case RC.NEXT_SCENE.RETURN: break;
+    case RC.NEXT_SCENE.RETURN:
+        this.pop_();
+        break;
     }
 };
 
@@ -33013,29 +33106,24 @@ RRLL.prototype.start = function()
 RRLL.prototype.init_scene = function() {
     this.ui.init(this.asset, this.gfx.get_uicontainer());
     this.scene_stack.init(this.asset, this.ui);
-
-    // initialize overlay menu
-    this.gfx.build_sprite(this.ui.get_menu());
 };
 
 RRLL.prototype.animate = function me() {
     requestAnimationFrame(me.bind(this));
 
+    // when top scene is changed
+    if (this.scene_stack.top_is_initialized() == false)
+    {
+        this.scene_stack.init_top(this.asset, this.ui);
+    }
+
+    // normal tick
     if (this.ui.is_command_queued())
     {
         if (this.gfx.is_animating()) { ; }
         else { this.scene_stack.update_top(this.ui); }
     }
 
-    // XXX FIXME
-/*
-    var top_scene = this.scene_stack.get_top();
-    if (!top_scene.is_initialized())
-    {
-        top_scene.init(this.asset);
-        this.gfx.build_sprite(top_scene.get_menus());
-    }
-*/
     this.gfx.update(this.scene_stack.get_top_level());
 
     // render the stage
