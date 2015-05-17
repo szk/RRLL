@@ -7,6 +7,10 @@ function Asset(image_atlas_url_) {
     this.gen_texture(image_atlas_url_);
 
     this.id_pool = new IdPool();
+    this.id_bst = new buckets.BSTree(function(l_, r_)
+                                     { if (l_.get_id() < r_.get_id()) { return -1; }
+                                       else if (l_.get_id() === r_.get_id()) { return 0; }
+                                       return 1; });
 
     this.terrain = {};
     this.level = {};
@@ -142,14 +146,13 @@ Asset.prototype.build_default = function(src_)
     return true;
 };
 
-Asset.prototype.gen_id = function()
+Asset.prototype.free = function(entry_)
 {
-    return this.id_pool.get_id();
-};
+    console.log('freeing' + entry_.get_id());
+    entry_.get_sprite().renderable = false;
 
-Asset.prototype.remove_id = function(id_)
-{
-    this.id_pool.free_id(id_);
+//     entry_.get_id();
+//     this.id_pool.free_id(id_);
 };
 
 Asset.prototype.gen_texture = function(image_)
@@ -164,10 +167,18 @@ Asset.prototype.gen_texture = function(image_)
 };
 
 // basically, generate by inside of scene
-Asset.prototype.gen_menu = function(cmd_queue_, texture_id_, x_, y_, item_array_)
+Asset.prototype.gen_menu = function(cmd_queue_, texture_, x_, y_, item_array_)
 {
     var menu_sprite = new UISprite(this.id_pool.get_id(), cmd_queue_);
-    menu_sprite.init_as_menu(x_, y_, this.get_texture(texture_id_));
+    this.id_bst.add(menu_sprite);
+
+    if (this.is_url(item_array_[0]))
+    {
+        menu_sprite.init_as_html(x_, y_, item_array_[0]);
+        return menu_sprite;
+    }
+    else
+    { menu_sprite.init_as_menu(x_, y_, this.get_texture(texture_)); }
 
     for (var i in item_array_)
     {
@@ -180,10 +191,27 @@ Asset.prototype.gen_menu = function(cmd_queue_, texture_id_, x_, y_, item_array_
                                    item_array_[i][4], // width
                                    item_array_[i][5], // height
                                    item_array_[i][6]); // texture
-        menu_sprite.sprite.addChild(item_sprite.get_sprite());
+        menu_sprite.get_sprite().addChild(item_sprite.get_sprite());
     }
     return menu_sprite;
 };
+
+Asset.prototype.is_url = function(url_)
+{
+    if (url_.match == undefined) { return false; }
+    return url_.match( /^https?:\/\// );
+    /*
+    var div, elm;
+    div = document.getElementById( "info" );
+    elm = document.createElement( "a" );
+    elm.setAttribute( "href", url_);
+    if( elm.protocol.match( /^https?:$/ ) || elm.protocol === ":" || elm.protocol === "" ){
+        elm.appendChild(document.createTextNode(url_));
+        div.appendChild(elm);
+    }
+    */
+};
+
 
 /*
 SpriteBuilder.prototype.dom = function(resource_) {
@@ -285,6 +313,7 @@ Asset.prototype.gen_level = function(entry_)
                                parseInt(entry_[i].avatar[avatar_type][avtr].x),
                                parseInt(entry_[i].avatar[avatar_type][avtr].y));
                 level.set_avatar(newavatar);
+                this.id_bst.add(newavatar);
             }
         }
         for (var actor_type in entry_[i].actor)
@@ -297,6 +326,7 @@ Asset.prototype.gen_level = function(entry_)
                               parseInt(entry_[i].actor[actor_type][actr].x),
                               parseInt(entry_[i].actor[actor_type][actr].y), 3);
                 level.add_actor(newactor);
+                this.id_bst.add(newactor);
             }
         }
         for (var item_type in entry_[i].item)
@@ -309,6 +339,7 @@ Asset.prototype.gen_level = function(entry_)
                              parseInt(entry_[i].item[item_type][itm].x),
                              parseInt(entry_[i].item[item_type][itm].y));
                 level.add_item(newitem);
+                this.id_bst.add(newitem);
             }
         }
 

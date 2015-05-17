@@ -5,6 +5,7 @@ function ConfigScene() {
     this.transition_panel = new Menu();
 
     this.menus = [];
+    this.asset = null;
     this.ui = null;
 }
 
@@ -12,14 +13,22 @@ ConfigScene.prototype = Object.create(Scene.prototype);
 ConfigScene.prototype.constructor = ConfigScene;
 
 ConfigScene.prototype.init = function(asset_, ui_) {
+    this.asset = asset_;
     this.ui = ui_;
-    var menu = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 512, 300,
-                               [['Cancel', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL],
-                                 0, 0, 100, 50, asset_.get_texture(3)],
-                                ['OK', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.OK],
-                                 210, 0, 100, 50, asset_.get_texture(3)]]);
-    this.ui.add_sprite(menu.get_sprite());
-    this.menus.push(menu);
+
+    var result_btn = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 512, 300,
+                                     [['Cancel', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL],
+                                       0, 0, 100, 50, asset_.get_texture(3)],
+                                      ['OK', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.OK],
+                                       210, 0, 100, 50, asset_.get_texture(3)]]);
+    this.ui.add_sprite(result_btn.get_sprite());
+    this.menus.push(result_btn);
+
+    var config_panel = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 512, 0,
+                                       ["http://www.pixijs.com"]);
+    this.ui.add_sprite(config_panel.get_sprite());
+    this.menus.push(config_panel);
+
     this.initialized = true;
     return true;
 };
@@ -27,7 +36,8 @@ ConfigScene.prototype.init = function(asset_, ui_) {
 ConfigScene.prototype.terminate = function() {
     for (var i in this.menus)
     {
-        console.log(this.menus[i].get_id());
+        this.asset.free(this.menus[i]);
+//         console.log(this.menus[i].get_id());
     }
 };
 

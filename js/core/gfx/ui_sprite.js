@@ -15,6 +15,13 @@ UISprite.prototype.init_as_menu = function(x_, y_, texture_)
     this.sprite.position.y = this.y;
 };
 
+UISprite.prototype.init_as_html = function(x_, y_, url_)
+{
+    this.sprite = new PIXI.DOM.Sprite( '<iframe>', { src: url_ } );
+    this.sprite.position.x = x_;
+    this.sprite.position.y = y_;
+};
+
 UISprite.prototype.init_as_button = function(label_, command_, x_, y_, width_, height_,
                                              texture_)
 {

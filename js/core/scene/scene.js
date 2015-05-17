@@ -11,6 +11,7 @@ Scene.prototype.init = function(asset_, ui_) {
 };
 
 Scene.prototype.terminate = function() {
+    console.log('terminate of base class is called');
 };
 
 Scene.prototype.update = function(ui_) {
