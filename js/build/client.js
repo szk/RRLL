@@ -30719,6 +30719,13 @@ RC.CMD_MENU_TYPE = {
     OK: 4
 };
 
+RC.UI_SPRITE_TYPE = {
+    MENU: 0,
+    HTML: 1,
+    BUTTON: 2,
+    UNDEFINED: 9
+};
+
 //
 RC.MAX_TICK = Number.MAX_SAFE_INTEGER;
 RC.MIN_TICK = 0;
@@ -31666,10 +31673,8 @@ Asset.prototype.build_default = function(src_)
 Asset.prototype.free = function(entry_)
 {
     console.log('freeing' + entry_.get_id());
-    entry_.get_sprite().renderable = false;
-
-//     entry_.get_id();
-//     this.id_pool.free_id(id_);
+    this.id_pool.free_id(entry_.get_id());
+    // entry_.get_sprite().renderable = false;
 };
 
 Asset.prototype.gen_texture = function(image_)
@@ -31708,13 +31713,16 @@ Asset.prototype.gen_menu = function(cmd_queue_, texture_, x_, y_, item_array_)
                                    item_array_[i][4], // width
                                    item_array_[i][5], // height
                                    item_array_[i][6]); // texture
-        menu_sprite.get_sprite().addChild(item_sprite.get_sprite());
+        menu_sprite.add(item_sprite);
     }
     return menu_sprite;
 };
 
 Asset.prototype.is_url = function(url_)
 {
+    if (typeof url_ === 'string') { return true; }
+    return false;
+
     if (url_.match == undefined) { return false; }
     return url_.match( /^https?:\/\// );
     /*
@@ -31728,30 +31736,6 @@ Asset.prototype.is_url = function(url_)
     }
     */
 };
-
-
-/*
-SpriteBuilder.prototype.dom = function(resource_) {
-    var input = new PIXI.DOM.Sprite( '<input type="text" placeholder="enter message" />',
-                                     { x: 10, y: 10 } );
-    this.ui_container.addChild(input);
-
-    var button = new PIXI.DOM.Sprite( '<button style="font-size: 150%; color: red;" onclick="console.log(this);">oohoho</button>',
-                                     { x: 100, y: 40 } );
-    this.ui_container.addChild(button);
-
-    console.log(input.domElement);
-    console.log(input.domElement);// check 'value'
-
-    var iframe = new PIXI.DOM.Sprite( '<iframe>', { src: "http://www.pixijs.com" } );
-    iframe.position.x = 100; iframe.position.y = 100;
-    this.ui_container.addChild(iframe);
-
-//     input.destroy(); input = null; iframe.destroy(); iframe = null;
-};
-*/
-
-
 
 // need validation
 Asset.prototype.gen_item = function(entry_)
@@ -32375,6 +32359,8 @@ function UISprite(id_, global_command_)
     this.global_command = global_command_;
     this.sprite = null;
     this.id = id_;
+    this.ui_sprite_type = RC.UI_SPRITE_TYPE.UNDEFINED;
+    this.children = [];
 };
 
 UISprite.prototype.init_as_menu = function(x_, y_, texture_)
@@ -32385,13 +32371,16 @@ UISprite.prototype.init_as_menu = function(x_, y_, texture_)
 
     this.sprite.position.x = this.x;
     this.sprite.position.y = this.y;
+
+    this.ui_sprite_type = RC.UI_SPRITE_TYPE.MENU;
 };
 
 UISprite.prototype.init_as_html = function(x_, y_, url_)
 {
-    this.sprite = new PIXI.DOM.Sprite( '<iframe>', { src: url_ } );
+    this.sprite = new PIXI.DOM.Sprite('<iframe>', { src: url_ });
     this.sprite.position.x = x_;
     this.sprite.position.y = y_;
+    this.ui_sprite_type = RC.UI_SPRITE_TYPE.HTML;
 };
 
 UISprite.prototype.init_as_button = function(label_, command_, x_, y_, width_, height_,
@@ -32416,6 +32405,13 @@ UISprite.prototype.init_as_button = function(label_, command_, x_, y_, width_, h
 
     var textobj = new PIXI.Text(label_, {font:'bold 13pt Arial', fill:'white'});
     this.sprite.addChild(textobj);
+
+    this.ui_sprite_type = RC.UI_SPRITE_TYPE.BUTTON;
+};
+
+UISprite.prototype.add = function(child_) {
+    this.sprite.addChild(child_.get_sprite());
+    this.children.push(child_);
 };
 
 UISprite.prototype.get_sprite = function() {
@@ -32424,6 +32420,34 @@ UISprite.prototype.get_sprite = function() {
 
 UISprite.prototype.get_id = function() {
     return this.id;
+};
+
+UISprite.prototype.get_type = function() {
+    return this.ui_sprite_type;
+};
+
+UISprite.prototype.terminate = function() {
+    // for (var i in this.children)
+    // {
+    //     this.children[i].terminate();
+    // }
+
+    switch (this.ui_sprite_type)
+    {
+    case RC.UI_SPRITE_TYPE.MENU:
+        // this.sprite.destroy();
+        // this.sprite = null;
+        break;
+    case RC.UI_SPRITE_TYPE.HTML:
+        this.sprite.destroy();
+        this.sprite = null;
+        break;
+    case RC.UI_SPRITE_TYPE.BUTTON:
+        // this.sprite.parent.removeChild(this.sprite);
+        // this.sprite.destroy();
+        // this.sprite = null;
+        break;
+    }
 };
 
 /*
@@ -32797,6 +32821,7 @@ function Scene() {
     this.avatar = null;
     this.level = null;
     this.initialized = false;
+    this.menus = [];
 }
 
 Scene.prototype.init = function(asset_, ui_) {
@@ -32822,9 +32847,6 @@ Scene.prototype.get_avatar = function() {
 
 Scene.prototype.get_level = function() {
     return this.level;
-};
-
-Scene.prototype.get_menus = function() {
 };
 
 
@@ -32911,8 +32933,6 @@ PlayingScene.prototype.terminate = function()
 };
 
 PlayingScene.prototype.update = function(ui_) {
-    console.log('update in playing scene');
-
     // what type of command in command queue?
     var cmd = ui_.get_command_queue().peek();
     if (!cmd && !cmd[0] && !cmd[1])
@@ -32928,9 +32948,7 @@ PlayingScene.prototype.update = function(ui_) {
         switch (next_menu)
         {
         case RC.CMD_MENU_TYPE.CONFIG:
-            console.log('next scene is config menu');
             return RC.NEXT_SCENE.CONFIG;
-
         case RC.CMD_MENU_TYPE.INFO:
             return RC.NEXT_SCENE.INFO;
         }
@@ -32944,10 +32962,7 @@ PlayingScene.prototype.update = function(ui_) {
 function ConfigScene() {
     Scene.apply(this, arguments);
 
-    this.main_panel = new Menu();
-    this.transition_panel = new Menu();
-
-    this.menus = [];
+    this.config_panel = null;
     this.asset = null;
     this.ui = null;
 }
@@ -32967,21 +32982,25 @@ ConfigScene.prototype.init = function(asset_, ui_) {
     this.ui.add_sprite(result_btn.get_sprite());
     this.menus.push(result_btn);
 
-    var config_panel = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 512, 0,
-                                       ["http://www.pixijs.com"]);
-    this.ui.add_sprite(config_panel.get_sprite());
-    this.menus.push(config_panel);
+    this.config_panel = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 512, 0,
+                                       ["dist/config.html"]);
+    this.ui.add_sprite(this.config_panel.get_sprite());
+    this.menus.push(this.config_panel);
 
     this.initialized = true;
     return true;
 };
 
 ConfigScene.prototype.terminate = function() {
+    var dom = this.config_panel.get_sprite().domElement.contentWindow;
+    console.log(dom.$('#system'));
+
     for (var i in this.menus)
     {
+        this.menus[i].terminate();
         this.asset.free(this.menus[i]);
-//         console.log(this.menus[i].get_id());
     }
+
 };
 
 ConfigScene.prototype.update = function(ui_) {
@@ -33010,10 +33029,6 @@ ConfigScene.prototype.update = function(ui_) {
 
 ConfigScene.prototype.is_initialized = function() {
     return this.initialized;
-};
-
-ConfigScene.prototype.get_menus = function() {
-    return [this.transition_panel];
 };
 
 function InfoScene() {
@@ -33075,10 +33090,6 @@ SceneStack.prototype.get_top_level = function() {
         --i;
     }
     return null;
-};
-
-SceneStack.prototype.get_top_menus = function() {
-    return this.top.get_menus();
 };
 
 SceneStack.prototype.push_ = function(scene_) {

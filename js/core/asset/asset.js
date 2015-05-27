@@ -149,10 +149,8 @@ Asset.prototype.build_default = function(src_)
 Asset.prototype.free = function(entry_)
 {
     console.log('freeing' + entry_.get_id());
-    entry_.get_sprite().renderable = false;
-
-//     entry_.get_id();
-//     this.id_pool.free_id(id_);
+    this.id_pool.free_id(entry_.get_id());
+    // entry_.get_sprite().renderable = false;
 };
 
 Asset.prototype.gen_texture = function(image_)
@@ -191,13 +189,16 @@ Asset.prototype.gen_menu = function(cmd_queue_, texture_, x_, y_, item_array_)
                                    item_array_[i][4], // width
                                    item_array_[i][5], // height
                                    item_array_[i][6]); // texture
-        menu_sprite.get_sprite().addChild(item_sprite.get_sprite());
+        menu_sprite.add(item_sprite);
     }
     return menu_sprite;
 };
 
 Asset.prototype.is_url = function(url_)
 {
+    if (typeof url_ === 'string') { return true; }
+    return false;
+
     if (url_.match == undefined) { return false; }
     return url_.match( /^https?:\/\// );
     /*
@@ -211,30 +212,6 @@ Asset.prototype.is_url = function(url_)
     }
     */
 };
-
-
-/*
-SpriteBuilder.prototype.dom = function(resource_) {
-    var input = new PIXI.DOM.Sprite( '<input type="text" placeholder="enter message" />',
-                                     { x: 10, y: 10 } );
-    this.ui_container.addChild(input);
-
-    var button = new PIXI.DOM.Sprite( '<button style="font-size: 150%; color: red;" onclick="console.log(this);">oohoho</button>',
-                                     { x: 100, y: 40 } );
-    this.ui_container.addChild(button);
-
-    console.log(input.domElement);
-    console.log(input.domElement);// check 'value'
-
-    var iframe = new PIXI.DOM.Sprite( '<iframe>', { src: "http://www.pixijs.com" } );
-    iframe.position.x = 100; iframe.position.y = 100;
-    this.ui_container.addChild(iframe);
-
-//     input.destroy(); input = null; iframe.destroy(); iframe = null;
-};
-*/
-
-
 
 // need validation
 Asset.prototype.gen_item = function(entry_)

@@ -1,10 +1,7 @@
 function ConfigScene() {
     Scene.apply(this, arguments);
 
-    this.main_panel = new Menu();
-    this.transition_panel = new Menu();
-
-    this.menus = [];
+    this.config_panel = null;
     this.asset = null;
     this.ui = null;
 }
@@ -24,21 +21,25 @@ ConfigScene.prototype.init = function(asset_, ui_) {
     this.ui.add_sprite(result_btn.get_sprite());
     this.menus.push(result_btn);
 
-    var config_panel = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 512, 0,
-                                       ["http://www.pixijs.com"]);
-    this.ui.add_sprite(config_panel.get_sprite());
-    this.menus.push(config_panel);
+    this.config_panel = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 512, 0,
+                                       ["dist/config.html"]);
+    this.ui.add_sprite(this.config_panel.get_sprite());
+    this.menus.push(this.config_panel);
 
     this.initialized = true;
     return true;
 };
 
 ConfigScene.prototype.terminate = function() {
+    var dom = this.config_panel.get_sprite().domElement.contentWindow;
+    console.log(dom.$('#system'));
+
     for (var i in this.menus)
     {
+        this.menus[i].terminate();
         this.asset.free(this.menus[i]);
-//         console.log(this.menus[i].get_id());
     }
+
 };
 
 ConfigScene.prototype.update = function(ui_) {
@@ -67,8 +68,4 @@ ConfigScene.prototype.update = function(ui_) {
 
 ConfigScene.prototype.is_initialized = function() {
     return this.initialized;
-};
-
-ConfigScene.prototype.get_menus = function() {
-    return [this.transition_panel];
 };

@@ -43,10 +43,6 @@ SceneStack.prototype.get_top_level = function() {
     return null;
 };
 
-SceneStack.prototype.get_top_menus = function() {
-    return this.top.get_menus();
-};
-
 SceneStack.prototype.push_ = function(scene_) {
     this.stack.push(scene_);
     this.top = scene_;
