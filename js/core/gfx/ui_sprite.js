@@ -3,6 +3,8 @@ function UISprite(id_, global_command_)
     this.global_command = global_command_;
     this.sprite = null;
     this.id = id_;
+    this.ui_sprite_type = RC.UI_SPRITE_TYPE.UNDEFINED;
+    this.children = [];
 };
 
 UISprite.prototype.init_as_menu = function(x_, y_, texture_)
@@ -13,13 +15,16 @@ UISprite.prototype.init_as_menu = function(x_, y_, texture_)
 
     this.sprite.position.x = this.x;
     this.sprite.position.y = this.y;
+
+    this.ui_sprite_type = RC.UI_SPRITE_TYPE.MENU;
 };
 
 UISprite.prototype.init_as_html = function(x_, y_, url_)
 {
-    this.sprite = new PIXI.DOM.Sprite( '<iframe>', { src: url_ } );
+    this.sprite = new PIXI.DOM.Sprite('<iframe>', { src: url_ });
     this.sprite.position.x = x_;
     this.sprite.position.y = y_;
+    this.ui_sprite_type = RC.UI_SPRITE_TYPE.HTML;
 };
 
 UISprite.prototype.init_as_button = function(label_, command_, x_, y_, width_, height_,
@@ -44,6 +49,13 @@ UISprite.prototype.init_as_button = function(label_, command_, x_, y_, width_, h
 
     var textobj = new PIXI.Text(label_, {font:'bold 13pt Arial', fill:'white'});
     this.sprite.addChild(textobj);
+
+    this.ui_sprite_type = RC.UI_SPRITE_TYPE.BUTTON;
+};
+
+UISprite.prototype.add = function(child_) {
+    this.sprite.addChild(child_.get_sprite());
+    this.children.push(child_);
 };
 
 UISprite.prototype.get_sprite = function() {
@@ -52,6 +64,34 @@ UISprite.prototype.get_sprite = function() {
 
 UISprite.prototype.get_id = function() {
     return this.id;
+};
+
+UISprite.prototype.get_type = function() {
+    return this.ui_sprite_type;
+};
+
+UISprite.prototype.terminate = function() {
+    // for (var i in this.children)
+    // {
+    //     this.children[i].terminate();
+    // }
+
+    switch (this.ui_sprite_type)
+    {
+    case RC.UI_SPRITE_TYPE.MENU:
+        // this.sprite.destroy();
+        // this.sprite = null;
+        break;
+    case RC.UI_SPRITE_TYPE.HTML:
+        this.sprite.destroy();
+        this.sprite = null;
+        break;
+    case RC.UI_SPRITE_TYPE.BUTTON:
+        // this.sprite.parent.removeChild(this.sprite);
+        // this.sprite.destroy();
+        // this.sprite = null;
+        break;
+    }
 };
 
 /*

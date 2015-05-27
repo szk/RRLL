@@ -95,6 +95,13 @@ RC.CMD_MENU_TYPE = {
     OK: 4
 };
 
+RC.UI_SPRITE_TYPE = {
+    MENU: 0,
+    HTML: 1,
+    BUTTON: 2,
+    UNDEFINED: 9
+};
+
 //
 RC.MAX_TICK = Number.MAX_SAFE_INTEGER;
 RC.MIN_TICK = 0;

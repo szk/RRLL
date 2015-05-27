@@ -80,8 +80,6 @@ PlayingScene.prototype.terminate = function()
 };
 
 PlayingScene.prototype.update = function(ui_) {
-    console.log('update in playing scene');
-
     // what type of command in command queue?
     var cmd = ui_.get_command_queue().peek();
     if (!cmd && !cmd[0] && !cmd[1])
@@ -97,9 +95,7 @@ PlayingScene.prototype.update = function(ui_) {
         switch (next_menu)
         {
         case RC.CMD_MENU_TYPE.CONFIG:
-            console.log('next scene is config menu');
             return RC.NEXT_SCENE.CONFIG;
-
         case RC.CMD_MENU_TYPE.INFO:
             return RC.NEXT_SCENE.INFO;
         }

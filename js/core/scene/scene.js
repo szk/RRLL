@@ -2,6 +2,7 @@ function Scene() {
     this.avatar = null;
     this.level = null;
     this.initialized = false;
+    this.menus = [];
 }
 
 Scene.prototype.init = function(asset_, ui_) {
@@ -27,7 +28,4 @@ Scene.prototype.get_avatar = function() {
 
 Scene.prototype.get_level = function() {
     return this.level;
-};
-
-Scene.prototype.get_menus = function() {
 };
