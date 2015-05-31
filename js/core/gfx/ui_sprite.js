@@ -7,7 +7,7 @@ function UISprite(id_, global_command_)
     this.children = [];
 };
 
-UISprite.prototype.init_as_menu = function(x_, y_, texture_)
+UISprite.prototype.init_as_panel = function(x_, y_, texture_)
 {
     this.sprite = new PIXI.Sprite(texture_);
     this.x = x_;
@@ -16,15 +16,23 @@ UISprite.prototype.init_as_menu = function(x_, y_, texture_)
     this.sprite.position.x = this.x;
     this.sprite.position.y = this.y;
 
-    this.ui_sprite_type = RC.UI_SPRITE_TYPE.MENU;
+    this.ui_sprite_type = RC.UI_SPRITE_TYPE.PANEL;
 };
 
-UISprite.prototype.init_as_html = function(x_, y_, url_)
+UISprite.prototype.init_as_tag = function(x_, y_, tag_, events_)
 {
-    this.sprite = new PIXI.DOM.Sprite('<iframe>', { src: url_ });
+    this.sprite = new PIXI.DOM.Sprite(tag_,
+                                      { events: {
+                                          click: function()
+                                          {
+                                              if (event.target.id == 'cancel')
+                                              {
+                                                  this.global_command.add([RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]);
+                                              }
+                                          }.bind(this)}});
     this.sprite.position.x = x_;
     this.sprite.position.y = y_;
-    this.ui_sprite_type = RC.UI_SPRITE_TYPE.HTML;
+    this.ui_sprite_type = RC.UI_SPRITE_TYPE.TAG;
 };
 
 UISprite.prototype.init_as_button = function(label_, command_, x_, y_, width_, height_,
@@ -78,7 +86,7 @@ UISprite.prototype.terminate = function() {
 
     switch (this.ui_sprite_type)
     {
-    case RC.UI_SPRITE_TYPE.MENU:
+    case RC.UI_SPRITE_TYPE.PANEL:
         // this.sprite.destroy();
         // this.sprite = null;
         break;

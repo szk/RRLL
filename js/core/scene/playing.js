@@ -1,6 +1,6 @@
 function PlayingScene() {
     Scene.apply(this, arguments);
-    this.menus = [];
+    this.panels = [];
 }
 
 PlayingScene.prototype = Object.create(Scene.prototype);
@@ -20,7 +20,7 @@ PlayingScene.prototype.init = function(asset_, ui_) {
      * asd qsc
      * zxc azx
      */
-    var move_menu = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 10, 400,
+    var move_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 10, 400,
                                     [['s', [RC.CMD_ACTOR_ACT.WAIT, RC.CMD_ACTOR_DIR.LEFT], 60, 60, 50, 50,
                                       asset_.get_texture(3)],
                                      ['q', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.LEFT], 0, 0, 50, 50,
@@ -40,34 +40,34 @@ PlayingScene.prototype.init = function(asset_, ui_) {
                                      ['x', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNRIGHT], 60, 120, 50, 50,
                                       asset_.get_texture(3)]]);
 
-    ui_.add_sprite(move_menu.get_sprite());
-    this.menus.push(move_menu);
+    ui_.add_sprite(move_panel.get_sprite());
+    this.panels.push(move_panel);
 
-    var inventry_menu = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 824, 400,
+    var inventry_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 824, 400,
                                         [['inv', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.INVENTRY], 0, 0, 200, 200,
                                           asset_.get_texture(3)]]);
-    ui_.add_sprite(inventry_menu.get_sprite());
-    this.menus.push(inventry_menu);
+    ui_.add_sprite(inventry_panel.get_sprite());
+    this.panels.push(inventry_panel);
 
-    var automation_menu = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 320, 550,
+    var automation_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 320, 550,
                                         [['stat', [RC.CMD_ACTOR_ACT.AUTOMATION, RC.CMD_ACTOR_AUTOMATION.STATUS],
                       0, 0, 100, 50, asset_.get_texture(3)],
                                          ['expl', [RC.CMD_ACTOR_ACT.AUTOMATION, RC.CMD_ACTOR_AUTOMATION.EXPLORING],
                                           210, 0, 100, 50, asset_.get_texture(3)]]);
-    ui_.add_sprite(automation_menu.get_sprite());
-    this.menus.push(automation_menu);
+    ui_.add_sprite(automation_panel.get_sprite());
+    this.panels.push(automation_panel);
 
-    var config_menu = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 0, 0,
+    var config_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 0, 0,
                                      [['config', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CONFIG], 0, 0, 50, 50,
                                        asset_.get_texture(3)]]);
-    ui_.add_sprite(config_menu.get_sprite());
-    this.menus.push(config_menu);
+    ui_.add_sprite(config_panel.get_sprite());
+    this.panels.push(config_panel);
 
-    var info_menu = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 974, 0,
+    var info_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 974, 0,
                                     [['i', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.INFO], 0, 0, 50, 50,
                                       asset_.get_texture(3)]]);
-    ui_.add_sprite(info_menu.get_sprite());
-    this.menus.push(info_menu);
+    ui_.add_sprite(info_panel.get_sprite());
+    this.panels.push(info_panel);
 
     this.initialized = true;
 

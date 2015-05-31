@@ -165,18 +165,18 @@ Asset.prototype.gen_texture = function(image_)
 };
 
 // basically, generate by inside of scene
-Asset.prototype.gen_menu = function(cmd_queue_, texture_, x_, y_, item_array_)
+Asset.prototype.gen_panel = function(cmd_queue_, texture_, x_, y_, item_array_)
 {
-    var menu_sprite = new UISprite(this.id_pool.get_id(), cmd_queue_);
-    this.id_bst.add(menu_sprite);
+    var panel_sprite = new UISprite(this.id_pool.get_id(), cmd_queue_);
+    this.id_bst.add(panel_sprite);
 
-    if (this.is_url(item_array_[0]))
+    if (this.is_tag(item_array_[0]))
     {
-        menu_sprite.init_as_html(x_, y_, item_array_[0]);
-        return menu_sprite;
+        panel_sprite.init_as_tag(x_, y_, item_array_[0], item_array_[1]);
+        return panel_sprite;
     }
     else
-    { menu_sprite.init_as_menu(x_, y_, this.get_texture(texture_)); }
+    { panel_sprite.init_as_panel(x_, y_, this.get_texture(texture_)); }
 
     for (var i in item_array_)
     {
@@ -189,28 +189,19 @@ Asset.prototype.gen_menu = function(cmd_queue_, texture_, x_, y_, item_array_)
                                    item_array_[i][4], // width
                                    item_array_[i][5], // height
                                    item_array_[i][6]); // texture
-        menu_sprite.add(item_sprite);
+        panel_sprite.add(item_sprite);
     }
-    return menu_sprite;
+    return panel_sprite;
 };
 
-Asset.prototype.is_url = function(url_)
+// XXX dirty
+Asset.prototype.is_tag = function(tags_)
 {
-    if (typeof url_ === 'string') { return true; }
+    var tmp_p = document.createElement("p");
+    tmp_p.innerHTML = tags_;
+    console.log(tmp_p.children.length);
+    if (tmp_p.children.length != 0) { return true; }
     return false;
-
-    if (url_.match == undefined) { return false; }
-    return url_.match( /^https?:\/\// );
-    /*
-    var div, elm;
-    div = document.getElementById( "info" );
-    elm = document.createElement( "a" );
-    elm.setAttribute( "href", url_);
-    if( elm.protocol.match( /^https?:$/ ) || elm.protocol === ":" || elm.protocol === "" ){
-        elm.appendChild(document.createTextNode(url_));
-        div.appendChild(elm);
-    }
-    */
 };
 
 // need validation
