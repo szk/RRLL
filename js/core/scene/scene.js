@@ -2,7 +2,7 @@ function Scene() {
     this.avatar = null;
     this.level = null;
     this.initialized = false;
-    this.menus = [];
+    this.panels = [];
 }
 
 Scene.prototype.init = function(asset_, ui_) {

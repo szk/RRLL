@@ -2,9 +2,21 @@
 from bottle import route, run, template, request, static_file, response, url
 from json import dumps
 
+@route('/<filename:re:.*\.ico>')
+def send_ico(filename):
+    return static_file(filename, root='../img', mimetype='image/x-icon')
+
 @route('/img/<filename:re:.*\.png>')
 def send_image(filename):
     return static_file(filename, root='../img', mimetype='image/png')
+
+@route('/js/<filename:re:.*\.min.js>')
+def send_minjs(filename):
+    return static_file(filename, root='../dist', mimetype='text/javascript')
+
+@route('/css/<filename:re:.*\.css>')
+def send_css(filename):
+    return static_file(filename, root='../dist', mimetype='text/css')
 
 @route('/js/<filename:re:.*\.js>')
 def send_js(filename):
@@ -22,6 +34,7 @@ def send_atlas(filename):
 def send_atlas_img(filename):
     return static_file(filename, root='../data', mimetype='image/png')
 
+# reference
 @route('/static/<filename:path>')
 def send_static(filename):
     return static_file(filename, root='/path/to/static/files')

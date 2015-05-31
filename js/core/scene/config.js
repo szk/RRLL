@@ -13,18 +13,14 @@ ConfigScene.prototype.init = function(asset_, ui_) {
     this.asset = asset_;
     this.ui = ui_;
 
-    var result_btn = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 512, 300,
-                                     [['Cancel', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL],
-                                       0, 0, 100, 50, asset_.get_texture(3)],
-                                      ['OK', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.OK],
-                                       210, 0, 100, 50, asset_.get_texture(3)]]);
-    this.ui.add_sprite(result_btn.get_sprite());
-    this.menus.push(result_btn);
+    this.config_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 128, 0,
+                                        ['<div><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true" id="cancel">&times;</span></button><h4 class="modal-title">Modal title</h4></div><div class="modal-body"><p>One fine body&hellip;</p></div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal" id="close">Close</button><button type="button" class="btn btn-primary" id="ok">Save changes</button></div></div></div></div>',
+                                         [['cancel', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
+                                          ['close', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
+                                          ['ok', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.OK]]]]);
 
-    this.config_panel = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 512, 0,
-                                       ["dist/config.html"]);
     this.ui.add_sprite(this.config_panel.get_sprite());
-    this.menus.push(this.config_panel);
+    this.panels.push(this.config_panel);
 
     this.initialized = true;
     return true;
@@ -32,12 +28,12 @@ ConfigScene.prototype.init = function(asset_, ui_) {
 
 ConfigScene.prototype.terminate = function() {
     var dom = this.config_panel.get_sprite().domElement.contentWindow;
-    console.log(dom.$('#system'));
+//     console.log(dom.$('#system'));
 
-    for (var i in this.menus)
+    for (var i in this.panels)
     {
-        this.menus[i].terminate();
-        this.asset.free(this.menus[i]);
+        this.panels[i].terminate();
+        this.asset.free(this.panels[i]);
     }
 
 };

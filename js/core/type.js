@@ -97,7 +97,7 @@ RC.CMD_MENU_TYPE = {
 
 RC.UI_SPRITE_TYPE = {
     MENU: 0,
-    HTML: 1,
+    TAG: 1,
     BUTTON: 2,
     UNDEFINED: 9
 };

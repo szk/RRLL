@@ -30721,7 +30721,7 @@ RC.CMD_MENU_TYPE = {
 
 RC.UI_SPRITE_TYPE = {
     MENU: 0,
-    HTML: 1,
+    TAG: 1,
     BUTTON: 2,
     UNDEFINED: 9
 };
@@ -31298,7 +31298,7 @@ MenuItem.prototype.set_appearance = function()
 };
 
 
-function Menu() {
+function Panel() {
     this.global_command = null;
     this.texture = null;
     this.x = this.y = 0;
@@ -31307,7 +31307,7 @@ function Menu() {
     this.mid = null;
 }
 
-Menu.prototype.init = function(id_, command_, texture_, x_, y_) {
+Panel.prototype.init = function(id_, command_, texture_, x_, y_) {
     this.global_command = command_;
     this.texture = texture_;
     this.url = null;
@@ -31318,7 +31318,7 @@ Menu.prototype.init = function(id_, command_, texture_, x_, y_) {
     return this.id;
 };
 
-Menu.prototype.init_html = function(id_, command_, url_, x_, y_) {
+Panel.prototype.init_html = function(id_, command_, url_, x_, y_) {
     this.global_command = command_;
     this.texture = null;
     this.url = url_;
@@ -31329,15 +31329,15 @@ Menu.prototype.init_html = function(id_, command_, url_, x_, y_) {
     return this.id;
 };
 
-Menu.prototype.add_item = function(menu_item_) {
-    this.items.push(menu_item_);
+Panel.prototype.add_item = function(button_) {
+    this.items.push(button_);
 };
 
-Menu.prototype.get_global_command = function() { return this.global_command; };
-Menu.prototype.get_texture = function() { return this.texture; };
-Menu.prototype.get_x = function() { return this.x; };
-Menu.prototype.get_y = function() { return this.y; };
-Menu.prototype.get_url = function() { return this.url; };
+Panel.prototype.get_global_command = function() { return this.global_command; };
+Panel.prototype.get_texture = function() { return this.texture; };
+Panel.prototype.get_x = function() { return this.x; };
+Panel.prototype.get_y = function() { return this.y; };
+Panel.prototype.get_url = function() { return this.url; };
 
 function UI() {
     this.listener = new window.keypress.Listener();
@@ -31345,12 +31345,12 @@ function UI() {
     this.menu = [];
     this.asset = null;
 
-    this.move_panel = new Menu();
-    this.inventry_panel = new Menu();
-    this.automation_panel = new Menu();
+    this.move_panel = new Panel();
+    this.inventry_panel = new Panel();
+    this.automation_panel = new Panel();
 
-    this.config_panel = new Menu();
-    this.info_panel = new Menu();
+    this.config_panel = new Panel();
+    this.info_panel = new Panel();
     this.command_queue = new buckets.Queue();
 }
 
@@ -31370,21 +31370,6 @@ UI.prototype.add_sprite = function(sprite_)
 UI.prototype.is_command_queued = function() { return !(this.command_queue.isEmpty()); };
 UI.prototype.get_command_queue = function() { return this.command_queue; };
 UI.prototype.clear_command_queue = function() { this.command_queue.clear(); };
-
-UI.prototype.build_menu = function(panel_, menu_array_) {
-    for (var i in menu_array_)
-    {
-        var menuitem = new MenuItem();
-        menuitem.init.apply(menuitem, menu_array_[i]);
-        panel_.add_item(menuitem);
-    }
-    this.add_menu(panel_);
-};
-
-UI.prototype.get_menu = function() { return this.menu; };
-UI.prototype.add_menu = function(menu_) {
-    this.menu.push(menu_);
-};
 
 UI.prototype.set_keybinding = function() {
     var my_scope = this;
@@ -31689,18 +31674,18 @@ Asset.prototype.gen_texture = function(image_)
 };
 
 // basically, generate by inside of scene
-Asset.prototype.gen_menu = function(cmd_queue_, texture_, x_, y_, item_array_)
+Asset.prototype.gen_panel = function(cmd_queue_, texture_, x_, y_, item_array_)
 {
-    var menu_sprite = new UISprite(this.id_pool.get_id(), cmd_queue_);
-    this.id_bst.add(menu_sprite);
+    var panel_sprite = new UISprite(this.id_pool.get_id(), cmd_queue_);
+    this.id_bst.add(panel_sprite);
 
-    if (this.is_url(item_array_[0]))
+    if (this.is_tag(item_array_[0]))
     {
-        menu_sprite.init_as_html(x_, y_, item_array_[0]);
-        return menu_sprite;
+        panel_sprite.init_as_tag(x_, y_, item_array_[0], item_array_[1]);
+        return panel_sprite;
     }
     else
-    { menu_sprite.init_as_menu(x_, y_, this.get_texture(texture_)); }
+    { panel_sprite.init_as_panel(x_, y_, this.get_texture(texture_)); }
 
     for (var i in item_array_)
     {
@@ -31713,28 +31698,19 @@ Asset.prototype.gen_menu = function(cmd_queue_, texture_, x_, y_, item_array_)
                                    item_array_[i][4], // width
                                    item_array_[i][5], // height
                                    item_array_[i][6]); // texture
-        menu_sprite.add(item_sprite);
+        panel_sprite.add(item_sprite);
     }
-    return menu_sprite;
+    return panel_sprite;
 };
 
-Asset.prototype.is_url = function(url_)
+// XXX dirty
+Asset.prototype.is_tag = function(tags_)
 {
-    if (typeof url_ === 'string') { return true; }
+    var tmp_p = document.createElement("p");
+    tmp_p.innerHTML = tags_;
+    console.log(tmp_p.children.length);
+    if (tmp_p.children.length != 0) { return true; }
     return false;
-
-    if (url_.match == undefined) { return false; }
-    return url_.match( /^https?:\/\// );
-    /*
-    var div, elm;
-    div = document.getElementById( "info" );
-    elm = document.createElement( "a" );
-    elm.setAttribute( "href", url_);
-    if( elm.protocol.match( /^https?:$/ ) || elm.protocol === ":" || elm.protocol === "" ){
-        elm.appendChild(document.createTextNode(url_));
-        div.appendChild(elm);
-    }
-    */
 };
 
 // need validation
@@ -32363,7 +32339,7 @@ function UISprite(id_, global_command_)
     this.children = [];
 };
 
-UISprite.prototype.init_as_menu = function(x_, y_, texture_)
+UISprite.prototype.init_as_panel = function(x_, y_, texture_)
 {
     this.sprite = new PIXI.Sprite(texture_);
     this.x = x_;
@@ -32372,15 +32348,23 @@ UISprite.prototype.init_as_menu = function(x_, y_, texture_)
     this.sprite.position.x = this.x;
     this.sprite.position.y = this.y;
 
-    this.ui_sprite_type = RC.UI_SPRITE_TYPE.MENU;
+    this.ui_sprite_type = RC.UI_SPRITE_TYPE.PANEL;
 };
 
-UISprite.prototype.init_as_html = function(x_, y_, url_)
+UISprite.prototype.init_as_tag = function(x_, y_, tag_, events_)
 {
-    this.sprite = new PIXI.DOM.Sprite('<iframe>', { src: url_ });
+    this.sprite = new PIXI.DOM.Sprite(tag_,
+                                      { events: {
+                                          click: function()
+                                          {
+                                              if (event.target.id == 'cancel')
+                                              {
+                                                  this.global_command.add([RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]);
+                                              }
+                                          }.bind(this)}});
     this.sprite.position.x = x_;
     this.sprite.position.y = y_;
-    this.ui_sprite_type = RC.UI_SPRITE_TYPE.HTML;
+    this.ui_sprite_type = RC.UI_SPRITE_TYPE.TAG;
 };
 
 UISprite.prototype.init_as_button = function(label_, command_, x_, y_, width_, height_,
@@ -32434,7 +32418,7 @@ UISprite.prototype.terminate = function() {
 
     switch (this.ui_sprite_type)
     {
-    case RC.UI_SPRITE_TYPE.MENU:
+    case RC.UI_SPRITE_TYPE.PANEL:
         // this.sprite.destroy();
         // this.sprite = null;
         break;
@@ -32821,7 +32805,7 @@ function Scene() {
     this.avatar = null;
     this.level = null;
     this.initialized = false;
-    this.menus = [];
+    this.panels = [];
 }
 
 Scene.prototype.init = function(asset_, ui_) {
@@ -32853,7 +32837,7 @@ Scene.prototype.get_level = function() {
 
 function PlayingScene() {
     Scene.apply(this, arguments);
-    this.menus = [];
+    this.panels = [];
 }
 
 PlayingScene.prototype = Object.create(Scene.prototype);
@@ -32873,7 +32857,7 @@ PlayingScene.prototype.init = function(asset_, ui_) {
      * asd qsc
      * zxc azx
      */
-    var move_menu = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 10, 400,
+    var move_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 10, 400,
                                     [['s', [RC.CMD_ACTOR_ACT.WAIT, RC.CMD_ACTOR_DIR.LEFT], 60, 60, 50, 50,
                                       asset_.get_texture(3)],
                                      ['q', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.LEFT], 0, 0, 50, 50,
@@ -32893,34 +32877,34 @@ PlayingScene.prototype.init = function(asset_, ui_) {
                                      ['x', [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNRIGHT], 60, 120, 50, 50,
                                       asset_.get_texture(3)]]);
 
-    ui_.add_sprite(move_menu.get_sprite());
-    this.menus.push(move_menu);
+    ui_.add_sprite(move_panel.get_sprite());
+    this.panels.push(move_panel);
 
-    var inventry_menu = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 824, 400,
+    var inventry_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 824, 400,
                                         [['inv', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.INVENTRY], 0, 0, 200, 200,
                                           asset_.get_texture(3)]]);
-    ui_.add_sprite(inventry_menu.get_sprite());
-    this.menus.push(inventry_menu);
+    ui_.add_sprite(inventry_panel.get_sprite());
+    this.panels.push(inventry_panel);
 
-    var automation_menu = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 320, 550,
+    var automation_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 320, 550,
                                         [['stat', [RC.CMD_ACTOR_ACT.AUTOMATION, RC.CMD_ACTOR_AUTOMATION.STATUS],
                       0, 0, 100, 50, asset_.get_texture(3)],
                                          ['expl', [RC.CMD_ACTOR_ACT.AUTOMATION, RC.CMD_ACTOR_AUTOMATION.EXPLORING],
                                           210, 0, 100, 50, asset_.get_texture(3)]]);
-    ui_.add_sprite(automation_menu.get_sprite());
-    this.menus.push(automation_menu);
+    ui_.add_sprite(automation_panel.get_sprite());
+    this.panels.push(automation_panel);
 
-    var config_menu = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 0, 0,
+    var config_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 0, 0,
                                      [['config', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CONFIG], 0, 0, 50, 50,
                                        asset_.get_texture(3)]]);
-    ui_.add_sprite(config_menu.get_sprite());
-    this.menus.push(config_menu);
+    ui_.add_sprite(config_panel.get_sprite());
+    this.panels.push(config_panel);
 
-    var info_menu = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 974, 0,
+    var info_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 974, 0,
                                     [['i', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.INFO], 0, 0, 50, 50,
                                       asset_.get_texture(3)]]);
-    ui_.add_sprite(info_menu.get_sprite());
-    this.menus.push(info_menu);
+    ui_.add_sprite(info_panel.get_sprite());
+    this.panels.push(info_panel);
 
     this.initialized = true;
 
@@ -32974,18 +32958,14 @@ ConfigScene.prototype.init = function(asset_, ui_) {
     this.asset = asset_;
     this.ui = ui_;
 
-    var result_btn = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 512, 300,
-                                     [['Cancel', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL],
-                                       0, 0, 100, 50, asset_.get_texture(3)],
-                                      ['OK', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.OK],
-                                       210, 0, 100, 50, asset_.get_texture(3)]]);
-    this.ui.add_sprite(result_btn.get_sprite());
-    this.menus.push(result_btn);
+    this.config_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 128, 0,
+                                        ['<div><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true" id="cancel">&times;</span></button><h4 class="modal-title">Modal title</h4></div><div class="modal-body"><p>One fine body&hellip;</p></div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal" id="close">Close</button><button type="button" class="btn btn-primary" id="ok">Save changes</button></div></div></div></div>',
+                                         [['cancel', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
+                                          ['close', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
+                                          ['ok', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.OK]]]]);
 
-    this.config_panel = asset_.gen_menu(ui_.command_queue, asset_.get_texture(1), 512, 0,
-                                       ["dist/config.html"]);
     this.ui.add_sprite(this.config_panel.get_sprite());
-    this.menus.push(this.config_panel);
+    this.panels.push(this.config_panel);
 
     this.initialized = true;
     return true;
@@ -32993,12 +32973,12 @@ ConfigScene.prototype.init = function(asset_, ui_) {
 
 ConfigScene.prototype.terminate = function() {
     var dom = this.config_panel.get_sprite().domElement.contentWindow;
-    console.log(dom.$('#system'));
+//     console.log(dom.$('#system'));
 
-    for (var i in this.menus)
+    for (var i in this.panels)
     {
-        this.menus[i].terminate();
-        this.asset.free(this.menus[i]);
+        this.panels[i].terminate();
+        this.asset.free(this.panels[i]);
     }
 
 };

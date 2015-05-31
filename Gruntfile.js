@@ -27,8 +27,8 @@ module.exports = function(grunt) {
                       'js/core/level/terrain.js',
                       'js/core/level/level.js',
                       // ui
-                      'js/core/ui/menu_item.js',
-                      'js/core/ui/menu.js',
+                      'js/core/ui/button.js',
+                      'js/core/ui/panel.js',
                       'js/core/ui/ui.js',
                       // asset
                       'js/core/asset/object_pool.js',

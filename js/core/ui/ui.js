@@ -4,12 +4,12 @@ function UI() {
     this.menu = [];
     this.asset = null;
 
-    this.move_panel = new Menu();
-    this.inventry_panel = new Menu();
-    this.automation_panel = new Menu();
+    this.move_panel = new Panel();
+    this.inventry_panel = new Panel();
+    this.automation_panel = new Panel();
 
-    this.config_panel = new Menu();
-    this.info_panel = new Menu();
+    this.config_panel = new Panel();
+    this.info_panel = new Panel();
     this.command_queue = new buckets.Queue();
 }
 
@@ -29,21 +29,6 @@ UI.prototype.add_sprite = function(sprite_)
 UI.prototype.is_command_queued = function() { return !(this.command_queue.isEmpty()); };
 UI.prototype.get_command_queue = function() { return this.command_queue; };
 UI.prototype.clear_command_queue = function() { this.command_queue.clear(); };
-
-UI.prototype.build_menu = function(panel_, menu_array_) {
-    for (var i in menu_array_)
-    {
-        var menuitem = new MenuItem();
-        menuitem.init.apply(menuitem, menu_array_[i]);
-        panel_.add_item(menuitem);
-    }
-    this.add_menu(panel_);
-};
-
-UI.prototype.get_menu = function() { return this.menu; };
-UI.prototype.add_menu = function(menu_) {
-    this.menu.push(menu_);
-};
 
 UI.prototype.set_keybinding = function() {
     var my_scope = this;
