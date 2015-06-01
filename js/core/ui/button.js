@@ -1,4 +1,4 @@
-function MenuItem()
+function Button()
 {
     this.x = 0;
     this.y = 0;
@@ -14,17 +14,17 @@ function MenuItem()
     this.command = null;
 }
 
-MenuItem.prototype.get_label = function() { return this.label; };
-MenuItem.prototype.get_color = function() { return this.color; };
-MenuItem.prototype.get_outline = function() { return this.outline; };
-MenuItem.prototype.get_x = function() { return this.x; };
-MenuItem.prototype.get_y = function() { return this.y; };
-MenuItem.prototype.get_width = function() { return this.width; };
-MenuItem.prototype.get_height = function() { return this.height; };
-MenuItem.prototype.get_command = function() { return this.command; };
-MenuItem.prototype.get_texture = function() { return this.texture; };
+Button.prototype.get_label = function() { return this.label; };
+Button.prototype.get_color = function() { return this.color; };
+Button.prototype.get_outline = function() { return this.outline; };
+Button.prototype.get_x = function() { return this.x; };
+Button.prototype.get_y = function() { return this.y; };
+Button.prototype.get_width = function() { return this.width; };
+Button.prototype.get_height = function() { return this.height; };
+Button.prototype.get_command = function() { return this.command; };
+Button.prototype.get_texture = function() { return this.texture; };
 
-MenuItem.prototype.init = function(label_, command_, x_, y_, width_, height_, texture_)
+Button.prototype.init = function(label_, command_, x_, y_, width_, height_, texture_)
 {
     this.label = label_;
     this.command = command_; /// XXX
@@ -36,7 +36,7 @@ MenuItem.prototype.init = function(label_, command_, x_, y_, width_, height_, te
     this.texture = texture_;
 };
 
-MenuItem.prototype.set_appearance = function()
+Button.prototype.set_appearance = function()
 {
 };
 

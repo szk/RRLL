@@ -9,12 +9,12 @@ Sound.prototype.init = function() {
         var canPlayOgg = ("" != this.audio.canPlayType("audio/ogg"));
         var canPlayMp3 = ("" != this.audio.canPlayType("audio/mpeg"));
         if(canPlayOgg){
-            // oggをサポートしている
+            // ogg supported
             this.audio.src = "./sound/test.ogg";
         }
         else if(canPlayMp3)
         {
-            // mp3をサポートしている
+            // mp3 supported
             this.audio.src = "./sound/test.mp3";
         }
         else

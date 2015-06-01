@@ -1,15 +1,7 @@
 function UI() {
     this.listener = new window.keypress.Listener();
     this.uicontainer = null;
-    this.menu = [];
     this.asset = null;
-
-    this.move_panel = new Panel();
-    this.inventry_panel = new Panel();
-    this.automation_panel = new Panel();
-
-    this.config_panel = new Panel();
-    this.info_panel = new Panel();
     this.command_queue = new buckets.Queue();
 }
 
@@ -34,44 +26,32 @@ UI.prototype.set_keybinding = function() {
     var my_scope = this;
     var my_combos = this.listener.register_many([
         // wait
-        {   "keys"       : "s",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.WAIT, RC.CMD_ACTOR_DIR.LEFT]); },
-            "this"       : my_scope },
+        {"keys": "s", "this": my_scope,
+         "on_keydown": function() { this.command_queue.add([RC.CMD_ACTOR_ACT.WAIT, RC.CMD_ACTOR_DIR.LEFT]); }},
         // move
-        {   "keys"       : "q",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.LEFT]); },
-            "this"       : my_scope },
-        {   "keys"       : "z",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWN]); },
-            "this"       : my_scope },
-        {   "keys"       : "e",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UP]); },
-            "this"       : my_scope },
-        {   "keys"       : "c",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.RIGHT]); },
-            "this"       : my_scope },
-        {   "keys"       : "w",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPLEFT]); },
-            "this"       : my_scope },
-        {   "keys"       : "d",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPRIGHT]); },
-            "this"       : my_scope },
-        {   "keys"       : "a",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNLEFT]); },
-            "this"       : my_scope },
-        {   "keys"       : "x",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNRIGHT]); },
-            "this"       : my_scope },
-        // config
-        {   "keys"       : "esc",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CONFIG]); },
-            "this"       : my_scope },
-        {   "keys"       : "i",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.INFO]); },
-            "this"       : my_scope }
+        {"keys": "q", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.LEFT]); }},
+        {"keys": "z", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWN]); }},
+        {"keys": "e", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UP]); }},
+        {"keys": "c", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.RIGHT]); }},
+        {"keys": "w", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPLEFT]); }},
+        {"keys": "d", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPRIGHT]); }},
+        {"keys": "a", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNLEFT]); }},
+        {"keys": "x", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNRIGHT]); }},
+        // menus
+        {"keys": "esc", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.MAIN]); }},
+        {"keys": "i", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.ABOUT]); }}
     ]);
 };
-
 
 /*
     //     this.menu = new dat.GUI({
@@ -87,4 +67,33 @@ UI.prototype.set_keybinding = function() {
     // map_folder.add(map.m, 'd', -5.00, 5.00, 0.01).name("d");
     // map_folder.add(map.m, 'tx', 0, 500).name("Translate X");
     // map_folder.add(map.m, 'ty', 0, 500).name("Translate Y");
+
+UI.prototype.set_keybinding_bak = function() {
+    this.listener.reset();
+    var my_scope = this;
+
+    this.kb = [["s", [RC.CMD_ACTOR_ACT.WAIT, RC.CMD_ACTOR_DIR.LEFT]],
+               ["q", [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.LEFT]],
+               ["z", [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWN]],
+               ["e", [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UP]],
+               ["c", [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.RIGHT]],
+               ["w", [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPLEFT]],
+               ["d", [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPRIGHT]],
+               ["a", [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNLEFT]],
+               ["x", [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNRIGHT]],
+               ["esc", [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.MAIN]],
+               ["i", [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.ABOUT]]];
+
+    for (var k in this.kb)
+    {
+        var key = this.kb[k][0];
+        var cmd = this.kb[k][1];
+        this.combos.push({"keys"       : key,
+                          "on_keydown" : function() { console.log(key); this.command_queue.add(cmd); },
+                          "this"       : my_scope });
+    }
+    this.listener.register_many(this.combos);
+    console.log(this.listener.get_registered_combos());
+};
+
  */

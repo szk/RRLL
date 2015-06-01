@@ -57,17 +57,11 @@ PlayingScene.prototype.init = function(asset_, ui_) {
     ui_.add_sprite(automation_panel.get_sprite());
     this.panels.push(automation_panel);
 
-    var config_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 0, 0,
-                                     [['config', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CONFIG], 0, 0, 50, 50,
+    var menu_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 0, 0,
+                                     [['menu', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.MAIN], 0, 0, 50, 50,
                                        asset_.get_texture(3)]]);
-    ui_.add_sprite(config_panel.get_sprite());
-    this.panels.push(config_panel);
-
-    var info_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 974, 0,
-                                    [['i', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.INFO], 0, 0, 50, 50,
-                                      asset_.get_texture(3)]]);
-    ui_.add_sprite(info_panel.get_sprite());
-    this.panels.push(info_panel);
+    ui_.add_sprite(menu_panel.get_sprite());
+    this.panels.push(menu_panel);
 
     this.initialized = true;
 
@@ -94,10 +88,9 @@ PlayingScene.prototype.update = function(ui_) {
         ui_.clear_command_queue();
         switch (next_menu)
         {
-        case RC.CMD_MENU_TYPE.CONFIG:
-            return RC.NEXT_SCENE.CONFIG;
-        case RC.CMD_MENU_TYPE.INFO:
-            return RC.NEXT_SCENE.INFO;
+        case RC.CMD_MENU_TYPE.MAIN: return RC.NEXT_SCENE.MAINMENU;
+        case RC.CMD_MENU_TYPE.SETTING: return RC.NEXT_SCENE.SETTINGMENU;
+        case RC.CMD_MENU_TYPE.INFO: return RC.NEXT_SCENE.INFO;
         }
         return RC.NEXT_SCENE.CONTINUE;
     }

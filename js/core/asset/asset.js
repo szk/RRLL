@@ -164,20 +164,11 @@ Asset.prototype.gen_texture = function(image_)
     }
 };
 
-// basically, generate by inside of scene
 Asset.prototype.gen_panel = function(cmd_queue_, texture_, x_, y_, item_array_)
 {
     var panel_sprite = new UISprite(this.id_pool.get_id(), cmd_queue_);
     this.id_bst.add(panel_sprite);
-
-    if (this.is_tag(item_array_[0]))
-    {
-        panel_sprite.init_as_tag(x_, y_, item_array_[0], item_array_[1]);
-        return panel_sprite;
-    }
-    else
-    { panel_sprite.init_as_panel(x_, y_, this.get_texture(texture_)); }
-
+    panel_sprite.init_as_panel(x_, y_, this.get_texture(texture_));
     for (var i in item_array_)
     {
         var item_sprite = new UISprite(this.id_pool.get_id(), cmd_queue_);
@@ -194,14 +185,12 @@ Asset.prototype.gen_panel = function(cmd_queue_, texture_, x_, y_, item_array_)
     return panel_sprite;
 };
 
-// XXX dirty
-Asset.prototype.is_tag = function(tags_)
+Asset.prototype.gen_dom = function(cmd_queue_, texture_, x_, y_, item_array_)
 {
-    var tmp_p = document.createElement("p");
-    tmp_p.innerHTML = tags_;
-    console.log(tmp_p.children.length);
-    if (tmp_p.children.length != 0) { return true; }
-    return false;
+    var dom_sprite = new UISprite(this.id_pool.get_id(), cmd_queue_);
+    this.id_bst.add(dom_sprite);
+    dom_sprite.init_as_dom(x_, y_, item_array_[0], item_array_[1]);
+    return dom_sprite;
 };
 
 // need validation

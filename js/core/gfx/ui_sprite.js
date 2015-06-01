@@ -19,20 +19,28 @@ UISprite.prototype.init_as_panel = function(x_, y_, texture_)
     this.ui_sprite_type = RC.UI_SPRITE_TYPE.PANEL;
 };
 
-UISprite.prototype.init_as_tag = function(x_, y_, tag_, events_)
+UISprite.prototype.init_as_dom = function(x_, y_, tag_, events_)
 {
-    this.sprite = new PIXI.DOM.Sprite(tag_,
-                                      { events: {
-                                          click: function()
-                                          {
-                                              if (event.target.id == 'cancel')
-                                              {
-                                                  this.global_command.add([RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]);
-                                              }
-                                          }.bind(this)}});
+    var dom_ev = {
+        click: function(e_) {
+            var evt = e_ || window.event;
+            var tgt = evt.target;// || evt.srcElement; // XXX for IE
+            for (var i in events_)
+            {
+                if (tgt.id == events_[i][0])
+                {
+                    console.log(tgt.id);
+                    this.global_command.add(events_[i][1]);
+                }
+            }
+        }.bind(this)
+    };
+
+    this.sprite = new PIXI.DOM.Sprite(tag_, { x: x_, y: y_,
+                                              events: { click: dom_ev.click}});
     this.sprite.position.x = x_;
     this.sprite.position.y = y_;
-    this.ui_sprite_type = RC.UI_SPRITE_TYPE.TAG;
+    this.ui_sprite_type = RC.UI_SPRITE_TYPE.DOM;
 };
 
 UISprite.prototype.init_as_button = function(label_, command_, x_, y_, width_, height_,
@@ -90,7 +98,7 @@ UISprite.prototype.terminate = function() {
         // this.sprite.destroy();
         // this.sprite = null;
         break;
-    case RC.UI_SPRITE_TYPE.HTML:
+    case RC.UI_SPRITE_TYPE.DOM:
         this.sprite.destroy();
         this.sprite = null;
         break;
