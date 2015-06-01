@@ -30328,11 +30328,11 @@ module.exports = {
 			var scope = this;
 			for( var name in opts.events ) {
 				this.domElement.addEventListener( name, (function( name ) {
-					return function() {
+					return function(e) { // szk added argument 'e'.
 						if(!scope.isHidden) {
-							opts.events[name]();
+							opts.events[name](e);
 						}
-					}
+					};
 				})( name ), false );
 			}
 		}
@@ -30666,14 +30666,15 @@ RC.TEXTURE_CATEGORY = {
 
 RC.NEXT_SCENE = {
     CONTINUE: 0,
-    CONFIG: 1,
-    GAMEOVER: 2,
-    INTRO: 3,
-    LOADING: 4,
-    PLAYING: 5,
-    RANKING: 6,
-    INFO: 7,
-    RETURN: 8
+    MAINMENU: 1,
+    SETTINGMENU: 2,
+    GAMEOVER: 3,
+    INTRO: 4,
+    LOADING: 5,
+    PLAYING: 6,
+    RANKING: 7,
+    ABOUTMENU: 8,
+    RETURN: 9
 };
 
 /// bitmask test (not using)
@@ -30712,16 +30713,17 @@ RC.CMD_ACTOR_DIR = {
 };
 
 RC.CMD_MENU_TYPE = {
-    CONFIG: 0,
-    INFO: 1,
-    INVENTRY: 2,
-    CANCEL: 3,
-    OK: 4
+    MAIN: 0,
+    SETTING: 1,
+    ABOUT: 2,
+    INVENTRY: 3,
+    CANCEL: 4,
+    OK: 5
 };
 
 RC.UI_SPRITE_TYPE = {
     MENU: 0,
-    TAG: 1,
+    DOM: 1,
     BUTTON: 2,
     UNDEFINED: 9
 };
@@ -31255,7 +31257,7 @@ Level.prototype.add_item = function(item_)
     this.add_entity_tick(item_);
 };
 
-function MenuItem()
+function Button()
 {
     this.x = 0;
     this.y = 0;
@@ -31271,17 +31273,17 @@ function MenuItem()
     this.command = null;
 }
 
-MenuItem.prototype.get_label = function() { return this.label; };
-MenuItem.prototype.get_color = function() { return this.color; };
-MenuItem.prototype.get_outline = function() { return this.outline; };
-MenuItem.prototype.get_x = function() { return this.x; };
-MenuItem.prototype.get_y = function() { return this.y; };
-MenuItem.prototype.get_width = function() { return this.width; };
-MenuItem.prototype.get_height = function() { return this.height; };
-MenuItem.prototype.get_command = function() { return this.command; };
-MenuItem.prototype.get_texture = function() { return this.texture; };
+Button.prototype.get_label = function() { return this.label; };
+Button.prototype.get_color = function() { return this.color; };
+Button.prototype.get_outline = function() { return this.outline; };
+Button.prototype.get_x = function() { return this.x; };
+Button.prototype.get_y = function() { return this.y; };
+Button.prototype.get_width = function() { return this.width; };
+Button.prototype.get_height = function() { return this.height; };
+Button.prototype.get_command = function() { return this.command; };
+Button.prototype.get_texture = function() { return this.texture; };
 
-MenuItem.prototype.init = function(label_, command_, x_, y_, width_, height_, texture_)
+Button.prototype.init = function(label_, command_, x_, y_, width_, height_, texture_)
 {
     this.label = label_;
     this.command = command_; /// XXX
@@ -31293,7 +31295,7 @@ MenuItem.prototype.init = function(label_, command_, x_, y_, width_, height_, te
     this.texture = texture_;
 };
 
-MenuItem.prototype.set_appearance = function()
+Button.prototype.set_appearance = function()
 {
 };
 
@@ -31342,15 +31344,7 @@ Panel.prototype.get_url = function() { return this.url; };
 function UI() {
     this.listener = new window.keypress.Listener();
     this.uicontainer = null;
-    this.menu = [];
     this.asset = null;
-
-    this.move_panel = new Panel();
-    this.inventry_panel = new Panel();
-    this.automation_panel = new Panel();
-
-    this.config_panel = new Panel();
-    this.info_panel = new Panel();
     this.command_queue = new buckets.Queue();
 }
 
@@ -31375,44 +31369,32 @@ UI.prototype.set_keybinding = function() {
     var my_scope = this;
     var my_combos = this.listener.register_many([
         // wait
-        {   "keys"       : "s",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.WAIT, RC.CMD_ACTOR_DIR.LEFT]); },
-            "this"       : my_scope },
+        {"keys": "s", "this": my_scope,
+         "on_keydown": function() { this.command_queue.add([RC.CMD_ACTOR_ACT.WAIT, RC.CMD_ACTOR_DIR.LEFT]); }},
         // move
-        {   "keys"       : "q",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.LEFT]); },
-            "this"       : my_scope },
-        {   "keys"       : "z",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWN]); },
-            "this"       : my_scope },
-        {   "keys"       : "e",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UP]); },
-            "this"       : my_scope },
-        {   "keys"       : "c",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.RIGHT]); },
-            "this"       : my_scope },
-        {   "keys"       : "w",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPLEFT]); },
-            "this"       : my_scope },
-        {   "keys"       : "d",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPRIGHT]); },
-            "this"       : my_scope },
-        {   "keys"       : "a",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNLEFT]); },
-            "this"       : my_scope },
-        {   "keys"       : "x",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNRIGHT]); },
-            "this"       : my_scope },
-        // config
-        {   "keys"       : "esc",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CONFIG]); },
-            "this"       : my_scope },
-        {   "keys"       : "i",
-            "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.INFO]); },
-            "this"       : my_scope }
+        {"keys": "q", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.LEFT]); }},
+        {"keys": "z", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWN]); }},
+        {"keys": "e", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UP]); }},
+        {"keys": "c", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.RIGHT]); }},
+        {"keys": "w", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPLEFT]); }},
+        {"keys": "d", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPRIGHT]); }},
+        {"keys": "a", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNLEFT]); }},
+        {"keys": "x", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNRIGHT]); }},
+        // menus
+        {"keys": "esc", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.MAIN]); }},
+        {"keys": "i", "this": my_scope,
+         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.ABOUT]); }}
     ]);
 };
-
 
 /*
     //     this.menu = new dat.GUI({
@@ -31428,6 +31410,35 @@ UI.prototype.set_keybinding = function() {
     // map_folder.add(map.m, 'd', -5.00, 5.00, 0.01).name("d");
     // map_folder.add(map.m, 'tx', 0, 500).name("Translate X");
     // map_folder.add(map.m, 'ty', 0, 500).name("Translate Y");
+
+UI.prototype.set_keybinding_bak = function() {
+    this.listener.reset();
+    var my_scope = this;
+
+    this.kb = [["s", [RC.CMD_ACTOR_ACT.WAIT, RC.CMD_ACTOR_DIR.LEFT]],
+               ["q", [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.LEFT]],
+               ["z", [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWN]],
+               ["e", [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UP]],
+               ["c", [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.RIGHT]],
+               ["w", [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPLEFT]],
+               ["d", [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPRIGHT]],
+               ["a", [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNLEFT]],
+               ["x", [RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNRIGHT]],
+               ["esc", [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.MAIN]],
+               ["i", [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.ABOUT]]];
+
+    for (var k in this.kb)
+    {
+        var key = this.kb[k][0];
+        var cmd = this.kb[k][1];
+        this.combos.push({"keys"       : key,
+                          "on_keydown" : function() { console.log(key); this.command_queue.add(cmd); },
+                          "this"       : my_scope });
+    }
+    this.listener.register_many(this.combos);
+    console.log(this.listener.get_registered_combos());
+};
+
  */
 function ObjectPool(classname_) {
     this.classname = classname_;
@@ -31673,20 +31684,11 @@ Asset.prototype.gen_texture = function(image_)
     }
 };
 
-// basically, generate by inside of scene
 Asset.prototype.gen_panel = function(cmd_queue_, texture_, x_, y_, item_array_)
 {
     var panel_sprite = new UISprite(this.id_pool.get_id(), cmd_queue_);
     this.id_bst.add(panel_sprite);
-
-    if (this.is_tag(item_array_[0]))
-    {
-        panel_sprite.init_as_tag(x_, y_, item_array_[0], item_array_[1]);
-        return panel_sprite;
-    }
-    else
-    { panel_sprite.init_as_panel(x_, y_, this.get_texture(texture_)); }
-
+    panel_sprite.init_as_panel(x_, y_, this.get_texture(texture_));
     for (var i in item_array_)
     {
         var item_sprite = new UISprite(this.id_pool.get_id(), cmd_queue_);
@@ -31703,14 +31705,12 @@ Asset.prototype.gen_panel = function(cmd_queue_, texture_, x_, y_, item_array_)
     return panel_sprite;
 };
 
-// XXX dirty
-Asset.prototype.is_tag = function(tags_)
+Asset.prototype.gen_dom = function(cmd_queue_, texture_, x_, y_, item_array_)
 {
-    var tmp_p = document.createElement("p");
-    tmp_p.innerHTML = tags_;
-    console.log(tmp_p.children.length);
-    if (tmp_p.children.length != 0) { return true; }
-    return false;
+    var dom_sprite = new UISprite(this.id_pool.get_id(), cmd_queue_);
+    this.id_bst.add(dom_sprite);
+    dom_sprite.init_as_dom(x_, y_, item_array_[0], item_array_[1]);
+    return dom_sprite;
 };
 
 // need validation
@@ -32351,20 +32351,28 @@ UISprite.prototype.init_as_panel = function(x_, y_, texture_)
     this.ui_sprite_type = RC.UI_SPRITE_TYPE.PANEL;
 };
 
-UISprite.prototype.init_as_tag = function(x_, y_, tag_, events_)
+UISprite.prototype.init_as_dom = function(x_, y_, tag_, events_)
 {
-    this.sprite = new PIXI.DOM.Sprite(tag_,
-                                      { events: {
-                                          click: function()
-                                          {
-                                              if (event.target.id == 'cancel')
-                                              {
-                                                  this.global_command.add([RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]);
-                                              }
-                                          }.bind(this)}});
+    var dom_ev = {
+        click: function(e_) {
+            var evt = e_ || window.event;
+            var tgt = evt.target;// || evt.srcElement; // XXX for IE
+            for (var i in events_)
+            {
+                if (tgt.id == events_[i][0])
+                {
+                    console.log(tgt.id);
+                    this.global_command.add(events_[i][1]);
+                }
+            }
+        }.bind(this)
+    };
+
+    this.sprite = new PIXI.DOM.Sprite(tag_, { x: x_, y: y_,
+                                              events: { click: dom_ev.click}});
     this.sprite.position.x = x_;
     this.sprite.position.y = y_;
-    this.ui_sprite_type = RC.UI_SPRITE_TYPE.TAG;
+    this.ui_sprite_type = RC.UI_SPRITE_TYPE.DOM;
 };
 
 UISprite.prototype.init_as_button = function(label_, command_, x_, y_, width_, height_,
@@ -32422,7 +32430,7 @@ UISprite.prototype.terminate = function() {
         // this.sprite.destroy();
         // this.sprite = null;
         break;
-    case RC.UI_SPRITE_TYPE.HTML:
+    case RC.UI_SPRITE_TYPE.DOM:
         this.sprite.destroy();
         this.sprite = null;
         break;
@@ -32781,12 +32789,12 @@ Sound.prototype.init = function() {
         var canPlayOgg = ("" != this.audio.canPlayType("audio/ogg"));
         var canPlayMp3 = ("" != this.audio.canPlayType("audio/mpeg"));
         if(canPlayOgg){
-            // oggをサポートしている
+            // ogg supported
             this.audio.src = "./sound/test.ogg";
         }
         else if(canPlayMp3)
         {
-            // mp3をサポートしている
+            // mp3 supported
             this.audio.src = "./sound/test.mp3";
         }
         else
@@ -32894,17 +32902,11 @@ PlayingScene.prototype.init = function(asset_, ui_) {
     ui_.add_sprite(automation_panel.get_sprite());
     this.panels.push(automation_panel);
 
-    var config_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 0, 0,
-                                     [['config', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CONFIG], 0, 0, 50, 50,
+    var menu_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 0, 0,
+                                     [['menu', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.MAIN], 0, 0, 50, 50,
                                        asset_.get_texture(3)]]);
-    ui_.add_sprite(config_panel.get_sprite());
-    this.panels.push(config_panel);
-
-    var info_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 974, 0,
-                                    [['i', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.INFO], 0, 0, 50, 50,
-                                      asset_.get_texture(3)]]);
-    ui_.add_sprite(info_panel.get_sprite());
-    this.panels.push(info_panel);
+    ui_.add_sprite(menu_panel.get_sprite());
+    this.panels.push(menu_panel);
 
     this.initialized = true;
 
@@ -32931,10 +32933,9 @@ PlayingScene.prototype.update = function(ui_) {
         ui_.clear_command_queue();
         switch (next_menu)
         {
-        case RC.CMD_MENU_TYPE.CONFIG:
-            return RC.NEXT_SCENE.CONFIG;
-        case RC.CMD_MENU_TYPE.INFO:
-            return RC.NEXT_SCENE.INFO;
+        case RC.CMD_MENU_TYPE.MAIN: return RC.NEXT_SCENE.MAINMENU;
+        case RC.CMD_MENU_TYPE.SETTING: return RC.NEXT_SCENE.SETTINGMENU;
+        case RC.CMD_MENU_TYPE.INFO: return RC.NEXT_SCENE.INFO;
         }
         return RC.NEXT_SCENE.CONTINUE;
     }
@@ -32943,36 +32944,36 @@ PlayingScene.prototype.update = function(ui_) {
     return RC.NEXT_SCENE.CONTINUE;
 };
 
-function ConfigScene() {
+function MainMenuScene() {
     Scene.apply(this, arguments);
 
-    this.config_panel = null;
+    this.menu_panel = null;
     this.asset = null;
     this.ui = null;
 }
 
-ConfigScene.prototype = Object.create(Scene.prototype);
-ConfigScene.prototype.constructor = ConfigScene;
+MainMenuScene.prototype = Object.create(Scene.prototype);
+MainMenuScene.prototype.constructor = MainMenuScene;
 
-ConfigScene.prototype.init = function(asset_, ui_) {
+MainMenuScene.prototype.init = function(asset_, ui_) {
     this.asset = asset_;
     this.ui = ui_;
 
-    this.config_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 128, 0,
-                                        ['<div><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true" id="cancel">&times;</span></button><h4 class="modal-title">Modal title</h4></div><div class="modal-body"><p>One fine body&hellip;</p></div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal" id="close">Close</button><button type="button" class="btn btn-primary" id="ok">Save changes</button></div></div></div></div>',
-                                         [['cancel', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
-                                          ['close', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
-                                          ['ok', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.OK]]]]);
+    this.menu_panel = asset_.gen_dom(ui_.command_queue, asset_.get_texture(1), 384, 64,
+                                       ['<div style="width: 256px;" class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" id="cancel"><span aria-hidden="true" id="cancel">&times;</span></button><h4 class="modal-title">Main menu</h4></div><div class="modal-body"><div class="container-fluid"><div class="row"><button type="button" class="btn btn-default col-xs-offset-2 col-xs-8" id="restart">Restart</button></div><br/><div class="row"><button type="button" class="btn btn-default col-xs-offset-2 col-xs-8" id="sandbox">Sandbox</button></div><br/><div class="row"><button type="button" class="btn btn-default col-xs-offset-2 col-xs-8" id="setting">Setting</button></div><br/><div class="row"><button type="button" class="btn btn-default col-xs-offset-2 col-xs-8" id="about">About</button></div><br/><div class="row"><button type="button" class="btn btn-default col-xs-offset-2 col-xs-8" id="close">Close</button></div><br/></div></div></div></div>',
+                                        [['cancel', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
+                                         ['close', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
+                                         ['ok', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.OK]]]]);
 
-    this.ui.add_sprite(this.config_panel.get_sprite());
-    this.panels.push(this.config_panel);
+    this.ui.add_sprite(this.menu_panel.get_sprite());
+    this.panels.push(this.menu_panel);
 
     this.initialized = true;
     return true;
 };
 
-ConfigScene.prototype.terminate = function() {
-    var dom = this.config_panel.get_sprite().domElement.contentWindow;
+MainMenuScene.prototype.terminate = function() {
+    var dom = this.menu_panel.get_sprite().domElement.contentWindow;
 //     console.log(dom.$('#system'));
 
     for (var i in this.panels)
@@ -32983,7 +32984,7 @@ ConfigScene.prototype.terminate = function() {
 
 };
 
-ConfigScene.prototype.update = function(ui_) {
+MainMenuScene.prototype.update = function(ui_) {
     var cmd = ui_.get_command_queue().peek();
     if (!cmd && !cmd[0] && !cmd[1])
     {
@@ -33007,22 +33008,91 @@ ConfigScene.prototype.update = function(ui_) {
     return RC.NEXT_SCENE.CONTINUE;
 };
 
-ConfigScene.prototype.is_initialized = function() {
+MainMenuScene.prototype.is_initialized = function() {
     return this.initialized;
 };
 
-function InfoScene() {
+function SettingMenuScene() {
     Scene.apply(this, arguments);
+
+    this.setting_panel = null;
+    this.asset = null;
+    this.ui = null;
 }
 
-InfoScene.prototype = Object.create(Scene.prototype);
-InfoScene.prototype.constructor = InfoScene;
+SettingMenuScene.prototype = Object.create(Scene.prototype);
+SettingMenuScene.prototype.constructor = SettingMenuScene;
 
-InfoScene.prototype.init = function(asset_, ui_) {
+SettingMenuScene.prototype.init = function(asset_, ui_) {
+    this.asset = asset_;
+    this.ui = ui_;
+    this.ui.set_keybinding([]);
+
+    this.setting_panel = asset_.gen_dom(ui_.command_queue, asset_.get_texture(1), 128, 0,
+                                       ['<div style="width: 768px;" class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close" id="cancel"><span aria-hidden="true" id="cancel">&times;</span></button><h4 class="modal-title">Modal title</h4></div><div class="modal-body"><p>One fine body&hellip;</p></div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal" id="close">Close</button><button type="button" class="btn btn-primary" id="ok">Save changes</button></div></div></div>',
+                                        [['cancel', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
+                                         ['close', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
+                                         ['ok', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.OK]]]]);
+
+    this.ui.add_sprite(this.setting_panel.get_sprite());
+    this.panels.push(this.setting_panel);
+
+    this.initialized = true;
     return true;
 };
 
-InfoScene.prototype.update = function(ui_) {
+SettingMenuScene.prototype.terminate = function() {
+    var dom = this.setting_panel.get_sprite().domElement.contentWindow;
+//     console.log(dom.$('#system'));
+
+    for (var i in this.panels)
+    {
+        this.panels[i].terminate();
+        this.asset.free(this.panels[i]);
+    }
+
+};
+
+SettingMenuScene.prototype.update = function(ui_) {
+    var cmd = ui_.get_command_queue().peek();
+    if (!cmd && !cmd[0] && !cmd[1])
+    {
+        ui_.clear_command_queue();
+        return RC.NEXT_SCENE.CONTINUE;
+    }
+
+    if (cmd[0] == RC.CMD_ACTOR_ACT.MENU)
+    {
+        var pressed_button = cmd[1];
+        ui_.clear_command_queue();
+        switch (pressed_button)
+        {
+            case RC.CMD_MENU_TYPE.CANCEL:
+            console.log('cancel clicked'); break;
+            case RC.CMD_MENU_TYPE.OK:
+            console.log('ok clicked'); break;
+        }
+        return RC.NEXT_SCENE.RETURN;
+    }
+    return RC.NEXT_SCENE.CONTINUE;
+};
+
+SettingMenuScene.prototype.is_initialized = function() {
+    return this.initialized;
+};
+
+function AboutMenuScene() {
+    Scene.apply(this, arguments);
+}
+
+AboutMenuScene.prototype = Object.create(Scene.prototype);
+AboutMenuScene.prototype.constructor = AboutMenuScene;
+
+AboutMenuScene.prototype.init = function(asset_, ui_) {
+    return true;
+};
+
+AboutMenuScene.prototype.update = function(ui_) {
 };
 
 
@@ -33036,8 +33106,9 @@ SceneStack.prototype.init = function(asset_, ui_) {
 //     this.loading_scene = new LoadingScene();
 //     this.intro_scene = new IntroScene();
     this.playing_scene = new PlayingScene();
-    this.config_scene = new ConfigScene();
-//     this.info_scene = new InfoScene();
+    this.settingmenu_scene = new SettingMenuScene();
+    this.mainmenu_scene = new MainMenuScene();
+    this.aboutmenu_scene = new AboutMenuScene();
 //     this.gameover_scene = new GameoverScene();
 //     this.ranking_scene = new RankingScene();
 
@@ -33088,17 +33159,21 @@ SceneStack.prototype.result_check_ = function (result_, ui_) {
 
     switch (result_)
     {
-    case RC.NEXT_SCENE.CONFIG:
-        console.log("result check says next is config");
-        this.push_(this.config_scene);
+    case RC.NEXT_SCENE.MAINMENU:
+        console.log("result check says next is mainmenu");
+        this.push_(this.mainmenu_scene);
+        break;
+    case RC.NEXT_SCENE.SETTINGMENU:
+        console.log("result check says next is setting");
+        this.push_(this.settingmenu_scene);
         break;
     case RC.NEXT_SCENE.GAMEOVER: break;
     case RC.NEXT_SCENE.INTRO: break;
     case RC.NEXT_SCENE.LOADING: break;
     case RC.NEXT_SCENE.PLAYING: break;
     case RC.NEXT_SCENE.RANKING: break;
-    case RC.NEXT_SCENE.INFO:
-        this.push_(this.info_scene);
+    case RC.NEXT_SCENE.ABOUTMENU:
+        this.push_(this.aboutmenu_scene);
         break;
     case RC.NEXT_SCENE.RETURN:
         this.pop_();

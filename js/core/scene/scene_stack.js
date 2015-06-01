@@ -7,8 +7,9 @@ SceneStack.prototype.init = function(asset_, ui_) {
 //     this.loading_scene = new LoadingScene();
 //     this.intro_scene = new IntroScene();
     this.playing_scene = new PlayingScene();
-    this.config_scene = new ConfigScene();
-//     this.info_scene = new InfoScene();
+    this.settingmenu_scene = new SettingMenuScene();
+    this.mainmenu_scene = new MainMenuScene();
+    this.aboutmenu_scene = new AboutMenuScene();
 //     this.gameover_scene = new GameoverScene();
 //     this.ranking_scene = new RankingScene();
 
@@ -59,17 +60,21 @@ SceneStack.prototype.result_check_ = function (result_, ui_) {
 
     switch (result_)
     {
-    case RC.NEXT_SCENE.CONFIG:
-        console.log("result check says next is config");
-        this.push_(this.config_scene);
+    case RC.NEXT_SCENE.MAINMENU:
+        console.log("result check says next is mainmenu");
+        this.push_(this.mainmenu_scene);
+        break;
+    case RC.NEXT_SCENE.SETTINGMENU:
+        console.log("result check says next is setting");
+        this.push_(this.settingmenu_scene);
         break;
     case RC.NEXT_SCENE.GAMEOVER: break;
     case RC.NEXT_SCENE.INTRO: break;
     case RC.NEXT_SCENE.LOADING: break;
     case RC.NEXT_SCENE.PLAYING: break;
     case RC.NEXT_SCENE.RANKING: break;
-    case RC.NEXT_SCENE.INFO:
-        this.push_(this.info_scene);
+    case RC.NEXT_SCENE.ABOUTMENU:
+        this.push_(this.aboutmenu_scene);
         break;
     case RC.NEXT_SCENE.RETURN:
         this.pop_();

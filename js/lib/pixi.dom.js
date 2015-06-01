@@ -302,11 +302,11 @@
 			var scope = this;
 			for( var name in opts.events ) {
 				this.domElement.addEventListener( name, (function( name ) {
-					return function() {
+					return function(e) { // szk added argument 'e'.
 						if(!scope.isHidden) {
-							opts.events[name]();
+							opts.events[name](e);
 						}
-					}
+					};
 				})( name ), false );
 			}
 		}

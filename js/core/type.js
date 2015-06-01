@@ -42,14 +42,15 @@ RC.TEXTURE_CATEGORY = {
 
 RC.NEXT_SCENE = {
     CONTINUE: 0,
-    CONFIG: 1,
-    GAMEOVER: 2,
-    INTRO: 3,
-    LOADING: 4,
-    PLAYING: 5,
-    RANKING: 6,
-    INFO: 7,
-    RETURN: 8
+    MAINMENU: 1,
+    SETTINGMENU: 2,
+    GAMEOVER: 3,
+    INTRO: 4,
+    LOADING: 5,
+    PLAYING: 6,
+    RANKING: 7,
+    ABOUTMENU: 8,
+    RETURN: 9
 };
 
 /// bitmask test (not using)
@@ -88,16 +89,17 @@ RC.CMD_ACTOR_DIR = {
 };
 
 RC.CMD_MENU_TYPE = {
-    CONFIG: 0,
-    INFO: 1,
-    INVENTRY: 2,
-    CANCEL: 3,
-    OK: 4
+    MAIN: 0,
+    SETTING: 1,
+    ABOUT: 2,
+    INVENTRY: 3,
+    CANCEL: 4,
+    OK: 5
 };
 
 RC.UI_SPRITE_TYPE = {
     MENU: 0,
-    TAG: 1,
+    DOM: 1,
     BUTTON: 2,
     UNDEFINED: 9
 };
