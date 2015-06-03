@@ -1,14 +1,18 @@
 function Entity() {
 }
 
-Entity.prototype.init = function(id_, type_, sprite_, x_, y_)
+Entity.prototype.create = function(id_, type_, sprite_, x_, y_)
+{
+};
+
+Entity.prototype.init = function(id_, type_, appearance_, x_, y_)
 {
     this.id = id_;
     this.next_tick = RC.MAX_TICK;
     this.live = true;
 
     this.type = type_;
-    this.sprite = sprite_;
+    this.sprite = appearance_;
     this.tile_pos_x = x_;
     this.tile_pos_y = y_;
 

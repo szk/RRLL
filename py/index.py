@@ -117,8 +117,9 @@ def level():
                        "fg_texture_id": "1",
                        "bg_texture_id": "0"}],
 
-          "actor": [{"human": {"health": "10", "energy": "20"}},
-                    {"dog": {"health": "10", "energy":"20"}}
+          "actor": [{"human": {"appearance": "humanoid", "health": "10", "energy": "20"}},
+                    {"dog": {"appearance": "multileg", "health": "10", "energy":"20"}},
+                    {"worm": {"appearance": "noleg", "health": "5", "energy":"20"}}
                     ],
           "item": [{"sword": {"weight": "mogera"}},
                    {"shield": {"weight": "mogera"}},

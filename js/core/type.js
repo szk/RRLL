@@ -9,9 +9,9 @@ RC.SCENE_MODE = {
 };
 RC.ENTITY_TYPE = {
     ROOT:0, // for asset
-    HUMANOID:1, LEGGED:2, CRAWLER:3, FLYING:4, // for actor
-    EQUIPMENT:5, ITEM:6, // for item
-    WALL:7, STRUCTURE:8 // for terrain
+    HUMANOID:1, MULTILEG:2, NOLEG:3, // for actor
+    EQUIPMENT:4, ITEM:5, // for item
+    WALL:6, STRUCTURE:7 // for terrain
 };
 
 RC.TILE_SCREEN_WIDTH = 45.0;
