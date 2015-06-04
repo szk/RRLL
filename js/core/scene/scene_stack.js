@@ -1,9 +1,14 @@
 function SceneStack() {
     this.stack = [];
     this.top = null;
+    this.asset = null;
+    this.ui = null;
 }
 
 SceneStack.prototype.init = function(asset_, ui_) {
+    this.asset = asset_;
+    this.ui = ui_;
+
 //     this.loading_scene = new LoadingScene();
 //     this.intro_scene = new IntroScene();
     this.playing_scene = new PlayingScene();
@@ -15,7 +20,7 @@ SceneStack.prototype.init = function(asset_, ui_) {
 
     this.push_(this.playing_scene);
     this.top.init(asset_, ui_);
-    ui_.set_keybinding();
+    this.ui.set_keybinding();
 };
 
 SceneStack.prototype.update_top = function(ui_) {
@@ -58,6 +63,7 @@ SceneStack.prototype.pop_ = function() {
 SceneStack.prototype.result_check_ = function (result_, ui_) {
     if (result_ == RC.NEXT_SCENE.CONTINUE) { return; }
 
+    // scene is changing
     switch (result_)
     {
     case RC.NEXT_SCENE.MAINMENU:
@@ -80,4 +86,6 @@ SceneStack.prototype.result_check_ = function (result_, ui_) {
         this.pop_();
         break;
     }
+
+//     this.init_top(this.asset, this.ui);
 };

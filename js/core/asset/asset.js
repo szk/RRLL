@@ -1,17 +1,20 @@
-function Asset(image_atlas_url_) {
+function Asset(base_texture_img_) {
     this.load_base_completed = false;
     this.load_variable_completed = false;
 
-    // Load image from image atras
+    // Load base texture
     this.texture_array = new Array(16385);
-    this.gen_texture(image_atlas_url_);
+    this.gen_texture(base_texture_img_);
 
     this.id_pool = new IdPool();
     this.id_bst = new buckets.BSTree(function(l_, r_)
                                      { if (l_.get_id() < r_.get_id()) { return -1; }
                                        else if (l_.get_id() === r_.get_id()) { return 0; }
                                        return 1; });
+    // base
+    this.appearance_template = {};
 
+    // variable
     this.terrain = {};
     this.level = {};
     this.avatar_template = {};
@@ -59,74 +62,76 @@ Asset.prototype.find_item_ = function(name_) { return this.item_template[name_];
 Asset.prototype.init = function(level_url_)
 {
     // load external data
-    this.load_base(["data/humanoid.json"], this.actor_template);
-    this.load_variable(level_url_, this.actor_template, this.build_default);
+    var loader = PIXI.loader;
+    loader.reset();
+    this.load_base("data/humanoid.json", level_url_, loader, this.build_base);
 
     return true;
 };
 
-Asset.prototype.load_base = function(assets_json_url_, template_) {
-    return;
-/*
+Asset.prototype.load_base = function(base_json_url_, var_json_url_, loader_, builder_) {
     // create a new loader
-    var loader = new PIXI.AssetLoader(assets_json_url_);
-    // use callback
-    loader.onComplete = on_base_loaded;
-    //begin load
-    loader.load();
+    loader_.add('base_json', base_json_url_).load(on_base_loaded.bind(this));
+    loader_.once('complete', next_assets.bind(this));
 
-    // this.base_load_completed = false;
-    function on_base_loaded()
+    var o = this;
+
+    // refer http://pixijs.github.io/examples/index.html
+    function on_base_loaded(loader_, res_)
     {
-        var spine = new PIXI.Spine("data/humanoid.json");
+        // XXX dirty
+        if (res_.base_json.isJson) { builder_.apply(o, [res_.base_json]); }
+        else { builder_.apply(o, [JSON.parse(res_.base_json.data)]); }
+        this.load_base_completed = true;
+    };
 
-        // set current skin
-        spine.skeleton.setSlotsToSetupPose();
-
-        // set the position
-        spine.position.x = window.innerWidth/2;
-        spine.position.y = window.innerHeight;
-
-        spine.scale.x = spine.scale.y = window.innerHeight / 400;
-
-        // play animation
-        spine.state.setAnimationByName(0, "walk", true);
-        // spine.skeleton.data.skins.attachments
-        // for (i = 0; i < spine.getChildIndex(); ++i) {}
-
-        template_['Humanoid'] = new Humanoid(spine);
-        // template_['Humanoid'].set_head(global_texture);
-        // stage_.addChild(template_['Humanoid'].spine);
-        load_base_completed = true;
+    function next_assets()
+    {
+        console.log('next_assets');
+        this.load_variable(var_json_url_, loader_, this.build_variable);
     }
-*/
+
+    return;
 };
 
-Asset.prototype.load_variable = function(variables_json_url_, template_, builder_)
+Asset.prototype.load_variable = function(variables_json_url_, loader_, builder_)
 {
     // create a new loader
-    var loader = PIXI.loader;
-    loader.reset();
-    loader.add('json', variables_json_url_);
-    loader.once('complete', on_variable_loaded.bind(this));
+    loader_.add('var_json', variables_json_url_).load(on_var_loaded.bind(this));
+    loader_.once('complete', on_variable_loaded.bind(this));
 
     var o = this;
     //begin load
-    loader.load(function (loader_, res_)
+    function on_var_loaded(loader_, res_)
                 {
                     // XXX dirty
-                    if (res_.json.isJson) { builder_.apply(o, [res_.json.data]); }
-                    else { builder_.apply(o, [JSON.parse(res_.json.data)]); }
-                });
+                    if (res_.var_json.isJson) { builder_.apply(o, [res_.var_json.data]); }
+                    else { builder_.apply(o, [JSON.parse(res_.var_json.data)]); }
+                };
 
     function on_variable_loaded(e_)
-    {
-        this.load_variable_completed = true;
-        this.load_base_completed = true; // TEMPORARY
-    }
+    { this.load_variable_completed = true; }
 };
 
-Asset.prototype.build_default = function(src_)
+Asset.prototype.build_base = function(src_)
+{
+    var spine = new PIXI.spine.Spine(src_.spineData);
+    // set current skin
+    spine.skeleton.setSlotsToSetupPose();
+
+    // set the position
+    spine.position.x = window.innerWidth/2;
+    spine.position.y = window.innerHeight;
+
+    // play animation
+    spine.state.setAnimationByName(0, "walk", true);
+    // spine.skeleton.data.skins.attachments
+    // for (i = 0; i < spine.getChildIndex(); ++i) {}
+
+    this.appearance_template['humanoid'] = new Humanoid(spine);
+};
+
+Asset.prototype.build_variable = function(src_)
 {
     if (!src_) { return false; }
     // item
@@ -203,7 +208,7 @@ Asset.prototype.gen_item = function(entry_)
         var type_name = null;
         for (var key in entry_[i]) { type_name = key; }
         this.item_template[type_name] = new Item(type_name, new PIXI.Sprite(this.get_texture(128)),
-                                                  0, 0);
+                                                 0, 0);
 
     }
     return 1;
@@ -245,10 +250,17 @@ Asset.prototype.gen_actor = function(entry_)
     {
         var type_name = null;
         for (var key in entry_[i]) { type_name = key; }
-        this.actor_template[type_name] = new Actor();
+        var new_actor = new Actor();
+
+        new_actor.create(type_name,
+                         entry_[i][type_name]['appearance'],
+                         entry_[i][type_name]['health'],
+                         entry_[i][type_name]['energy']);
+        this.actor_template[type_name] = new_actor;
     }
     return this.actor_template.length;
 };
+
 
 Asset.prototype.gen_level = function(entry_)
 {
@@ -265,8 +277,16 @@ Asset.prototype.gen_level = function(entry_)
             for (var avtr in entry_[i].avatar[avatar_type])
             {
                 var newavatar = clone(this.find_avatar_(avatar_type));
+                var newsp = this.appearance_template['humanoid'].get_spine();
+                this.appearance_template['humanoid'].set_head(this.get_texture(131));
+
+                // avatar and actors should have these (own) clones.
+                console.log(newsp.state);
+                console.log(newsp.slotContainers);
+
                 newavatar.init(this.id_pool.get_id(), avatar_type,
-                               new PIXI.Sprite(this.get_texture(131)),
+                               newsp,
+//                                new PIXI.Sprite(this.get_texture(131)),
                                parseInt(entry_[i].avatar[avatar_type][avtr].x),
                                parseInt(entry_[i].avatar[avatar_type][avtr].y));
                 level.set_avatar(newavatar);
@@ -278,8 +298,10 @@ Asset.prototype.gen_level = function(entry_)
             for (var actr in entry_[i].actor[actor_type])
             {
                 var newactor = clone(this.find_actor_(actor_type));
+                var news = this.appearance_template['humanoid'].get_spine();
                 newactor.init(this.id_pool.get_id(), actor_type,
-                              new PIXI.Sprite(this.get_texture(128)),
+                              news,
+//                               new PIXI.Sprite(this.get_texture(128)),
                               parseInt(entry_[i].actor[actor_type][actr].x),
                               parseInt(entry_[i].actor[actor_type][actr].y), 3);
                 level.add_actor(newactor);

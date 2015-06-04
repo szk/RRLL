@@ -58,6 +58,9 @@ RRLL.prototype.animate = function me() {
 
     this.gfx.update(this.scene_stack.get_top_level());
 
+//     TODO: should own animations
+//     all_of_actors.update_animation(using_own_anim_slots_and_anim_state_by_update(dt))
+
     // render the stage
     this.renderer.render(this.gfx.get_root());
 };
