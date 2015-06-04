@@ -29,6 +29,15 @@ Actor.prototype.create = function(type_, appearance_, health_, energy_)
 //     }
 };
 
+// pseudo proc
+Actor.prototype.update_animation = function(dt_)
+{
+
+    this.appearance.slotContainers = this.anim_slots;
+    this.appearance.state = this.anim_state;
+    this.appearance.update(dt_);
+};
+
 Actor.prototype.init = function(eid_, type_, sprite_, x_, y_)
 {
     this.entity.init.call(this, eid_, type_, sprite_, x_, y_);

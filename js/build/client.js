@@ -3215,7 +3215,6 @@ function clone(parent, circular, depth, prototype) {
       if (attrs && attrs.set == null) {
         continue;
       }
-
       child[i] = _clone(parent[i], depth - 1);
     }
 
@@ -30128,7 +30127,6 @@ module.exports = {
 	var generateFakeTexture = function(w, h) {
 		return {
 			baseTexture: { hasLoaded: true },
-			frame: { width: w, height: h },
 			_frame: { width: w, height: h } // szk added it for Pixi v3
 		};
 	};
@@ -30193,7 +30191,8 @@ module.exports = {
 // // 		return !displayObject.visible || displayObject.alpha <= 0 || (displayObject.stage !== displayObject && (!displayObject.parent || invisbilityCheck(displayObject.parent)));
 // 	};
 	var invisbilityCheck = function(displayObject) {
- 	    return !displayObject.visible || displayObject.alpha <= 0; // szk added it for Pixi v3
+            return !displayObject.visible || displayObject.alpha <= 0 || (displayObject.parent !== null && invisbilityCheck(displayObject.parent)); // for Pixi v3
+//  	    return !displayObject.visible || displayObject.alpha <= 0;
 	};
 
 	//
@@ -30238,11 +30237,12 @@ module.exports = {
 		/* grab dom element */
 		this.domElement = getDomElement( tag );
 
+                var oldElement = this.domElement;
 		/* remove from prior parent, ensure we have a domcontainer... and attach element */
 		if(this.domElement.parentNode) {
-			this.domElement.parentNode.removeChild(this.domElement);
+		    oldElement = this.domElement.parentNode.removeChild(this.domElement);
 		}
-		(_domContainer || document.body || document.documentElement).appendChild(this.domElement);
+		(_domContainer || document.body || document.documentElement).appendChild(oldElement);
 
 		/* grab opts */
 		for(var name in opts) {
@@ -34699,6 +34699,15 @@ Actor.prototype.create = function(type_, appearance_, health_, energy_)
 //     }
 };
 
+// pseudo proc
+Actor.prototype.update_animation = function(dt_)
+{
+
+    this.appearance.slotContainers = this.anim_slots;
+    this.appearance.state = this.anim_state;
+    this.appearance.update(dt_);
+};
+
 Actor.prototype.init = function(eid_, type_, sprite_, x_, y_)
 {
     this.entity.init.call(this, eid_, type_, sprite_, x_, y_);
@@ -37092,6 +37101,9 @@ RRLL.prototype.animate = function me() {
     }
 
     this.gfx.update(this.scene_stack.get_top_level());
+
+//     TODO: should own animations
+//     all_of_actors.update_animation(using_own_anim_slots_and_anim_state_by_update(dt))
 
     // render the stage
     this.renderer.render(this.gfx.get_root());

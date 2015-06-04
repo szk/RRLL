@@ -101,7 +101,6 @@
 	var generateFakeTexture = function(w, h) {
 		return {
 			baseTexture: { hasLoaded: true },
-			frame: { width: w, height: h },
 			_frame: { width: w, height: h } // szk added it for Pixi v3
 		};
 	};
@@ -166,7 +165,8 @@
 // // 		return !displayObject.visible || displayObject.alpha <= 0 || (displayObject.stage !== displayObject && (!displayObject.parent || invisbilityCheck(displayObject.parent)));
 // 	};
 	var invisbilityCheck = function(displayObject) {
- 	    return !displayObject.visible || displayObject.alpha <= 0; // szk added it for Pixi v3
+            return !displayObject.visible || displayObject.alpha <= 0 || (displayObject.parent !== null && invisbilityCheck(displayObject.parent)); // for Pixi v3
+//  	    return !displayObject.visible || displayObject.alpha <= 0;
 	};
 
 	//
@@ -211,11 +211,12 @@
 		/* grab dom element */
 		this.domElement = getDomElement( tag );
 
+                var oldElement = this.domElement;
 		/* remove from prior parent, ensure we have a domcontainer... and attach element */
 		if(this.domElement.parentNode) {
-			this.domElement.parentNode.removeChild(this.domElement);
+		    oldElement = this.domElement.parentNode.removeChild(this.domElement);
 		}
-		(_domContainer || document.body || document.documentElement).appendChild(this.domElement);
+		(_domContainer || document.body || document.documentElement).appendChild(oldElement);
 
 		/* grab opts */
 		for(var name in opts) {
