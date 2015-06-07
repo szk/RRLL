@@ -13,6 +13,7 @@ module.exports = function(grunt) {
                       'js/lib/*.js',
                        // common type
                       'js/core/type.js',
+                      'js/core/menu_content.js',
                       // entity
                       'js/core/entity/entity.js',
                       'js/core/entity/humanoid.js',
@@ -20,13 +21,13 @@ module.exports = function(grunt) {
                       'js/core/entity/noleg.js',
                       'js/core/entity/item.js',
                       'js/core/entity/actor.js',
-                      'js/core/entity/avatar.js',
                       // level
                       'js/core/level/tick_node.js',
                       'js/core/level/tile.js',
                       'js/core/level/terrain.js',
                       'js/core/level/level.js',
                       // ui
+                      'js/core/ui/avatar.js',
                       'js/core/ui/button.js',
                       'js/core/ui/panel.js',
                       'js/core/ui/ui.js',
@@ -49,9 +50,7 @@ module.exports = function(grunt) {
                       'js/core/scene/loading.js',
                       'js/core/scene/intro.js',
                       'js/core/scene/playing.js',
-                      'js/core/scene/mainmenu.js',
-                      'js/core/scene/settingmenu.js',
-                      'js/core/scene/aboutmenu.js',
+                      'js/core/scene/menu.js',
                       'js/core/scene/gameover.js',
                       'js/core/scene/ranking.js',
                       'js/core/scene/scene_stack.js',

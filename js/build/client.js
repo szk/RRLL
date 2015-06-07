@@ -34339,13 +34339,28 @@ RC.NEXT_SCENE = {
     CONTINUE: 0,
     MAINMENU: 1,
     SETTINGMENU: 2,
-    GAMEOVER: 3,
-    INTRO: 4,
-    LOADING: 5,
-    PLAYING: 6,
-    RANKING: 7,
-    ABOUTMENU: 8,
+    ABOUTMENU: 3,
+    GAMEOVER: 4,
+    INTRO: 5,
+    LOADING: 6,
+    PLAYING: 7,
+    RANKING: 8,
     RETURN: 9
+};
+
+RC.CMD_SYS = {
+    NEXT_SCENE: 0,
+    POP_SCENE: 1,
+    RESTART_SCENE: 2
+};
+
+RC.CMD_MENU_TYPE = {
+    MAIN: 1,
+    SETTING: 2,
+    ABOUT: 3,
+    INVENTRY: 4,
+    CANCEL: 5,
+    OK: 6
 };
 
 /// bitmask test (not using)
@@ -34364,7 +34379,7 @@ RC.CMD_ACTOR_ACT = {
     TALK: 4,
     MENU: 5,
     AUTOMATION: 6,
-    RESERVED2: 7
+    CHANGE_SCENE: 7
 };
 
 RC.CMD_ACTOR_AUTOMATION = {
@@ -34381,15 +34396,6 @@ RC.CMD_ACTOR_DIR = {
     UPLEFT: 5,
     DOWNRIGHT: 6,
     DOWNLEFT: 7
-};
-
-RC.CMD_MENU_TYPE = {
-    MAIN: 0,
-    SETTING: 1,
-    ABOUT: 2,
-    INVENTRY: 3,
-    CANCEL: 4,
-    OK: 5
 };
 
 RC.UI_SPRITE_TYPE = {
@@ -34411,8 +34417,35 @@ RC.SCREEN_HEIGHT = 600;
 RC.SCROLL_FRAME = 5;
 RC.MAP_RADIUS = 17;
 
-// 
+//
 RC.BG = 0x888888;
+
+var MENU = MENU || {};
+
+MENU.MAIN = {
+    tag: '<div style="width: 256px;" class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" id="cancel"><span aria-hidden="true" id="cancel">&times;</span></button><h4 class="modal-title">Main menu</h4></div><div class="modal-body"><div class="container-fluid"><div class="row"><button type="button" class="btn btn-default col-xs-offset-2 col-xs-8" id="restart">Restart</button></div><br/><div class="row"><button type="button" class="btn btn-default col-xs-offset-2 col-xs-8" id="sandbox">Sandbox</button></div><br/><div class="row"><button type="button" class="btn btn-default col-xs-offset-2 col-xs-8" id="setting">Setting</button></div><br/><div class="row"><button type="button" class="btn btn-default col-xs-offset-2 col-xs-8" id="about">About</button></div><br/><div class="row"><button type="button" class="btn btn-default col-xs-offset-2 col-xs-8" id="close">Close</button></div><br/></div></div></div></div>',
+    command: [['restart', [RC.CMD_SYS.RESTART_SCENE, RC.CMD_MENU_TYPE.CANCEL]],
+              ['sandbox', [RC.CMD_SYS.NEXT_SCENE, RC.CMD_MENU_TYPE.CANCEL]],
+              ['setting', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.SETTING]],
+              ['about', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.ABOUT]],
+              ['cancel', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
+              ['close', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
+              ['ok', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.OK]]]
+};
+
+MENU.SETTING = {
+    tag: '<div style="width: 768px;" class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close" id="cancel"><span aria-hidden="true" id="cancel">&times;</span></button><h4 class="modal-title">Setting</h4></div><div class="modal-body"><p>One fine body&hellip;</p></div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal" id="close">Close</button><button type="button" class="btn btn-primary" id="ok">Save changes</button></div></div></div>',
+    command: [['cancel', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
+              ['close', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
+              ['ok', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.OK]]]
+};
+
+MENU.ABOUT = {
+    tag: '<div style="width: 768px;" class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close" id="cancel"><span aria-hidden="true" id="cancel">&times;</span></button><h4 class="modal-title">About</h4></div><div class="modal-body"><p>One fine body&hellip;</p></div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal" id="close">Close</button><button type="button" class="btn btn-primary" id="ok">Save changes</button></div></div></div>',
+    command: [['cancel', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
+              ['close', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
+              ['ok', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.OK]]]
+};
 
 function Entity() {
 }
@@ -34421,16 +34454,19 @@ Entity.prototype.create = function(id_, type_, sprite_, x_, y_)
 {
 };
 
-Entity.prototype.init = function(id_, type_, appearance_, x_, y_)
+Entity.prototype.init = function(id_, type_, appearance_, x_, y_, flag_)
 {
     this.id = id_;
     this.next_tick = RC.MAX_TICK;
     this.live = true;
 
     this.type = type_;
+    this.sys_flag = 0;
     this.sprite = appearance_;
     this.tile_pos_x = x_;
     this.tile_pos_y = y_;
+
+    this.sys_flag = flag_;
 
     // center the sprites anchor point
 //     if (this.sprite != null)
@@ -34446,9 +34482,11 @@ Entity.prototype.init = function(id_, type_, appearance_, x_, y_)
 
 Entity.prototype.is_live = function() { return this.live; };
 Entity.prototype.get_id = function() { return this.id; };
+Entity.prototype.get_flag = function() { return this.sys_flag; };
 Entity.prototype.get_next_tick = function() { return this.next_tick; };
 Entity.prototype.get_displayobject = function() { return this.sprite; };
 
+Entity.prototype.set_flag = function(flag_) { this.sys_flag = flag_; };
 Entity.prototype.set_next_tick = function(tick_) { return this.next_tick = tick_; };
 
 Entity.prototype.observe = function(current_tick_) {;};
@@ -34658,9 +34696,9 @@ function Item() {
 Item.prototype = Object.create(Entity.prototype);
 Item.prototype.constructor = Item;
 
-Item.prototype.init = function(eid_, type_, sprite_, x_, y_)
+Item.prototype.init = function(eid_, type_, sprite_, x_, y_, flag_)
 {
-    this.entity.init.call(this, eid_, type_, sprite_, x_, y_);
+    this.entity.init.call(this, eid_, type_, sprite_, x_, y_, flag_);
     this.entity.next_tick = 15;
 };
 
@@ -34705,21 +34743,30 @@ Actor.prototype.update_animation = function(dt_)
 
     this.appearance.slotContainers = this.anim_slots;
     this.appearance.state = this.anim_state;
-    this.appearance.update(dt_);
+//     this.appearance.update(dt_);
 };
 
-Actor.prototype.init = function(eid_, type_, sprite_, x_, y_)
+Actor.prototype.init = function(eid_, type_, sprite_, x_, y_, flag_)
 {
-    this.entity.init.call(this, eid_, type_, sprite_, x_, y_);
+    this.entity.init.call(this, eid_, type_, sprite_, x_, y_, flag_);
 
     if (PIXI.spine.Spine.prototype.isPrototypeOf(sprite_))
     {
         console.log('spine found');
+        sprite_.autoUpdate = false;
         this.anim_slots = clone(sprite_.slotContainers, false, 2);
         this.anim_state = clone(sprite_.state);
+//         this.appearance = clone(sprite_.slotContainers, false, 2);
     }
 
     this.entity.set_next_tick.call(this, 5);
+
+    // center the sprites anchor point
+//     if (this.sprite != null)
+//     {
+//         this.sprite.anchor.x = -0.5;
+//         this.sprite.anchor.y = -0.5;
+//     }
 };
 
 Actor.prototype.observe = function()
@@ -34731,62 +34778,20 @@ Actor.prototype.observe = function()
 
 Actor.prototype.action = function(current_tick_)
 {
-    this.right();
+//     this.right();
     this.entity.set_next_tick.call(this, current_tick_ + 20);
-};
 
-function Avatar() {
-    // for pseudo class
-    Entity.apply(this, arguments);
-    this.entity = Entity.prototype;
-    //
-}
-
-Avatar.prototype = Object.create(Entity.prototype);
-Avatar.prototype.constructor = Avatar;
-
-Avatar.prototype.init = function(eid_, type_, sprite_, x_, y_)
-{
-    this.entity.init.call(this, eid_, type_, sprite_, x_, y_);
-    this.entity.set_next_tick.call(this, 0);
-
-    // refer type.js
-    this.cmd_table = [this.cmd_wait, this.cmd_move, this.cmd_use, this.cmd_pickup, this.cmd_talk,
-                      this.cmd_menu, this.cmd_automation];
-    this.cmd_move_target = [this.entity.up,
-                            this.entity.down,
-                            this.entity.right,
-                            this.entity.left,
-                            this.entity.upright,
-                            this.entity.upleft,
-                            this.entity.downright,
-                            this.entity.downleft];
-
-    // center the sprites anchor point
-    if (this.entity.sprite != null)
+//     // 
+    if (this.appearance.lastTime)
     {
-        this.entity.sprite.anchor.x = -0.5;
-        this.entity.sprite.anchor.y = -0.5;
+        this.appearance.lastTime = this.appearance.lastTime || Date.now();
+        var timeDelta = (Date.now() - this.appearance.lastTime) * 0.001;
+        this.appearance.lastTime = Date.now();
+        this.appearance.update(timeDelta);
+        console.log(timeDelta);
     }
-
+//     console.log('action');
 };
-
-Avatar.prototype.cmd = function(cmd_id_, cmd_target_) {
-    this.cmd_table[cmd_id_].call(this, cmd_target_);
-};
-
-Avatar.prototype.action = function(current_tick_) {
-    this.entity.set_next_tick.call(this, current_tick_ + 10);
-};
-
-Avatar.prototype.cmd_wait = function(target_) { console.log('wait'); };
-Avatar.prototype.cmd_move = function(target_) { this.cmd_move_target[target_].call(this); };
-
-Avatar.prototype.cmd_use = function(target_) { console.log('use'); };
-Avatar.prototype.cmd_pickup = function(target_) { console.log('pickup'); };
-Avatar.prototype.cmd_talk = function(target_) { console.log('talk'); };
-Avatar.prototype.cmd_menu = function(target_) { console.log('menu'); };
-Avatar.prototype.cmd_automation = function(target_) { console.log('automation'); };
 
 function TickNode(tick_) {
     this.tick = tick_;
@@ -34896,6 +34901,8 @@ function Level(max_x_, max_y_, aspect_, root_texture_) // XXX use argument for
     this.terrain = null;
     this.stain = []; // fluid, stain, etc. per tile
     this.entity = []; // other objects
+    this.carrier = null;
+
     this.avatar = null;
 
     this.tick = 0;
@@ -34951,20 +34958,22 @@ Level.prototype.update = function(command_)
     // if the target's 'is_live' is false, release the targeting (watch out to reusing of eid).
     // (how about 'actor.observe' checks is_live then 'actor.action' executes action?)
 
+//     console.log('nexturn: ' + this.tick);
+
     var now_ticknode = new TickNode(this.tick);
     var found_ticknode = this.tick_bst.search(now_ticknode).element;
 
-    for (var ent in found_ticknode.get_entities())
+    for (var i = 0; found_ticknode.get_entities().length > i; ++i)
     {
-        if (found_ticknode.get_entities()[ent] == this.avatar) // if this is avatar
+        if (found_ticknode.get_entities()[i].get_flag() == 1) // if this is avatar
         {
             this.avatar.cmd(command_.peek()[0], command_.peek()[1]); // block at here
             command_.clear();
         }
 
-        found_ticknode.get_entities()[ent].observe(); // for intrrupt (e.g. noise hearing in sleep)
-        found_ticknode.get_entities()[ent].action(this.tick);
-        this.add_entity_tick(found_ticknode.get_entities()[ent]);
+        found_ticknode.get_entities()[i].observe(); // for intrrupt (e.g. noise hearing in sleep)
+        found_ticknode.get_entities()[i].action(this.tick);
+        this.add_entity_tick(found_ticknode.get_entities()[i]);
         this.update_levelstat();
     }
     this.tick_bst.remove(now_ticknode); // remove ticknode by GC
@@ -34990,7 +34999,7 @@ Level.prototype.compute_visibility = function()
     this.pre_visible_tiles = [];
     this.visible_entity = [];
 
-    this.visibility.compute(this.avatar.get_x(), this.avatar.get_y(), RC.MAP_RADIUS,
+    this.visibility.compute(this.carrier.get_x(), this.carrier.get_y(), RC.MAP_RADIUS,
                             (function(tile_x_, tile_y_, length_from_center_, is_visible_) {
                                 // tiles
                                 var t = this.terrain.get_tile(tile_x_, tile_y_);
@@ -35005,7 +35014,7 @@ Level.prototype.compute_visibility = function()
 Level.prototype.get_terrain = function() { return this.terrain; };
 Level.prototype.get_stain = function() { return this.stain; };
 Level.prototype.get_entity = function() { return this.entity; };
-Level.prototype.get_avatar = function() { return this.avatar; };
+Level.prototype.get_avatar = function() { return this.carrier; };
 Level.prototype.get_visible_entity = function() { return this.visible_entity; };
 
 Level.prototype.update_levelstat = function(entity_)
@@ -35071,8 +35080,10 @@ Level.prototype.get_entity_on_tile = function(tile_x_, tile_y_)
 
 Level.prototype.set_avatar = function(avatar_)
 {
-    this.entity[this.entity.length] = avatar_;
-    this.add_entity_tick(avatar_);
+    this.carrier = avatar_.get_actor();
+
+    this.entity[this.entity.length] = this.carrier;
+    this.add_entity_tick(this.carrier);
     this.avatar = avatar_;
 };
 
@@ -35087,6 +35098,52 @@ Level.prototype.add_item = function(item_)
     this.entity[this.entity.length] = item_;
     this.add_entity_tick(item_);
 };
+
+function Avatar() {
+    this.actor = null;
+};
+
+Avatar.prototype.create = function(type_, appearance_, health_, energy_)
+{
+};
+
+Avatar.prototype.init = function(actor_)
+{
+    this.actor = actor_;
+    this.actor.set_flag(1);
+
+    this.actor.set_next_tick(0);
+
+    // refer type.js
+    this.cmd_table = [this.cmd_wait, this.cmd_move, this.cmd_use, this.cmd_pickup, this.cmd_talk,
+                      this.cmd_menu, this.cmd_automation, this.cmd_changescene ];
+    this.cmd_move_target = [this.actor.up,
+                            this.actor.down,
+                            this.actor.right,
+                            this.actor.left,
+                            this.actor.upright,
+                            this.actor.upleft,
+                            this.actor.downright,
+                            this.actor.downleft];
+};
+
+Avatar.prototype.cmd = function(cmd_id_, cmd_target_) {
+    console.log('cmd: ' + cmd_id_ + ', ' +  cmd_target_);
+    this.cmd_table[cmd_id_].call(this, cmd_target_);
+};
+
+Avatar.prototype.get_actor = function() { return this.actor; };
+
+Avatar.prototype.cmd_wait = function(target_) { console.log('wait'); };
+Avatar.prototype.cmd_move = function(target_) { console.log('move'); this.cmd_move_target[target_].call(this.actor); };
+
+Avatar.prototype.cmd_use = function(target_) { console.log('use'); };
+Avatar.prototype.cmd_pickup = function(target_) { console.log('pickup'); };
+Avatar.prototype.cmd_talk = function(target_) { console.log('talk'); };
+Avatar.prototype.cmd_menu = function(target_) { console.log('menu'); };
+Avatar.prototype.cmd_automation = function(target_) { console.log('automation'); };
+Avatar.prototype.cmd_changescene = function(target_) { console.log('changescene'); };
+
 
 function Button()
 {
@@ -35190,6 +35247,11 @@ UI.prototype.init = function(asset_, container_)
 UI.prototype.add_sprite = function(sprite_)
 {
     this.uicontainer.addChild(sprite_);
+};
+
+UI.prototype.remove_sprite = function(sprite_)
+{
+    this.uicontainer.removeChild(sprite_);
 };
 
 UI.prototype.is_command_queued = function() { return !(this.command_queue.isEmpty()); };
@@ -35489,10 +35551,10 @@ Asset.prototype.build_variable = function(src_)
     this.gen_item(src_.item);
     // terrain
     this.gen_terrain(src_.terrain);
-    // avatar
-    this.gen_avatar(src_.avatar);
     // actor
     this.gen_actor(src_.actor);
+    // avatar
+    this.gen_avatar(src_.avatar);
     // level
     this.gen_level(src_.level);
 
@@ -35588,7 +35650,11 @@ Asset.prototype.gen_avatar = function(entry_)
     {
         var type_name = null;
         for (var key in entry_[i]) { type_name = key; }
-        this.avatar_template[type_name] = new Avatar();
+        var new_avatar = new Avatar();
+
+        new_avatar.init(clone(this.find_actor_([entry_[i][type_name]['actor']])));
+        this.avatar_template[type_name] = new_avatar;
+//         console.log('actor: ' + this.actor_template[entry_[i][type_name]['actor']]);
     }
     return this.avatar_template.length;
 };
@@ -35627,7 +35693,8 @@ Asset.prototype.gen_level = function(entry_)
         {
             for (var avtr in entry_[i].avatar[avatar_type])
             {
-                var newavatar = clone(this.find_avatar_(avatar_type));
+                var base_avatar = clone(this.find_avatar_(avatar_type));
+                var newavatar = base_avatar.get_actor();
                 var newsp = this.appearance_template['humanoid'].get_spine();
                 this.appearance_template['humanoid'].set_head(this.get_texture(131));
 
@@ -35636,11 +35703,12 @@ Asset.prototype.gen_level = function(entry_)
                 console.log(newsp.slotContainers);
 
                 newavatar.init(this.id_pool.get_id(), avatar_type,
-                               newsp,
-//                                new PIXI.Sprite(this.get_texture(131)),
+                               newsp, // new PIXI.Sprite(this.get_texture(131)),
                                parseInt(entry_[i].avatar[avatar_type][avtr].x),
                                parseInt(entry_[i].avatar[avatar_type][avtr].y));
-                level.set_avatar(newavatar);
+                newavatar.set_next_tick(0);
+                newavatar.set_flag(1);
+                level.set_avatar(base_avatar);
                 this.id_bst.add(newavatar);
             }
         }
@@ -36271,7 +36339,10 @@ UISprite.prototype.get_type = function() {
     return this.ui_sprite_type;
 };
 
-UISprite.prototype.terminate = function() {
+UISprite.prototype.activate = function() {
+};
+
+UISprite.prototype.deactivate = function() {
     // for (var i in this.children)
     // {
     //     this.children[i].terminate();
@@ -36424,8 +36495,8 @@ Map.prototype.update_fov = function(level_)
         this.entity_container.position.x += scroll_step_x;
         this.entity_container.position.y += scroll_step_y;
 
-        avatar.sprite.position.x -= scroll_step_x;
-        avatar.sprite.position.y -= scroll_step_y;
+        avatar.get_sprite().position.x -= scroll_step_x;
+        avatar.get_sprite().position.y -= scroll_step_y;
 
         --this.scroll_wait;
         return;
@@ -36675,15 +36746,21 @@ Scene.prototype.init = function(asset_, ui_) {
     return true;
 };
 
-Scene.prototype.terminate = function() {
-    console.log('terminate of base class is called');
+Scene.prototype.activate = function() {
+};
+
+Scene.prototype.deactivate = function() {
+};
+
+Scene.prototype.activate = function() {
+    console.log('activate of base class is called');
+};
+
+Scene.prototype.deactivate = function() {
+    console.log('activate of base class is called');
 };
 
 Scene.prototype.update = function(ui_) {
-};
-
-Scene.prototype.is_initialized = function() {
-    return this.initialized;
 };
 
 Scene.prototype.get_avatar = function() {
@@ -36694,7 +36771,53 @@ Scene.prototype.get_level = function() {
     return this.level;
 };
 
+function LoadingScene() {
+    Scene.apply(this, arguments);
+    this.panels = [];
+}
 
+LoadingScene.prototype = Object.create(Scene.prototype);
+LoadingScene.prototype.constructor = LoadingScene;
+
+LoadingScene.prototype.init = function(asset_, ui_) {
+    return true;
+};
+
+LoadingScene.prototype.activate = function()
+{
+};
+
+LoadingScene.prototype.deactivate = function()
+{
+};
+
+LoadingScene.prototype.update = function(ui_) {
+    return RC.NEXT_SCENE.CONTINUE;
+};
+
+function IntroScene() {
+    Scene.apply(this, arguments);
+    this.panels = [];
+}
+
+IntroScene.prototype = Object.create(Scene.prototype);
+IntroScene.prototype.constructor = IntroScene;
+
+IntroScene.prototype.init = function(asset_, ui_) {
+    return true;
+};
+
+IntroScene.prototype.activate = function()
+{
+};
+
+IntroScene.prototype.deactivate = function()
+{
+};
+
+IntroScene.prototype.update = function(ui_) {
+    return RC.NEXT_SCENE.CONTINUE;
+};
 
 function PlayingScene() {
     Scene.apply(this, arguments);
@@ -36766,9 +36889,14 @@ PlayingScene.prototype.init = function(asset_, ui_) {
     return true;
 };
 
-PlayingScene.prototype.terminate = function()
+PlayingScene.prototype.activate = function()
 {
-    console.log('terminate');
+    console.log('activate playing scene');
+};
+
+PlayingScene.prototype.deactivate = function()
+{
+    console.log('deactivate playing scene');
 };
 
 PlayingScene.prototype.update = function(ui_) {
@@ -36797,120 +36925,51 @@ PlayingScene.prototype.update = function(ui_) {
     return RC.NEXT_SCENE.CONTINUE;
 };
 
-function MainMenuScene() {
+function MenuScene() {
     Scene.apply(this, arguments);
 
-    this.menu_panel = null;
+    this.dompanel = null;
     this.asset = null;
     this.ui = null;
+    this.panels = [];
 }
 
-MainMenuScene.prototype = Object.create(Scene.prototype);
-MainMenuScene.prototype.constructor = MainMenuScene;
+MenuScene.prototype = Object.create(Scene.prototype);
+MenuScene.prototype.constructor = MenuScene;
 
-MainMenuScene.prototype.init = function(asset_, ui_) {
-    this.asset = asset_;
-    this.ui = ui_;
-
-    this.menu_panel = asset_.gen_dom(ui_.command_queue, asset_.get_texture(1), 384, 64,
-                                       ['<div style="width: 256px;" class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" id="cancel"><span aria-hidden="true" id="cancel">&times;</span></button><h4 class="modal-title">Main menu</h4></div><div class="modal-body"><div class="container-fluid"><div class="row"><button type="button" class="btn btn-default col-xs-offset-2 col-xs-8" id="restart">Restart</button></div><br/><div class="row"><button type="button" class="btn btn-default col-xs-offset-2 col-xs-8" id="sandbox">Sandbox</button></div><br/><div class="row"><button type="button" class="btn btn-default col-xs-offset-2 col-xs-8" id="setting">Setting</button></div><br/><div class="row"><button type="button" class="btn btn-default col-xs-offset-2 col-xs-8" id="about">About</button></div><br/><div class="row"><button type="button" class="btn btn-default col-xs-offset-2 col-xs-8" id="close">Close</button></div><br/></div></div></div></div>',
-                                        [['cancel', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
-                                         ['close', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
-                                         ['ok', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.OK]]]]);
-
-    this.ui.add_sprite(this.menu_panel.get_sprite());
-    this.panels.push(this.menu_panel);
-
-    this.initialized = true;
-    return true;
-};
-
-MainMenuScene.prototype.terminate = function() {
-    var dom = this.menu_panel.get_sprite().domElement.contentWindow;
-//     console.log(dom.$('#system'));
-
-    for (var i in this.panels)
-    {
-        this.panels[i].terminate();
-        this.asset.free(this.panels[i]);
-    }
-
-};
-
-MainMenuScene.prototype.update = function(ui_) {
-    var cmd = ui_.get_command_queue().peek();
-    if (!cmd && !cmd[0] && !cmd[1])
-    {
-        ui_.clear_command_queue();
-        return RC.NEXT_SCENE.CONTINUE;
-    }
-
-    if (cmd[0] == RC.CMD_ACTOR_ACT.MENU)
-    {
-        var pressed_button = cmd[1];
-        ui_.clear_command_queue();
-        switch (pressed_button)
-        {
-            case RC.CMD_MENU_TYPE.CANCEL:
-            console.log('cancel clicked'); break;
-            case RC.CMD_MENU_TYPE.OK:
-            console.log('ok clicked'); break;
-        }
-        return RC.NEXT_SCENE.RETURN;
-    }
-    return RC.NEXT_SCENE.CONTINUE;
-};
-
-MainMenuScene.prototype.is_initialized = function() {
-    return this.initialized;
-};
-
-function SettingMenuScene() {
-    Scene.apply(this, arguments);
-
-    this.setting_panel = null;
-    this.asset = null;
-    this.ui = null;
-}
-
-SettingMenuScene.prototype = Object.create(Scene.prototype);
-SettingMenuScene.prototype.constructor = SettingMenuScene;
-
-SettingMenuScene.prototype.init = function(asset_, ui_) {
+MenuScene.prototype.init = function(asset_, ui_, x_, y_, tags_, cmds_) {
     this.asset = asset_;
     this.ui = ui_;
     this.ui.set_keybinding([]);
 
-    this.setting_panel = asset_.gen_dom(ui_.command_queue, asset_.get_texture(1), 128, 0,
-                                       ['<div style="width: 768px;" class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close" id="cancel"><span aria-hidden="true" id="cancel">&times;</span></button><h4 class="modal-title">Modal title</h4></div><div class="modal-body"><p>One fine body&hellip;</p></div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal" id="close">Close</button><button type="button" class="btn btn-primary" id="ok">Save changes</button></div></div></div>',
-                                        [['cancel', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
-                                         ['close', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.CANCEL]],
-                                         ['ok', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.OK]]]]);
-
-    this.ui.add_sprite(this.setting_panel.get_sprite());
-    this.panels.push(this.setting_panel);
-
+    this.dompanel = this.asset.gen_dom(ui_.command_queue, asset_.get_texture(1), x_, y_,
+                                            [tags_, cmds_]);
+    this.panels.push(this.dompanel);
     this.initialized = true;
     return true;
 };
 
-SettingMenuScene.prototype.terminate = function() {
-    var dom = this.setting_panel.get_sprite().domElement.contentWindow;
-//     console.log(dom.$('#system'));
+MenuScene.prototype.activate = function() {
+    this.ui.add_sprite(this.dompanel.get_sprite());
+//    var dom = this.dompanel.get_sprite().domElement.contentWindow;
+};
 
+MenuScene.prototype.deactivate = function() {
+    this.ui.remove_sprite(this.dompanel.get_sprite());
     for (var i in this.panels)
     {
-        this.panels[i].terminate();
-        this.asset.free(this.panels[i]);
+//         this.panels[i].terminate();
+//         this.asset.free(this.panels[i]);
     }
 
 };
 
-SettingMenuScene.prototype.update = function(ui_) {
+MenuScene.prototype.update = function(ui_) {
     var cmd = ui_.get_command_queue().peek();
+    ui_.clear_command_queue();
     if (!cmd && !cmd[0] && !cmd[1])
     {
-        ui_.clear_command_queue();
+
         return RC.NEXT_SCENE.CONTINUE;
     }
 
@@ -36921,34 +36980,64 @@ SettingMenuScene.prototype.update = function(ui_) {
         switch (pressed_button)
         {
             case RC.CMD_MENU_TYPE.CANCEL:
-            console.log('cancel clicked'); break;
+            console.log('cancel clicked'); return RC.NEXT_SCENE.RETURN;
             case RC.CMD_MENU_TYPE.OK:
-            console.log('ok clicked'); break;
+            console.log('ok clicked'); return RC.NEXT_SCENE.RETURN;
         }
-        return RC.NEXT_SCENE.RETURN;
+        console.log('clicked: ' + cmd[1]);
+        return cmd[1];
     }
+
     return RC.NEXT_SCENE.CONTINUE;
 };
 
-SettingMenuScene.prototype.is_initialized = function() {
-    return this.initialized;
-};
-
-function AboutMenuScene() {
+function GameoverScene() {
     Scene.apply(this, arguments);
+    this.panels = [];
 }
 
-AboutMenuScene.prototype = Object.create(Scene.prototype);
-AboutMenuScene.prototype.constructor = AboutMenuScene;
+GameoverScene.prototype = Object.create(Scene.prototype);
+GameoverScene.prototype.constructor = GameoverScene;
 
-AboutMenuScene.prototype.init = function(asset_, ui_) {
+GameoverScene.prototype.init = function(asset_, ui_) {
     return true;
 };
 
-AboutMenuScene.prototype.update = function(ui_) {
+GameoverScene.prototype.activate = function()
+{
 };
 
+GameoverScene.prototype.deactivate = function()
+{
+};
 
+GameoverScene.prototype.update = function(ui_) {
+    return RC.NEXT_SCENE.CONTINUE;
+};
+
+function RankingScene() {
+    Scene.apply(this, arguments);
+    this.panels = [];
+}
+
+RankingScene.prototype = Object.create(Scene.prototype);
+RankingScene.prototype.constructor = RankingScene;
+
+RankingScene.prototype.init = function(asset_, ui_) {
+    return true;
+};
+
+RankingScene.prototype.activate = function()
+{
+};
+
+RankingScene.prototype.deactivate = function()
+{
+};
+
+RankingScene.prototype.update = function(ui_) {
+    return RC.NEXT_SCENE.CONTINUE;
+};
 
 function SceneStack() {
     this.stack = [];
@@ -36961,31 +37050,28 @@ SceneStack.prototype.init = function(asset_, ui_) {
     this.asset = asset_;
     this.ui = ui_;
 
-//     this.loading_scene = new LoadingScene();
-//     this.intro_scene = new IntroScene();
+    // menus
+    this.mainmenu_scene = new MenuScene();
+    this.mainmenu_scene.init(this.asset, this.ui, 384, 64, MENU.MAIN['tag'], MENU.MAIN['command']);
+    this.settingmenu_scene = new MenuScene();
+    this.settingmenu_scene.init(this.asset, this.ui, 0, 0, MENU.SETTING['tag'], MENU.SETTING['command']);
+    this.aboutmenu_scene = new MenuScene();
+    this.aboutmenu_scene.init(this.asset, this.ui, 0, 0, MENU.ABOUT['tag'], MENU.ABOUT['command']);
+    // playing
+    this.loading_scene = new LoadingScene();
+    this.intro_scene = new IntroScene();
     this.playing_scene = new PlayingScene();
-    this.settingmenu_scene = new SettingMenuScene();
-    this.mainmenu_scene = new MainMenuScene();
-    this.aboutmenu_scene = new AboutMenuScene();
-//     this.gameover_scene = new GameoverScene();
-//     this.ranking_scene = new RankingScene();
+    this.playing_scene.init(this.asset, this.ui);
+    this.gameover_scene = new GameoverScene();
+    this.ranking_scene = new RankingScene();
 
     this.push_(this.playing_scene);
-    this.top.init(asset_, ui_);
     this.ui.set_keybinding();
 };
 
 SceneStack.prototype.update_top = function(ui_) {
     var result = this.top.update(ui_);
     this.result_check_(result, ui_);
-};
-
-SceneStack.prototype.init_top = function(asset_, ui_) {
-    return this.top.init(asset_, ui_);
-};
-
-SceneStack.prototype.top_is_initialized = function() {
-    return this.top.is_initialized();
 };
 
 SceneStack.prototype.get_top_level = function() {
@@ -37004,42 +37090,42 @@ SceneStack.prototype.get_top_level = function() {
 SceneStack.prototype.push_ = function(scene_) {
     this.stack.push(scene_);
     this.top = scene_;
+    this.top.activate();
 };
 
 SceneStack.prototype.pop_ = function() {
-    this.top.terminate();
+    if (this.top == null && this.stack.length == 0) { return; }
+    this.top.deactivate();
     this.stack.pop();
     this.top = this.stack[this.stack.length - 1];
+    this.top.activate();
 };
 
 SceneStack.prototype.result_check_ = function (result_, ui_) {
     if (result_ == RC.NEXT_SCENE.CONTINUE) { return; }
 
     // scene is changing
+    if (this.top) { this.top.deactivate(); }
     switch (result_)
     {
+// menus
     case RC.NEXT_SCENE.MAINMENU:
         console.log("result check says next is mainmenu");
-        this.push_(this.mainmenu_scene);
-        break;
+        this.push_(this.mainmenu_scene); break;
     case RC.NEXT_SCENE.SETTINGMENU:
         console.log("result check says next is setting");
-        this.push_(this.settingmenu_scene);
-        break;
-    case RC.NEXT_SCENE.GAMEOVER: break;
-    case RC.NEXT_SCENE.INTRO: break;
-    case RC.NEXT_SCENE.LOADING: break;
-    case RC.NEXT_SCENE.PLAYING: break;
-    case RC.NEXT_SCENE.RANKING: break;
+        this.push_(this.settingmenu_scene); break;
     case RC.NEXT_SCENE.ABOUTMENU:
-        this.push_(this.aboutmenu_scene);
-        break;
-    case RC.NEXT_SCENE.RETURN:
-        this.pop_();
-        break;
+        console.log("result check says next is about");
+        this.push_(this.aboutmenu_scene); break;
+// controller
+    case RC.NEXT_SCENE.GAMEOVER: this.push_(this.gameover_scene); break;
+    case RC.NEXT_SCENE.INTRO: this.push_(this.intro_scene); break;
+    case RC.NEXT_SCENE.LOADING: this.push_(this.loading_scene); break;
+    case RC.NEXT_SCENE.PLAYING: this.push_(this.playing_scene); break;
+    case RC.NEXT_SCENE.RANKING: this.push_(this.ranking_scene); break;
+    case RC.NEXT_SCENE.RETURN: this.pop_(); break;
     }
-
-//     this.init_top(this.asset, this.ui);
 };
 
 function RRLL(asset_location_) {
@@ -37057,7 +37143,7 @@ function RRLL(asset_location_) {
     this.renderer = PIXI.autoDetectRenderer(RC.SCREEN_WIDTH, RC.SCREEN_HEIGHT);
     // add the renderer view element to the DOM
     document.body.appendChild(this.renderer.view);
-    PIXI.DOM.Setup(this.renderer, true);
+    PIXI.DOM.Setup(this.renderer, true, true);
 }
 
 RRLL.prototype.start = function()
@@ -37086,12 +37172,6 @@ RRLL.prototype.init_scene = function() {
 
 RRLL.prototype.animate = function me() {
     requestAnimationFrame(me.bind(this));
-
-    // when top scene is changed
-    if (this.scene_stack.top_is_initialized() == false)
-    {
-        this.scene_stack.init_top(this.asset, this.ui);
-    }
 
     // normal tick
     if (this.ui.is_command_queued())

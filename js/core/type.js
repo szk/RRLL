@@ -44,13 +44,28 @@ RC.NEXT_SCENE = {
     CONTINUE: 0,
     MAINMENU: 1,
     SETTINGMENU: 2,
-    GAMEOVER: 3,
-    INTRO: 4,
-    LOADING: 5,
-    PLAYING: 6,
-    RANKING: 7,
-    ABOUTMENU: 8,
+    ABOUTMENU: 3,
+    GAMEOVER: 4,
+    INTRO: 5,
+    LOADING: 6,
+    PLAYING: 7,
+    RANKING: 8,
     RETURN: 9
+};
+
+RC.CMD_SYS = {
+    NEXT_SCENE: 0,
+    POP_SCENE: 1,
+    RESTART_SCENE: 2
+};
+
+RC.CMD_MENU_TYPE = {
+    MAIN: 1,
+    SETTING: 2,
+    ABOUT: 3,
+    INVENTRY: 4,
+    CANCEL: 5,
+    OK: 6
 };
 
 /// bitmask test (not using)
@@ -69,7 +84,7 @@ RC.CMD_ACTOR_ACT = {
     TALK: 4,
     MENU: 5,
     AUTOMATION: 6,
-    RESERVED2: 7
+    CHANGE_SCENE: 7
 };
 
 RC.CMD_ACTOR_AUTOMATION = {
@@ -86,15 +101,6 @@ RC.CMD_ACTOR_DIR = {
     UPLEFT: 5,
     DOWNRIGHT: 6,
     DOWNLEFT: 7
-};
-
-RC.CMD_MENU_TYPE = {
-    MAIN: 0,
-    SETTING: 1,
-    ABOUT: 2,
-    INVENTRY: 3,
-    CANCEL: 4,
-    OK: 5
 };
 
 RC.UI_SPRITE_TYPE = {
@@ -116,5 +122,5 @@ RC.SCREEN_HEIGHT = 600;
 RC.SCROLL_FRAME = 5;
 RC.MAP_RADIUS = 17;
 
-// 
+//
 RC.BG = 0x888888;

@@ -18,6 +18,11 @@ UI.prototype.add_sprite = function(sprite_)
     this.uicontainer.addChild(sprite_);
 };
 
+UI.prototype.remove_sprite = function(sprite_)
+{
+    this.uicontainer.removeChild(sprite_);
+};
+
 UI.prototype.is_command_queued = function() { return !(this.command_queue.isEmpty()); };
 UI.prototype.get_command_queue = function() { return this.command_queue; };
 UI.prototype.clear_command_queue = function() { this.command_queue.clear(); };

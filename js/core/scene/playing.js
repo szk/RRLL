@@ -68,9 +68,14 @@ PlayingScene.prototype.init = function(asset_, ui_) {
     return true;
 };
 
-PlayingScene.prototype.terminate = function()
+PlayingScene.prototype.activate = function()
 {
-    console.log('terminate');
+    console.log('activate playing scene');
+};
+
+PlayingScene.prototype.deactivate = function()
+{
+    console.log('deactivate playing scene');
 };
 
 PlayingScene.prototype.update = function(ui_) {

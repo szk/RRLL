@@ -58,8 +58,8 @@ def ui():
 
 @route('/level')
 def level():
-    rv = {"avatar": [{"defaultavatar": {"x": "1", "y": "12"}},
-                     {"advancedavatar": {"x": "1", "y": "12"}}],
+    rv = {"avatar": [{"defaultavatar": {"actor": "human"}},
+                     {"advancedavatar": {"actor": "dog"}}],
           "terrain": [{"name": "defaultmap",
                        "tile": {".":{"":"", "":""},
                                 "O":{"":"", "":""}},

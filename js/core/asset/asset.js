@@ -138,10 +138,10 @@ Asset.prototype.build_variable = function(src_)
     this.gen_item(src_.item);
     // terrain
     this.gen_terrain(src_.terrain);
-    // avatar
-    this.gen_avatar(src_.avatar);
     // actor
     this.gen_actor(src_.actor);
+    // avatar
+    this.gen_avatar(src_.avatar);
     // level
     this.gen_level(src_.level);
 
@@ -237,7 +237,11 @@ Asset.prototype.gen_avatar = function(entry_)
     {
         var type_name = null;
         for (var key in entry_[i]) { type_name = key; }
-        this.avatar_template[type_name] = new Avatar();
+        var new_avatar = new Avatar();
+
+        new_avatar.init(clone(this.find_actor_([entry_[i][type_name]['actor']])));
+        this.avatar_template[type_name] = new_avatar;
+//         console.log('actor: ' + this.actor_template[entry_[i][type_name]['actor']]);
     }
     return this.avatar_template.length;
 };
@@ -276,7 +280,8 @@ Asset.prototype.gen_level = function(entry_)
         {
             for (var avtr in entry_[i].avatar[avatar_type])
             {
-                var newavatar = clone(this.find_avatar_(avatar_type));
+                var base_avatar = clone(this.find_avatar_(avatar_type));
+                var newavatar = base_avatar.get_actor();
                 var newsp = this.appearance_template['humanoid'].get_spine();
                 this.appearance_template['humanoid'].set_head(this.get_texture(131));
 
@@ -285,11 +290,12 @@ Asset.prototype.gen_level = function(entry_)
                 console.log(newsp.slotContainers);
 
                 newavatar.init(this.id_pool.get_id(), avatar_type,
-                               newsp,
-//                                new PIXI.Sprite(this.get_texture(131)),
+                               newsp, // new PIXI.Sprite(this.get_texture(131)),
                                parseInt(entry_[i].avatar[avatar_type][avtr].x),
                                parseInt(entry_[i].avatar[avatar_type][avtr].y));
-                level.set_avatar(newavatar);
+                newavatar.set_next_tick(0);
+                newavatar.set_flag(1);
+                level.set_avatar(base_avatar);
                 this.id_bst.add(newavatar);
             }
         }

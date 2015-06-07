@@ -86,7 +86,10 @@ UISprite.prototype.get_type = function() {
     return this.ui_sprite_type;
 };
 
-UISprite.prototype.terminate = function() {
+UISprite.prototype.activate = function() {
+};
+
+UISprite.prototype.deactivate = function() {
     // for (var i in this.children)
     // {
     //     this.children[i].terminate();
