@@ -40,17 +40,20 @@ Actor.prototype.update_animation = function(dt_)
 
 Actor.prototype.init = function(eid_, type_, sprite_, x_, y_, flag_)
 {
-    this.entity.init.call(this, eid_, type_, sprite_, x_, y_, flag_);
-
+/*
+    var sprite = sprite_;
     if (PIXI.spine.Spine.prototype.isPrototypeOf(sprite_))
     {
         console.log('spine found');
-        sprite_.autoUpdate = false;
-        this.anim_slots = clone(sprite_.slotContainers, false, 2);
+        sprite_.autoUpdate = true;
+
+        this.anim_slots = clone(sprite_.slotContainer, false, 2);
         this.anim_state = clone(sprite_.state);
 //         this.appearance = clone(sprite_.slotContainers, false, 2);
+        sprite = this.anim_slots;
     }
-
+*/
+    this.entity.init.call(this, eid_, type_, sprite_, x_, y_, flag_);
     this.entity.set_next_tick.call(this, 5);
 
     // center the sprites anchor point

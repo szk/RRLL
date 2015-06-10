@@ -16,9 +16,6 @@ module.exports = function(grunt) {
                       'js/core/menu_content.js',
                       // entity
                       'js/core/entity/entity.js',
-                      'js/core/entity/humanoid.js',
-                      'js/core/entity/multileg.js',
-                      'js/core/entity/noleg.js',
                       'js/core/entity/item.js',
                       'js/core/entity/actor.js',
                       // level
@@ -40,6 +37,9 @@ module.exports = function(grunt) {
                       'js/core/gfx/wall_sprite.js',
                       'js/core/gfx/entity_sprite.js',
                       'js/core/gfx/ui_sprite.js',
+                      'js/core/gfx/humanoid.js',
+                      'js/core/gfx/multileg.js',
+                      'js/core/gfx/noleg.js',
                       'js/core/gfx/overlay.js',
                       'js/core/gfx/map.js',
                       'js/core/gfx/gfx.js',

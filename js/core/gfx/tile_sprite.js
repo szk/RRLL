@@ -15,7 +15,7 @@ function TileSprite(texture_, tile_x_, tile_y_) {
 };
 
 TileSprite.prototype = Object.create(PIXI.Sprite.prototype);
-TileSprite.prototype.constructor = PIXI.TileSprite;
+TileSprite.prototype.constructor = TileSprite;
 
 TileSprite.prototype.init = function(x_, y_) {
     this.position.x = x_;

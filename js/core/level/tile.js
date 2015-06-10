@@ -1,10 +1,10 @@
 function Tile(texture_, x_, y_, wall_dir_,
-              wall_north_texture_, wall_east_texture_, wall_west_texture_, wall_south_texture_) {
+              wall_north_, wall_east_, wall_west_, wall_south_) {
     this.texture = texture_;
-    this.wall_north_texture = wall_north_texture_;
-    this.wall_east_texture = wall_east_texture_;
-    this.wall_west_texture = wall_west_texture_;
-    this.wall_south_texture = wall_south_texture_;
+    this.wall_north = wall_north_;
+    this.wall_east = wall_east_;
+    this.wall_west = wall_west_;
+    this.wall_south = wall_south_;
 
     this.wall_dir = wall_dir_;
 

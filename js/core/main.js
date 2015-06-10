@@ -23,7 +23,8 @@ RRLL.prototype.start = function()
     var self = this;
 
     this.poll_interval = window.setInterval(function() {
-        if (!self.asset.is_load_base_completed() || !self.asset.is_load_variable_completed()) { return; }
+        if (!self.asset.is_load_base_completed()) { return; }
+        if (!self.asset.is_load_variable_completed()) { return; }
 
         // load completed and go
         window.clearInterval(self.poll_interval);

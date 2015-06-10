@@ -34507,185 +34507,6 @@ Entity.prototype.upleft = function() { this.tile_pos_x -= 1; this.tile_pos_y -= 
 Entity.prototype.downright = function() { this.tile_pos_x += 1; this.tile_pos_y += 1; };
 Entity.prototype.downleft = function() { this.tile_pos_x -= 1; this.tile_pos_y += 1; };
 
-/// http://www.html5gamedevs.com/topic/7546-pixi-dragonbones/
-function Humanoid(spine_) {
-    this.spine = spine_;
-    console.log('humanoid');
-};
-
-Humanoid.prototype.get_spine = function() {
-    return this.spine;
-};
-
-
-// http://esotericsoftware.com/forum/viewtopic.php?f=3&t=1322
-Humanoid.prototype.flip_x = function() {
-    this.spine.skeleton.flipX = true;
-};
-
-// appearance of bones
-Humanoid.prototype.set_torso = function(texture_) {
-    this.spine.skeleton.slots[0].sprites['torso'].texture = texture_;
-};
-
-Humanoid.prototype.set_head = function(texture_) {
-    this.spine.skeleton.slots[1].sprites['head'].texture = texture_;
-};
-
-Humanoid.prototype.set_rightarm = function(texture_) {
-    this.spine.skeleton.slots[2].sprites['right-arm'].texture = texture_;
-};
-
-Humanoid.prototype.set_leftarm = function(texture_) {
-    this.spine.skeleton.slots[3].sprites['left-arm'].texture = texture_;
-};
-
-Humanoid.prototype.set_rightleg = function(texture_) {
-    this.spine.skeleton.slots[4].sprites['right-leg'].texture = texture_;
-};
-
-Humanoid.prototype.set_leftleg = function(texture_) {
-    this.spine.skeleton.slots[5].sprites['left-leg'].texture = texture_;
-};
-
-// equips on the head
-Humanoid.prototype.set_hatted = function() {
-};
-
-// equips on the body
-Humanoid.prototype.set_weared = function() {
-};
-
-// equips on hands
-Humanoid.prototype.set_rightgrabbed = function() {
-};
-
-Humanoid.prototype.set_leftgrabbed = function() {
-};
-
-// equips on legs
-Humanoid.prototype.set_rightshod = function() {
-};
-
-Humanoid.prototype.set_leftshod = function() {
-};
-
-/// http://www.html5gamedevs.com/topic/7546-pixi-dragonbones/
-function Multileg(spine_) {
-    this.spine = spine_;
-    console.log('multileg');
-};
-
-// http://esotericsoftware.com/forum/viewtopic.php?f=3&t=1322
-Multileg.prototype.flip_x = function() {
-    this.spine.skeleton.flipX = true;
-};
-
-// appearance of bones
-Multileg.prototype.set_head = function(texture_) {
-    this.spine.skeleton.slots[0].sprites['torso'].setTexture(texture_);
-};
-
-Multileg.prototype.set_torso = function(texture_) {
-    this.spine.skeleton.slots[1].sprites['head'].setTexture(texture_);
-};
-
-Multileg.prototype.set_rightarm = function(texture_) {
-    this.spine.skeleton.slots[2].sprites['right-arm'].setTexture(texture_);
-};
-
-Multileg.prototype.set_leftarm = function(texture_) {
-    this.spine.skeleton.slots[3].sprites['left-arm'].setTexture(texture_);
-};
-
-Multileg.prototype.set_rightleg = function(texture_) {
-    this.spine.skeleton.slots[4].sprites['right-leg'].setTexture(texture_);
-};
-
-Multileg.prototype.set_leftleg = function(texture_) {
-    this.spine.skeleton.slots[5].sprites['left-leg'].setTexture(texture_);
-};
-
-// equips on the head
-Multileg.prototype.set_hatted = function() {
-};
-
-// equips on the body
-Multileg.prototype.set_weared = function() {
-};
-
-// equips on hands
-Multileg.prototype.set_rightgrabbed = function() {
-};
-
-Multileg.prototype.set_leftgrabbed = function() {
-};
-
-// equips on legs
-Multileg.prototype.set_rightshod = function() {
-};
-
-Multileg.prototype.set_leftshod = function() {
-};
-
-/// http://www.html5gamedevs.com/topic/7546-pixi-dragonbones/
-function Noleg(spine_) {
-    this.spine = spine_;
-    console.log('noleg');
-};
-
-// http://esotericsoftware.com/forum/viewtopic.php?f=3&t=1322
-Noleg.prototype.flip_x = function() {
-    this.spine.skeleton.flipX = true;
-};
-
-// appearance of bones
-Noleg.prototype.set_head = function(texture_) {
-    this.spine.skeleton.slots[0].sprites['torso'].setTexture(texture_);
-};
-
-Noleg.prototype.set_torso = function(texture_) {
-    this.spine.skeleton.slots[1].sprites['head'].setTexture(texture_);
-};
-
-Noleg.prototype.set_rightarm = function(texture_) {
-    this.spine.skeleton.slots[2].sprites['right-arm'].setTexture(texture_);
-};
-
-Noleg.prototype.set_leftarm = function(texture_) {
-    this.spine.skeleton.slots[3].sprites['left-arm'].setTexture(texture_);
-};
-
-Noleg.prototype.set_rightleg = function(texture_) {
-    this.spine.skeleton.slots[4].sprites['right-leg'].setTexture(texture_);
-};
-
-Noleg.prototype.set_leftleg = function(texture_) {
-    this.spine.skeleton.slots[5].sprites['left-leg'].setTexture(texture_);
-};
-
-// equips on the head
-Noleg.prototype.set_hatted = function() {
-};
-
-// equips on the body
-Noleg.prototype.set_weared = function() {
-};
-
-// equips on hands
-Noleg.prototype.set_rightgrabbed = function() {
-};
-
-Noleg.prototype.set_leftgrabbed = function() {
-};
-
-// equips on legs
-Noleg.prototype.set_rightshod = function() {
-};
-
-Noleg.prototype.set_leftshod = function() {
-};
-
 function Item() {
     // for pseudo class
     Entity.apply(this, arguments);
@@ -34748,17 +34569,20 @@ Actor.prototype.update_animation = function(dt_)
 
 Actor.prototype.init = function(eid_, type_, sprite_, x_, y_, flag_)
 {
-    this.entity.init.call(this, eid_, type_, sprite_, x_, y_, flag_);
-
+/*
+    var sprite = sprite_;
     if (PIXI.spine.Spine.prototype.isPrototypeOf(sprite_))
     {
         console.log('spine found');
-        sprite_.autoUpdate = false;
-        this.anim_slots = clone(sprite_.slotContainers, false, 2);
+        sprite_.autoUpdate = true;
+
+        this.anim_slots = clone(sprite_.slotContainer, false, 2);
         this.anim_state = clone(sprite_.state);
 //         this.appearance = clone(sprite_.slotContainers, false, 2);
+        sprite = this.anim_slots;
     }
-
+*/
+    this.entity.init.call(this, eid_, type_, sprite_, x_, y_, flag_);
     this.entity.set_next_tick.call(this, 5);
 
     // center the sprites anchor point
@@ -34823,12 +34647,12 @@ TickNode.prototype.clear = function() {
 };
 
 function Tile(texture_, x_, y_, wall_dir_,
-              wall_north_texture_, wall_east_texture_, wall_west_texture_, wall_south_texture_) {
+              wall_north_, wall_east_, wall_west_, wall_south_) {
     this.texture = texture_;
-    this.wall_north_texture = wall_north_texture_;
-    this.wall_east_texture = wall_east_texture_;
-    this.wall_west_texture = wall_west_texture_;
-    this.wall_south_texture = wall_south_texture_;
+    this.wall_north = wall_north_;
+    this.wall_east = wall_east_;
+    this.wall_west = wall_west_;
+    this.wall_south = wall_south_;
 
     this.wall_dir = wall_dir_;
 
@@ -35466,6 +35290,7 @@ Asset.prototype.get_texture = function(id_)
     return this.texture_array[id_];
 };
 
+Asset.prototype.find_appearance_ = function(name_) { return this.appearance_template[name_]; };
 Asset.prototype.find_level = function(name_) { return this.level[name_]; };
 Asset.prototype.find_terrain = function(name_) { return this.terrain[name_]; };
 Asset.prototype.find_avatar_ = function(name_) { return this.avatar_template[name_]; };
@@ -35477,15 +35302,23 @@ Asset.prototype.init = function(level_url_)
     // load external data
     var loader = PIXI.loader;
     loader.reset();
-    this.load_base("data/humanoid.json", level_url_, loader, this.build_base);
+//     this.load_base("data/humanoid.json", level_url_, loader, this.build_base);
+    var base_data = ["data/humanoid.json" /* , "data/multileg.json", "data/noleg.json" */];
+
+    for (var i = 0; i < base_data.length; ++i)
+    {
+        this.load_base(base_data[i], level_url_, loader, this.build_base);
+    }
 
     return true;
 };
 
-Asset.prototype.load_base = function(base_json_url_, var_json_url_, loader_, builder_) {
+Asset.prototype.load_base = function(base_json_urls_, var_json_url_, loader_, builder_) {
+    var base_json_name = base_json_urls_.replace(/^.*[\\\/]/, '').split('.')[0];
+
     // create a new loader
-    loader_.add('base_json', base_json_url_).load(on_base_loaded.bind(this));
-    loader_.once('complete', next_assets.bind(this));
+    loader_.add('base_json', base_json_urls_).load(on_base_loaded.bind(this));
+    loader_.once('complete', on_base_completed.bind(this));
 
     var o = this;
 
@@ -35493,14 +35326,15 @@ Asset.prototype.load_base = function(base_json_url_, var_json_url_, loader_, bui
     function on_base_loaded(loader_, res_)
     {
         // XXX dirty
-        if (res_.base_json.isJson) { builder_.apply(o, [res_.base_json]); }
+        if (res_.base_json.isJson) { builder_.apply(o, [base_json_name, res_.base_json]); }
         else { builder_.apply(o, [JSON.parse(res_.base_json.data)]); }
-        this.load_base_completed = true;
+
     };
 
-    function next_assets()
+    function on_base_completed()
     {
-        console.log('next_assets');
+        this.load_base_completed = true;
+//         console.log('next_assets');
         this.load_variable(var_json_url_, loader_, this.build_variable);
     }
 
@@ -35511,37 +35345,50 @@ Asset.prototype.load_variable = function(variables_json_url_, loader_, builder_)
 {
     // create a new loader
     loader_.add('var_json', variables_json_url_).load(on_var_loaded.bind(this));
-    loader_.once('complete', on_variable_loaded.bind(this));
+    loader_.once('complete', on_var_completed.bind(this));
 
     var o = this;
     //begin load
     function on_var_loaded(loader_, res_)
-                {
-                    // XXX dirty
-                    if (res_.var_json.isJson) { builder_.apply(o, [res_.var_json.data]); }
-                    else { builder_.apply(o, [JSON.parse(res_.var_json.data)]); }
-                };
+    {
+        // XXX dirty
+        if (res_.var_json.isJson) { builder_.apply(o, [res_.var_json.data]); }
+        else { builder_.apply(o, [JSON.parse(res_.var_json.data)]); }
+    };
 
-    function on_variable_loaded(e_)
-    { this.load_variable_completed = true; }
+    function on_var_completed(e_) { this.load_variable_completed = true; }
 };
 
-Asset.prototype.build_base = function(src_)
+Asset.prototype.build_base = function(name_, src_)
 {
-    var spine = new PIXI.spine.Spine(src_.spineData);
-    // set current skin
-    spine.skeleton.setSlotsToSetupPose();
+    console.log(name_);
+    if (src_.spineData != undefined) // src_ is spine
+    {
+        var spine = new PIXI.spine.Spine(src_.spineData);
+        // set current skin
+        spine.skeleton.setSlotsToSetupPose();
 
-    // set the position
-    spine.position.x = window.innerWidth/2;
-    spine.position.y = window.innerHeight;
+        // set the position
+        spine.position.x = window.innerWidth/2;
+        spine.position.y = window.innerHeight;
 
-    // play animation
-    spine.state.setAnimationByName(0, "walk", true);
-    // spine.skeleton.data.skins.attachments
-    // for (i = 0; i < spine.getChildIndex(); ++i) {}
+        // play animation
+        spine.state.setAnimationByName(0, "walk", true);
+        // spine.skeleton.data.skins.attachments
+        // for (i = 0; i < spine.getChildIndex(); ++i) {}
+//         this.gen_appearance(src_.appearance);
 
-    this.appearance_template['humanoid'] = new Humanoid(spine);
+        switch (name_)
+        {
+            case 'humanoid':
+            this.appearance_template[name_] = new Humanoid(spine); break;
+            case 'multileg':
+            this.appearance_template[name_] = new Multileg(spine); break;
+            case 'noleg':
+            this.appearance_template[name_] = new Noleg(spine); break;
+        }
+    }
+
 };
 
 Asset.prototype.build_variable = function(src_)
@@ -35611,7 +35458,7 @@ Asset.prototype.gen_dom = function(cmd_queue_, texture_, x_, y_, item_array_)
     return dom_sprite;
 };
 
-// need validation
+// need validations
 Asset.prototype.gen_item = function(entry_)
 {
     if (!entry_) { return 0; }
@@ -35654,7 +35501,6 @@ Asset.prototype.gen_avatar = function(entry_)
 
         new_avatar.init(clone(this.find_actor_([entry_[i][type_name]['actor']])));
         this.avatar_template[type_name] = new_avatar;
-//         console.log('actor: ' + this.actor_template[entry_[i][type_name]['actor']]);
     }
     return this.avatar_template.length;
 };
@@ -35695,15 +35541,18 @@ Asset.prototype.gen_level = function(entry_)
             {
                 var base_avatar = clone(this.find_avatar_(avatar_type));
                 var newavatar = base_avatar.get_actor();
-                var newsp = this.appearance_template['humanoid'].get_spine();
-                this.appearance_template['humanoid'].set_head(this.get_texture(131));
+                var appearance = this.find_appearance_('humanoid');
+
+//                 appearance.texture = this.get_texture(131);
+//                 appearance.set_head(this.get_texture(131));
 
                 // avatar and actors should have these (own) clones.
-                console.log(newsp.state);
-                console.log(newsp.slotContainers);
+//                 console.log(appearance);
+//                 console.log(appearance.slotContainers);
 
                 newavatar.init(this.id_pool.get_id(), avatar_type,
-                               newsp, // new PIXI.Sprite(this.get_texture(131)),
+//                                new EntitySprite(this.get_texture(131)),
+                               appearance.get_spine(), // new PIXI.Sprite(this.get_texture(131)),
                                parseInt(entry_[i].avatar[avatar_type][avtr].x),
                                parseInt(entry_[i].avatar[avatar_type][avtr].y));
                 newavatar.set_next_tick(0);
@@ -35762,7 +35611,7 @@ function TileSprite(texture_, tile_x_, tile_y_) {
 };
 
 TileSprite.prototype = Object.create(PIXI.Sprite.prototype);
-TileSprite.prototype.constructor = PIXI.TileSprite;
+TileSprite.prototype.constructor = TileSprite;
 
 TileSprite.prototype.init = function(x_, y_) {
     this.position.x = x_;
@@ -36242,6 +36091,8 @@ WallSprite.prototype.updateTransform = function() {
 // }
 
 function EntitySprite() {
+    PIXI.Sprite.apply(this, arguments);
+    this.sprite = PIXI.Sprite.prototype;
 };
 
 EntitySprite.prototype = Object.create(PIXI.Sprite.prototype);
@@ -36381,6 +36232,196 @@ UISprite.prototype.deactivate = function() {
 
 
 
+
+/// http://www.html5gamedevs.com/topic/7546-pixi-dragonbones/
+function Humanoid(spine_) {
+    PIXI.Sprite.apply(this, arguments);
+    this.sprite = PIXI.Sprite.prototype;
+//     EntitySprite.apply(this, arguments);
+//     this.entitysprite = EntitySprite.prototype;
+
+    this.spine = spine_;
+
+//     this.sprites = clone(spine_.slotContainer, false, 2);
+    console.log('humanoid');
+};
+
+//// if you uncomment below, error will be caused 'hasLoaded is undefined'.
+// Humanoid.prototype = Object.create(PIXI.Sprite.prototype);
+// Humanoid.prototype.constructor = Humanoid;
+
+Humanoid.prototype.get_spine = function() {
+    return this.spine;
+};
+
+
+// http://esotericsoftware.com/forum/viewtopic.php?f=3&t=1322
+Humanoid.prototype.flip_x = function() {
+    this.spine.skeleton.flipX = true;
+};
+
+// appearance of bones
+Humanoid.prototype.set_torso = function(texture_) {
+    this.spine.skeleton.slots[0].sprites['torso'].texture = texture_;
+};
+
+Humanoid.prototype.set_head = function(texture_) {
+    this.spine.skeleton.slots[1].sprites['head'].texture = texture_;
+};
+
+Humanoid.prototype.set_rightarm = function(texture_) {
+    this.spine.skeleton.slots[2].sprites['right-arm'].texture = texture_;
+};
+
+Humanoid.prototype.set_leftarm = function(texture_) {
+    this.spine.skeleton.slots[3].sprites['left-arm'].texture = texture_;
+};
+
+Humanoid.prototype.set_rightleg = function(texture_) {
+    this.spine.skeleton.slots[4].sprites['right-leg'].texture = texture_;
+};
+
+Humanoid.prototype.set_leftleg = function(texture_) {
+    this.spine.skeleton.slots[5].sprites['left-leg'].texture = texture_;
+};
+
+// equips on the head
+Humanoid.prototype.set_hatted = function() {
+};
+
+// equips on the body
+Humanoid.prototype.set_weared = function() {
+};
+
+// equips on hands
+Humanoid.prototype.set_rightgrabbed = function() {
+};
+
+Humanoid.prototype.set_leftgrabbed = function() {
+};
+
+// equips on legs
+Humanoid.prototype.set_rightshod = function() {
+};
+
+Humanoid.prototype.set_leftshod = function() {
+};
+
+/// http://www.html5gamedevs.com/topic/7546-pixi-dragonbones/
+function Multileg(spine_) {
+    this.spine = spine_;
+    console.log('multileg');
+};
+
+// http://esotericsoftware.com/forum/viewtopic.php?f=3&t=1322
+Multileg.prototype.flip_x = function() {
+    this.spine.skeleton.flipX = true;
+};
+
+// appearance of bones
+Multileg.prototype.set_head = function(texture_) {
+    this.spine.skeleton.slots[0].sprites['torso'].setTexture(texture_);
+};
+
+Multileg.prototype.set_torso = function(texture_) {
+    this.spine.skeleton.slots[1].sprites['head'].setTexture(texture_);
+};
+
+Multileg.prototype.set_rightarm = function(texture_) {
+    this.spine.skeleton.slots[2].sprites['right-arm'].setTexture(texture_);
+};
+
+Multileg.prototype.set_leftarm = function(texture_) {
+    this.spine.skeleton.slots[3].sprites['left-arm'].setTexture(texture_);
+};
+
+Multileg.prototype.set_rightleg = function(texture_) {
+    this.spine.skeleton.slots[4].sprites['right-leg'].setTexture(texture_);
+};
+
+Multileg.prototype.set_leftleg = function(texture_) {
+    this.spine.skeleton.slots[5].sprites['left-leg'].setTexture(texture_);
+};
+
+// equips on the head
+Multileg.prototype.set_hatted = function() {
+};
+
+// equips on the body
+Multileg.prototype.set_weared = function() {
+};
+
+// equips on hands
+Multileg.prototype.set_rightgrabbed = function() {
+};
+
+Multileg.prototype.set_leftgrabbed = function() {
+};
+
+// equips on legs
+Multileg.prototype.set_rightshod = function() {
+};
+
+Multileg.prototype.set_leftshod = function() {
+};
+
+/// http://www.html5gamedevs.com/topic/7546-pixi-dragonbones/
+function Noleg(spine_) {
+    this.spine = spine_;
+    console.log('noleg');
+};
+
+// http://esotericsoftware.com/forum/viewtopic.php?f=3&t=1322
+Noleg.prototype.flip_x = function() {
+    this.spine.skeleton.flipX = true;
+};
+
+// appearance of bones
+Noleg.prototype.set_head = function(texture_) {
+    this.spine.skeleton.slots[0].sprites['torso'].setTexture(texture_);
+};
+
+Noleg.prototype.set_torso = function(texture_) {
+    this.spine.skeleton.slots[1].sprites['head'].setTexture(texture_);
+};
+
+Noleg.prototype.set_rightarm = function(texture_) {
+    this.spine.skeleton.slots[2].sprites['right-arm'].setTexture(texture_);
+};
+
+Noleg.prototype.set_leftarm = function(texture_) {
+    this.spine.skeleton.slots[3].sprites['left-arm'].setTexture(texture_);
+};
+
+Noleg.prototype.set_rightleg = function(texture_) {
+    this.spine.skeleton.slots[4].sprites['right-leg'].setTexture(texture_);
+};
+
+Noleg.prototype.set_leftleg = function(texture_) {
+    this.spine.skeleton.slots[5].sprites['left-leg'].setTexture(texture_);
+};
+
+// equips on the head
+Noleg.prototype.set_hatted = function() {
+};
+
+// equips on the body
+Noleg.prototype.set_weared = function() {
+};
+
+// equips on hands
+Noleg.prototype.set_rightgrabbed = function() {
+};
+
+Noleg.prototype.set_leftgrabbed = function() {
+};
+
+// equips on legs
+Noleg.prototype.set_rightshod = function() {
+};
+
+Noleg.prototype.set_leftshod = function() {
+};
 
 function Overlay() {
     this.brush = new PIXI.Graphics();
@@ -37153,7 +37194,8 @@ RRLL.prototype.start = function()
     var self = this;
 
     this.poll_interval = window.setInterval(function() {
-        if (!self.asset.is_load_base_completed() || !self.asset.is_load_variable_completed()) { return; }
+        if (!self.asset.is_load_base_completed()) { return; }
+        if (!self.asset.is_load_variable_completed()) { return; }
 
         // load completed and go
         window.clearInterval(self.poll_interval);
