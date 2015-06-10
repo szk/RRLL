@@ -11,15 +11,21 @@ Scene.prototype.init = function(asset_, ui_) {
     return true;
 };
 
-Scene.prototype.terminate = function() {
-    console.log('terminate of base class is called');
+Scene.prototype.activate = function() {
+};
+
+Scene.prototype.deactivate = function() {
+};
+
+Scene.prototype.activate = function() {
+    console.log('activate of base class is called');
+};
+
+Scene.prototype.deactivate = function() {
+    console.log('activate of base class is called');
 };
 
 Scene.prototype.update = function(ui_) {
-};
-
-Scene.prototype.is_initialized = function() {
-    return this.initialized;
 };
 
 Scene.prototype.get_avatar = function() {

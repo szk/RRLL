@@ -1,4 +1,6 @@
 function EntitySprite() {
+    PIXI.Sprite.apply(this, arguments);
+    this.sprite = PIXI.Sprite.prototype;
 };
 
 EntitySprite.prototype = Object.create(PIXI.Sprite.prototype);

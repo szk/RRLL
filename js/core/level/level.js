@@ -3,6 +3,8 @@ function Level(max_x_, max_y_, aspect_, root_texture_) // XXX use argument for
     this.terrain = null;
     this.stain = []; // fluid, stain, etc. per tile
     this.entity = []; // other objects
+    this.carrier = null;
+
     this.avatar = null;
 
     this.tick = 0;
@@ -58,20 +60,22 @@ Level.prototype.update = function(command_)
     // if the target's 'is_live' is false, release the targeting (watch out to reusing of eid).
     // (how about 'actor.observe' checks is_live then 'actor.action' executes action?)
 
+//     console.log('nexturn: ' + this.tick);
+
     var now_ticknode = new TickNode(this.tick);
     var found_ticknode = this.tick_bst.search(now_ticknode).element;
 
-    for (var ent in found_ticknode.get_entities())
+    for (var i = 0; found_ticknode.get_entities().length > i; ++i)
     {
-        if (found_ticknode.get_entities()[ent] == this.avatar) // if this is avatar
+        if (found_ticknode.get_entities()[i].get_flag() == 1) // if this is avatar
         {
             this.avatar.cmd(command_.peek()[0], command_.peek()[1]); // block at here
             command_.clear();
         }
 
-        found_ticknode.get_entities()[ent].observe(); // for intrrupt (e.g. noise hearing in sleep)
-        found_ticknode.get_entities()[ent].action(this.tick);
-        this.add_entity_tick(found_ticknode.get_entities()[ent]);
+        found_ticknode.get_entities()[i].observe(); // for intrrupt (e.g. noise hearing in sleep)
+        found_ticknode.get_entities()[i].action(this.tick);
+        this.add_entity_tick(found_ticknode.get_entities()[i]);
         this.update_levelstat();
     }
     this.tick_bst.remove(now_ticknode); // remove ticknode by GC
@@ -97,7 +101,7 @@ Level.prototype.compute_visibility = function()
     this.pre_visible_tiles = [];
     this.visible_entity = [];
 
-    this.visibility.compute(this.avatar.get_x(), this.avatar.get_y(), RC.MAP_RADIUS,
+    this.visibility.compute(this.carrier.get_x(), this.carrier.get_y(), RC.MAP_RADIUS,
                             (function(tile_x_, tile_y_, length_from_center_, is_visible_) {
                                 // tiles
                                 var t = this.terrain.get_tile(tile_x_, tile_y_);
@@ -112,7 +116,7 @@ Level.prototype.compute_visibility = function()
 Level.prototype.get_terrain = function() { return this.terrain; };
 Level.prototype.get_stain = function() { return this.stain; };
 Level.prototype.get_entity = function() { return this.entity; };
-Level.prototype.get_avatar = function() { return this.avatar; };
+Level.prototype.get_avatar = function() { return this.carrier; };
 Level.prototype.get_visible_entity = function() { return this.visible_entity; };
 
 Level.prototype.update_levelstat = function(entity_)
@@ -178,8 +182,10 @@ Level.prototype.get_entity_on_tile = function(tile_x_, tile_y_)
 
 Level.prototype.set_avatar = function(avatar_)
 {
-    this.entity[this.entity.length] = avatar_;
-    this.add_entity_tick(avatar_);
+    this.carrier = avatar_.get_actor();
+
+    this.entity[this.entity.length] = this.carrier;
+    this.add_entity_tick(this.carrier);
     this.avatar = avatar_;
 };
 

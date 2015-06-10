@@ -35,21 +35,33 @@ Actor.prototype.update_animation = function(dt_)
 
     this.appearance.slotContainers = this.anim_slots;
     this.appearance.state = this.anim_state;
-    this.appearance.update(dt_);
+//     this.appearance.update(dt_);
 };
 
-Actor.prototype.init = function(eid_, type_, sprite_, x_, y_)
+Actor.prototype.init = function(eid_, type_, sprite_, x_, y_, flag_)
 {
-    this.entity.init.call(this, eid_, type_, sprite_, x_, y_);
-
+/*
+    var sprite = sprite_;
     if (PIXI.spine.Spine.prototype.isPrototypeOf(sprite_))
     {
         console.log('spine found');
-        this.anim_slots = clone(sprite_.slotContainers, false, 2);
-        this.anim_state = clone(sprite_.state);
-    }
+        sprite_.autoUpdate = true;
 
+        this.anim_slots = clone(sprite_.slotContainer, false, 2);
+        this.anim_state = clone(sprite_.state);
+//         this.appearance = clone(sprite_.slotContainers, false, 2);
+        sprite = this.anim_slots;
+    }
+*/
+    this.entity.init.call(this, eid_, type_, sprite_, x_, y_, flag_);
     this.entity.set_next_tick.call(this, 5);
+
+    // center the sprites anchor point
+//     if (this.sprite != null)
+//     {
+//         this.sprite.anchor.x = -0.5;
+//         this.sprite.anchor.y = -0.5;
+//     }
 };
 
 Actor.prototype.observe = function()
@@ -61,6 +73,17 @@ Actor.prototype.observe = function()
 
 Actor.prototype.action = function(current_tick_)
 {
-    this.right();
+//     this.right();
     this.entity.set_next_tick.call(this, current_tick_ + 20);
+
+//     // 
+    if (this.appearance.lastTime)
+    {
+        this.appearance.lastTime = this.appearance.lastTime || Date.now();
+        var timeDelta = (Date.now() - this.appearance.lastTime) * 0.001;
+        this.appearance.lastTime = Date.now();
+        this.appearance.update(timeDelta);
+        console.log(timeDelta);
+    }
+//     console.log('action');
 };

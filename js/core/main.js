@@ -13,7 +13,7 @@ function RRLL(asset_location_) {
     this.renderer = PIXI.autoDetectRenderer(RC.SCREEN_WIDTH, RC.SCREEN_HEIGHT);
     // add the renderer view element to the DOM
     document.body.appendChild(this.renderer.view);
-    PIXI.DOM.Setup(this.renderer, true);
+    PIXI.DOM.Setup(this.renderer, true, true);
 }
 
 RRLL.prototype.start = function()
@@ -23,7 +23,8 @@ RRLL.prototype.start = function()
     var self = this;
 
     this.poll_interval = window.setInterval(function() {
-        if (!self.asset.is_load_base_completed() || !self.asset.is_load_variable_completed()) { return; }
+        if (!self.asset.is_load_base_completed()) { return; }
+        if (!self.asset.is_load_variable_completed()) { return; }
 
         // load completed and go
         window.clearInterval(self.poll_interval);
@@ -42,12 +43,6 @@ RRLL.prototype.init_scene = function() {
 
 RRLL.prototype.animate = function me() {
     requestAnimationFrame(me.bind(this));
-
-    // when top scene is changed
-    if (this.scene_stack.top_is_initialized() == false)
-    {
-        this.scene_stack.init_top(this.asset, this.ui);
-    }
 
     // normal tick
     if (this.ui.is_command_queued())

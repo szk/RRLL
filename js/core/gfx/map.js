@@ -90,8 +90,8 @@ Map.prototype.update_fov = function(level_)
         this.entity_container.position.x += scroll_step_x;
         this.entity_container.position.y += scroll_step_y;
 
-        avatar.sprite.position.x -= scroll_step_x;
-        avatar.sprite.position.y -= scroll_step_y;
+        avatar.get_sprite().position.x -= scroll_step_x;
+        avatar.get_sprite().position.y -= scroll_step_y;
 
         --this.scroll_wait;
         return;

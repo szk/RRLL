@@ -58,8 +58,8 @@ def ui():
 
 @route('/level')
 def level():
-    rv = {"avatar": [{"defaultavatar": {"x": "1", "y": "12"}},
-                     {"advancedavatar": {"x": "1", "y": "12"}}],
+    rv = {"avatar": [{"defaultavatar": {"actor": "human"}},
+                     {"advancedavatar": {"actor": "dog"}}],
           "terrain": [{"name": "defaultmap",
                        "tile": {".":{"":"", "":""},
                                 "O":{"":"", "":""}},
@@ -124,6 +124,10 @@ def level():
           "item": [{"sword": {"weight": "mogera"}},
                    {"shield": {"weight": "mogera"}},
                    ],
+          "appearance": [{"defaulthuman": {"type": "humanoid"}},
+                         {"defaultanimal": {"type": "multileg"}},
+                         {"defaultworm": {"type": "noleg"}},
+                         ],
           "level": [{"name": "defaultlevel", "width": "54", "height": "54", "texture_id": "1",
                      "avatar": {"defaultavatar": [{"x": "12", "y": "12"}]},
                      "actor": {"human": [{"name": "taro", "x": "5", "y": "4"}],

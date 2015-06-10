@@ -53,6 +53,7 @@ Asset.prototype.get_texture = function(id_)
     return this.texture_array[id_];
 };
 
+Asset.prototype.find_appearance_ = function(name_) { return this.appearance_template[name_]; };
 Asset.prototype.find_level = function(name_) { return this.level[name_]; };
 Asset.prototype.find_terrain = function(name_) { return this.terrain[name_]; };
 Asset.prototype.find_avatar_ = function(name_) { return this.avatar_template[name_]; };
@@ -64,15 +65,23 @@ Asset.prototype.init = function(level_url_)
     // load external data
     var loader = PIXI.loader;
     loader.reset();
-    this.load_base("data/humanoid.json", level_url_, loader, this.build_base);
+//     this.load_base("data/humanoid.json", level_url_, loader, this.build_base);
+    var base_data = ["data/humanoid.json" /* , "data/multileg.json", "data/noleg.json" */];
+
+    for (var i = 0; i < base_data.length; ++i)
+    {
+        this.load_base(base_data[i], level_url_, loader, this.build_base);
+    }
 
     return true;
 };
 
-Asset.prototype.load_base = function(base_json_url_, var_json_url_, loader_, builder_) {
+Asset.prototype.load_base = function(base_json_urls_, var_json_url_, loader_, builder_) {
+    var base_json_name = base_json_urls_.replace(/^.*[\\\/]/, '').split('.')[0];
+
     // create a new loader
-    loader_.add('base_json', base_json_url_).load(on_base_loaded.bind(this));
-    loader_.once('complete', next_assets.bind(this));
+    loader_.add('base_json', base_json_urls_).load(on_base_loaded.bind(this));
+    loader_.once('complete', on_base_completed.bind(this));
 
     var o = this;
 
@@ -80,14 +89,15 @@ Asset.prototype.load_base = function(base_json_url_, var_json_url_, loader_, bui
     function on_base_loaded(loader_, res_)
     {
         // XXX dirty
-        if (res_.base_json.isJson) { builder_.apply(o, [res_.base_json]); }
+        if (res_.base_json.isJson) { builder_.apply(o, [base_json_name, res_.base_json]); }
         else { builder_.apply(o, [JSON.parse(res_.base_json.data)]); }
-        this.load_base_completed = true;
+
     };
 
-    function next_assets()
+    function on_base_completed()
     {
-        console.log('next_assets');
+        this.load_base_completed = true;
+//         console.log('next_assets');
         this.load_variable(var_json_url_, loader_, this.build_variable);
     }
 
@@ -98,37 +108,50 @@ Asset.prototype.load_variable = function(variables_json_url_, loader_, builder_)
 {
     // create a new loader
     loader_.add('var_json', variables_json_url_).load(on_var_loaded.bind(this));
-    loader_.once('complete', on_variable_loaded.bind(this));
+    loader_.once('complete', on_var_completed.bind(this));
 
     var o = this;
     //begin load
     function on_var_loaded(loader_, res_)
-                {
-                    // XXX dirty
-                    if (res_.var_json.isJson) { builder_.apply(o, [res_.var_json.data]); }
-                    else { builder_.apply(o, [JSON.parse(res_.var_json.data)]); }
-                };
+    {
+        // XXX dirty
+        if (res_.var_json.isJson) { builder_.apply(o, [res_.var_json.data]); }
+        else { builder_.apply(o, [JSON.parse(res_.var_json.data)]); }
+    };
 
-    function on_variable_loaded(e_)
-    { this.load_variable_completed = true; }
+    function on_var_completed(e_) { this.load_variable_completed = true; }
 };
 
-Asset.prototype.build_base = function(src_)
+Asset.prototype.build_base = function(name_, src_)
 {
-    var spine = new PIXI.spine.Spine(src_.spineData);
-    // set current skin
-    spine.skeleton.setSlotsToSetupPose();
+    console.log(name_);
+    if (src_.spineData != undefined) // src_ is spine
+    {
+        var spine = new PIXI.spine.Spine(src_.spineData);
+        // set current skin
+        spine.skeleton.setSlotsToSetupPose();
 
-    // set the position
-    spine.position.x = window.innerWidth/2;
-    spine.position.y = window.innerHeight;
+        // set the position
+        spine.position.x = window.innerWidth/2;
+        spine.position.y = window.innerHeight;
 
-    // play animation
-    spine.state.setAnimationByName(0, "walk", true);
-    // spine.skeleton.data.skins.attachments
-    // for (i = 0; i < spine.getChildIndex(); ++i) {}
+        // play animation
+        spine.state.setAnimationByName(0, "walk", true);
+        // spine.skeleton.data.skins.attachments
+        // for (i = 0; i < spine.getChildIndex(); ++i) {}
+//         this.gen_appearance(src_.appearance);
 
-    this.appearance_template['humanoid'] = new Humanoid(spine);
+        switch (name_)
+        {
+            case 'humanoid':
+            this.appearance_template[name_] = new Humanoid(spine); break;
+            case 'multileg':
+            this.appearance_template[name_] = new Multileg(spine); break;
+            case 'noleg':
+            this.appearance_template[name_] = new Noleg(spine); break;
+        }
+    }
+
 };
 
 Asset.prototype.build_variable = function(src_)
@@ -138,10 +161,10 @@ Asset.prototype.build_variable = function(src_)
     this.gen_item(src_.item);
     // terrain
     this.gen_terrain(src_.terrain);
-    // avatar
-    this.gen_avatar(src_.avatar);
     // actor
     this.gen_actor(src_.actor);
+    // avatar
+    this.gen_avatar(src_.avatar);
     // level
     this.gen_level(src_.level);
 
@@ -198,7 +221,7 @@ Asset.prototype.gen_dom = function(cmd_queue_, texture_, x_, y_, item_array_)
     return dom_sprite;
 };
 
-// need validation
+// need validations
 Asset.prototype.gen_item = function(entry_)
 {
     if (!entry_) { return 0; }
@@ -237,7 +260,10 @@ Asset.prototype.gen_avatar = function(entry_)
     {
         var type_name = null;
         for (var key in entry_[i]) { type_name = key; }
-        this.avatar_template[type_name] = new Avatar();
+        var new_avatar = new Avatar();
+
+        new_avatar.init(clone(this.find_actor_([entry_[i][type_name]['actor']])));
+        this.avatar_template[type_name] = new_avatar;
     }
     return this.avatar_template.length;
 };
@@ -276,20 +302,25 @@ Asset.prototype.gen_level = function(entry_)
         {
             for (var avtr in entry_[i].avatar[avatar_type])
             {
-                var newavatar = clone(this.find_avatar_(avatar_type));
-                var newsp = this.appearance_template['humanoid'].get_spine();
-                this.appearance_template['humanoid'].set_head(this.get_texture(131));
+                var base_avatar = clone(this.find_avatar_(avatar_type));
+                var newavatar = base_avatar.get_actor();
+                var appearance = this.find_appearance_('humanoid');
+
+//                 appearance.texture = this.get_texture(131);
+//                 appearance.set_head(this.get_texture(131));
 
                 // avatar and actors should have these (own) clones.
-                console.log(newsp.state);
-                console.log(newsp.slotContainers);
+//                 console.log(appearance);
+//                 console.log(appearance.slotContainers);
 
                 newavatar.init(this.id_pool.get_id(), avatar_type,
-                               newsp,
-//                                new PIXI.Sprite(this.get_texture(131)),
+//                                new EntitySprite(this.get_texture(131)),
+                               appearance.get_spine(), // new PIXI.Sprite(this.get_texture(131)),
                                parseInt(entry_[i].avatar[avatar_type][avtr].x),
                                parseInt(entry_[i].avatar[avatar_type][avtr].y));
-                level.set_avatar(newavatar);
+                newavatar.set_next_tick(0);
+                newavatar.set_flag(1);
+                level.set_avatar(base_avatar);
                 this.id_bst.add(newavatar);
             }
         }
