@@ -6,6 +6,9 @@
 # Compiled binary files
 *.pyc
 
+# Minified files for building
+js/build/*
+
 # Logs
 logs
 *.log

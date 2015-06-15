@@ -1,23 +1,22 @@
-function GameoverScene() {
-    Scene.apply(this, arguments);
-    this.panels = [];
+class GameoverScene extends Scene {
+    constructor() {
+        super();
+        this.panels = [];
+    }
+
+    init(asset_, ui_) {
+        return true;
+    }
+
+    activate()
+    {
+    }
+
+    deactivate()
+    {
+    }
+
+    update(ui_) {
+        return RC.NEXT_SCENE.CONTINUE;
+    }
 }
-
-GameoverScene.prototype = Object.create(Scene.prototype);
-GameoverScene.prototype.constructor = GameoverScene;
-
-GameoverScene.prototype.init = function(asset_, ui_) {
-    return true;
-};
-
-GameoverScene.prototype.activate = function()
-{
-};
-
-GameoverScene.prototype.deactivate = function()
-{
-};
-
-GameoverScene.prototype.update = function(ui_) {
-    return RC.NEXT_SCENE.CONTINUE;
-};

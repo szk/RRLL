@@ -1,19 +1,20 @@
 /// http://www.html5gamedevs.com/topic/7546-pixi-dragonbones/
-function Humanoid(spine_) {
+function Humanoid() {
     PIXI.Sprite.apply(this, arguments);
     this.sprite = PIXI.Sprite.prototype;
 //     EntitySprite.apply(this, arguments);
 //     this.entitysprite = EntitySprite.prototype;
 
-    this.spine = spine_;
-
 //     this.sprites = clone(spine_.slotContainer, false, 2);
-    console.log('humanoid');
+    console.log('humanoid found');
 };
 
-//// if you uncomment below, error will be caused 'hasLoaded is undefined'.
-// Humanoid.prototype = Object.create(PIXI.Sprite.prototype);
-// Humanoid.prototype.constructor = Humanoid;
+Humanoid.prototype = Object.create(PIXI.Sprite.prototype);
+Humanoid.prototype.constructor = Humanoid;
+
+Humanoid.prototype.init = function(spine_) {
+    this.spine = spine_;
+};
 
 Humanoid.prototype.get_spine = function() {
     return this.spine;

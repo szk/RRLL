@@ -1,28 +1,30 @@
-function TickNode(tick_) {
-    this.tick = tick_;
-    this.entities = [];
+class TickNode {
+    constructor(tick_) {
+        this.tick = tick_;
+        this.entities = [];
+    }
+
+    init(tick_) {
+        this.tick = tick_;
+        this.entities = [];
+    }
+
+    get_tick() {
+        return this.tick;
+    }
+
+    get_entities() {
+        return this.entities;
+    }
+
+    add_entity(entity_) {
+        this.entities.push(entity_);
+    }
+
+    remove_entity(entity_) {
+    }
+
+    clear() {
+        this.entities.clear();
+    }
 }
-
-TickNode.prototype.init = function(tick_) {
-    this.tick = tick_;
-    this.entities = [];
-};
-
-TickNode.prototype.get_tick = function() {
-    return this.tick;
-};
-
-TickNode.prototype.get_entities = function() {
-    return this.entities;
-};
-
-TickNode.prototype.add_entity = function(entity_) {
-    this.entities.push(entity_);
-};
-
-TickNode.prototype.remove_entity = function(entity_) {
-};
-
-TickNode.prototype.clear = function() {
-    this.entities.clear();
-};

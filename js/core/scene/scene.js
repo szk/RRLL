@@ -1,37 +1,40 @@
-function Scene() {
-    this.avatar = null;
-    this.level = null;
-    this.initialized = false;
-    this.panels = [];
+class Scene {
+    constructor() {
+        this.avatar = null;
+        this.level = null;
+        this.initialized = false;
+        this.panels = [];
+        this.ui = null;
+    }
+
+    init(asset_, ui_) {
+        this.initialized = true;
+        this.ui = ui_;
+        return true;
+    }
+
+    activate() {
+    }
+
+    deactivate() {
+    }
+
+    activate() {
+        console.log('activate of base class is called');
+    }
+
+    deactivate() {
+        console.log('activate of base class is called');
+    }
+
+    update(ui_) {
+    }
+
+    get_avatar() {
+        return this.avatar;
+    }
+
+    get_level() {
+        return this.level;
+    }
 }
-
-Scene.prototype.init = function(asset_, ui_) {
-    this.initialized = true;
-    this.ui = ui_;
-    return true;
-};
-
-Scene.prototype.activate = function() {
-};
-
-Scene.prototype.deactivate = function() {
-};
-
-Scene.prototype.activate = function() {
-    console.log('activate of base class is called');
-};
-
-Scene.prototype.deactivate = function() {
-    console.log('activate of base class is called');
-};
-
-Scene.prototype.update = function(ui_) {
-};
-
-Scene.prototype.get_avatar = function() {
-    return this.avatar;
-};
-
-Scene.prototype.get_level = function() {
-    return this.level;
-};

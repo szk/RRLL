@@ -1,7 +1,6 @@
-class MenuScene extends Scene {
+class SandboxScene extends Scene {
     constructor() {
         super();
-
         this.dompanel = null;
         this.asset = null;
         this.ui = null;

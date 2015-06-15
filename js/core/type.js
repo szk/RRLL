@@ -45,12 +45,13 @@ RC.NEXT_SCENE = {
     MAINMENU: 1,
     SETTINGMENU: 2,
     ABOUTMENU: 3,
-    GAMEOVER: 4,
-    INTRO: 5,
-    LOADING: 6,
-    PLAYING: 7,
-    RANKING: 8,
-    RETURN: 9
+    SANDBOX: 4,
+    GAMEOVER: 5,
+    INTRO: 6,
+    LOADING: 7,
+    PLAYING: 8,
+    RANKING: 9,
+    RETURN: 10
 };
 
 RC.CMD_SYS = {
