@@ -1,23 +1,22 @@
-function IntroScene() {
-    Scene.apply(this, arguments);
-    this.panels = [];
+class IntroScene extends Scene {
+    constructor() {
+        super();
+        this.panels = [];
+    }
+
+    init(asset_, ui_) {
+        return true;
+    }
+
+    activate()
+    {
+    }
+
+    deactivate()
+    {
+    }
+
+    update(ui_) {
+        return RC.NEXT_SCENE.CONTINUE;
+    }
 }
-
-IntroScene.prototype = Object.create(Scene.prototype);
-IntroScene.prototype.constructor = IntroScene;
-
-IntroScene.prototype.init = function(asset_, ui_) {
-    return true;
-};
-
-IntroScene.prototype.activate = function()
-{
-};
-
-IntroScene.prototype.deactivate = function()
-{
-};
-
-IntroScene.prototype.update = function(ui_) {
-    return RC.NEXT_SCENE.CONTINUE;
-};

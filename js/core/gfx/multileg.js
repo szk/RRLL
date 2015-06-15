@@ -1,7 +1,7 @@
 /// http://www.html5gamedevs.com/topic/7546-pixi-dragonbones/
 function Multileg(spine_) {
     this.spine = spine_;
-    console.log('multileg');
+    console.log('multileg created');
 };
 
 // http://esotericsoftware.com/forum/viewtopic.php?f=3&t=1322

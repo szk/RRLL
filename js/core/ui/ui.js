@@ -1,63 +1,64 @@
-function UI() {
-    this.listener = new window.keypress.Listener();
-    this.uicontainer = null;
-    this.asset = null;
-    this.command_queue = new buckets.Queue();
+class UI {
+    constructor() {
+        this.listener = new window.keypress.Listener();
+        this.uicontainer = null;
+        this.asset = null;
+        this.command_queue = new buckets.Queue();
+    }
+
+    init(asset_, container_)
+    {
+        this.asset = asset_;
+        this.uicontainer = container_;
+
+        return true;
+    }
+
+    add_sprite(sprite_)
+    {
+        this.uicontainer.addChild(sprite_);
+    }
+
+    remove_sprite(sprite_)
+    {
+        this.uicontainer.removeChild(sprite_);
+    }
+
+    is_command_queued() { return !(this.command_queue.isEmpty()); }
+    get_command_queue() { return this.command_queue; }
+    clear_command_queue() { this.command_queue.clear(); }
+
+    set_keybinding() {
+        var my_scope = this;
+        var my_combos = this.listener.register_many([
+            // wait
+            {"keys": "s", "this": my_scope,
+             "on_keydown": function() { this.command_queue.add([RC.CMD_ACTOR_ACT.WAIT, RC.CMD_ACTOR_DIR.LEFT]); }},
+            // move
+            {"keys": "q", "this": my_scope,
+             "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.LEFT]); }},
+            {"keys": "z", "this": my_scope,
+             "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWN]); }},
+            {"keys": "e", "this": my_scope,
+             "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UP]); }},
+            {"keys": "c", "this": my_scope,
+             "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.RIGHT]); }},
+            {"keys": "w", "this": my_scope,
+             "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPLEFT]); }},
+            {"keys": "d", "this": my_scope,
+             "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPRIGHT]); }},
+            {"keys": "a", "this": my_scope,
+             "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNLEFT]); }},
+            {"keys": "x", "this": my_scope,
+             "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNRIGHT]); }},
+            // menus
+            {"keys": "esc", "this": my_scope,
+             "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.MAIN]); }},
+            {"keys": "i", "this": my_scope,
+             "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.ABOUT]); }}
+        ]);
+    }
 }
-
-UI.prototype.init = function(asset_, container_)
-{
-    this.asset = asset_;
-    this.uicontainer = container_;
-
-    return true;
-};
-
-UI.prototype.add_sprite = function(sprite_)
-{
-    this.uicontainer.addChild(sprite_);
-};
-
-UI.prototype.remove_sprite = function(sprite_)
-{
-    this.uicontainer.removeChild(sprite_);
-};
-
-UI.prototype.is_command_queued = function() { return !(this.command_queue.isEmpty()); };
-UI.prototype.get_command_queue = function() { return this.command_queue; };
-UI.prototype.clear_command_queue = function() { this.command_queue.clear(); };
-
-UI.prototype.set_keybinding = function() {
-    var my_scope = this;
-    var my_combos = this.listener.register_many([
-        // wait
-        {"keys": "s", "this": my_scope,
-         "on_keydown": function() { this.command_queue.add([RC.CMD_ACTOR_ACT.WAIT, RC.CMD_ACTOR_DIR.LEFT]); }},
-        // move
-        {"keys": "q", "this": my_scope,
-         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.LEFT]); }},
-        {"keys": "z", "this": my_scope,
-         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWN]); }},
-        {"keys": "e", "this": my_scope,
-         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UP]); }},
-        {"keys": "c", "this": my_scope,
-         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.RIGHT]); }},
-        {"keys": "w", "this": my_scope,
-         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPLEFT]); }},
-        {"keys": "d", "this": my_scope,
-         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPRIGHT]); }},
-        {"keys": "a", "this": my_scope,
-         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNLEFT]); }},
-        {"keys": "x", "this": my_scope,
-         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNRIGHT]); }},
-        // menus
-        {"keys": "esc", "this": my_scope,
-         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.MAIN]); }},
-        {"keys": "i", "this": my_scope,
-         "on_keydown" : function() { this.command_queue.add([RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.ABOUT]); }}
-    ]);
-};
-
 /*
     //     this.menu = new dat.GUI({
     //     //height : 5 * 32 - 1,
@@ -73,7 +74,7 @@ UI.prototype.set_keybinding = function() {
     // map_folder.add(map.m, 'tx', 0, 500).name("Translate X");
     // map_folder.add(map.m, 'ty', 0, 500).name("Translate Y");
 
-UI.prototype.set_keybinding_bak = function() {
+set_keybinding_bak() {
     this.listener.reset();
     var my_scope = this;
 
@@ -99,6 +100,6 @@ UI.prototype.set_keybinding_bak = function() {
     }
     this.listener.register_many(this.combos);
     console.log(this.listener.get_registered_combos());
-};
+}
 
  */
