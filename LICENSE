@@ -29,6 +29,8 @@ SOFTWARE.
  **
  * Pixi Renderer - MIT License, Copyright (c) 2013-2015 Mathew Groves
  **
+ * stats.js - MIT License, Copyright (c) 2009-2012 Mr.doob
+ **
  * buckets 1.90.0 - MIT License, Copyright (c) 2015 Mauricio Santos
  **
  * clone - Copyright (c) 2011-2015 Paul Vorbach and contributors.
@@ -55,6 +57,8 @@ SOFTWARE.
  * Keypress version 2.1.0 - Apache License Version 2.0, (c) 2014 David Mauro
  **
  * PIXI.DOM v.0.1.0 - MIT License, Copyright (c) 2014 Sebastian Nette
+ **
+ * PixiParticles 1.4.1 - MIT License, Copyright (c) 2014 CloudKid
  **
  * recursive-shadowcasting.js - Copyright (c) 2012-now(), Ondrej Zara
  * All rights reserved.

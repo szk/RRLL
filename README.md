@@ -5,7 +5,9 @@ Roguelike game on HTML5. [LIVEDEMO](http://szk.github.io/RRLL/)
 ## Current features
 - Simple Client-Server model
 - Isometric view
-- Multiplatform (on HTML5/WebGL compliant browsers)
+- Multiplatform (on HTML5/WebGL compliant browsers)  
+
+More > [RRLL Wiki](https://github.com/szk/RRLL/wiki/)
 
 ## How to build / play on your computer
 Clone master branch or [download archive](https://github.com/szk/RRLL/archive/master.zip) and extract it.

@@ -43,15 +43,14 @@ class Asset {
     is_load_variable_completed() { return this.load_variable_completed; }
     get_texture(id_) { return this.texture_array[id_]; }
 
-    find_appearance_(name_) { return this.appearance_template[name_]; }
+    gen_entitysprite_(name_) { return this.appearance_template[name_].build_sprite(); }
     find_level(name_) { return this.level[name_]; }
     find_terrain(name_) { return this.terrain[name_]; }
     find_avatar_(name_) { return this.avatar_template[name_]; }
     find_actor_(name_) { return this.actor_template[name_]; }
     find_item_(name_) { return this.item_template[name_]; }
 
-    init(level_url_)
-    {
+    init(level_url_) {
         // load external data
         var loader = PIXI.loader;
         loader.reset();
@@ -67,18 +66,11 @@ class Asset {
     }
 
     load_base(base_json_urls_, var_json_url_, loader_, builder_) {
-
-
         var base_json_name = base_json_urls_.replace(/^.*[\\\/]/, '').split('.')[0];
-
-        console.log('before');
-
         // create a new loader
         loader_.add('base_json', base_json_urls_).load(on_base_loaded.bind(this));
         loader_.once('complete', on_base_completed.bind(this));
-
         var o = this;
-        console.log('after');
 
         // refer http://pixijs.github.io/examples/index.html
         function on_base_loaded(loader_, res_)
@@ -98,8 +90,7 @@ class Asset {
         return;
     }
 
-    load_variable(variables_json_url_, loader_, builder_)
-    {
+    load_variable(variables_json_url_, loader_, builder_) {
         // create a new loader
         loader_.add('var_json', variables_json_url_).load(on_var_loaded.bind(this));
         loader_.once('complete', on_var_completed.bind(this));
@@ -116,42 +107,25 @@ class Asset {
         function on_var_completed(e_) { this.load_variable_completed = true; }
     }
 
-    build_base(name_, src_)
-    {
+    build_base(name_, src_) {
         console.log('build: ' + name_);
         if (src_.spineData != undefined) // src_ is spine
         {
             var spine = new PIXI.spine.Spine(src_.spineData);
             // set current skin
             spine.skeleton.setSlotsToSetupPose();
-
-            // set the position
-            spine.position.x = window.innerWidth/2;
-            spine.position.y = window.innerHeight;
-
             // play animation
             spine.state.setAnimationByName(0, "walk", true);
-            // spine.skeleton.data.skins.attachments
-            // for (i = 0; i < spine.getChildIndex(); ++i) {}
-            //         this.gen_appearance(src_.appearance);
+            spine.update(0);
+            spine.autoUpdate = false;
 
-            switch (name_)
-            {
-            case 'humanoid':
-                this.appearance_template[name_] = new Humanoid();
-                this.appearance_template[name_].init(spine);
-                break;
-            case 'multileg':
-                this.appearance_template[name_] = new Multileg(spine); break;
-            case 'noleg':
-                this.appearance_template[name_] = new Noleg(spine); break;
-            }
+            this.appearance_template[name_] = new Appearance();
+            this.appearance_template[name_].init(spine);
+            return;
         }
-
     }
 
-    build_variable(src_)
-    {
+    build_variable(src_) {
         if (!src_) { return false; }
         // item
         this.gen_item(src_.item);
@@ -169,15 +143,13 @@ class Asset {
         return true;
     }
 
-    free(entry_)
-    {
+    free(entry_) {
         console.log('freeing' + entry_.get_id());
         this.id_pool.free_id(entry_.get_id());
         // entry_.get_sprite().renderable = false;
     }
 
-    gen_texture(image_)
-    {
+    gen_texture(image_) {
         var atras_image = PIXI.BaseTexture.fromImage(image_);
         for (var i = 0; i < 256; ++i)
         {
@@ -187,8 +159,7 @@ class Asset {
         }
     }
 
-    gen_panel(cmd_queue_, texture_, x_, y_, item_array_)
-    {
+    gen_panel(cmd_queue_, texture_, x_, y_, item_array_) {
         var panel_sprite = new UISprite(this.id_pool.get_id(), cmd_queue_);
         this.id_bst.add(panel_sprite);
         panel_sprite.init_as_panel(x_, y_, this.get_texture(texture_));
@@ -208,8 +179,7 @@ class Asset {
         return panel_sprite;
     }
 
-    gen_dom(cmd_queue_, texture_, x_, y_, item_array_)
-    {
+    gen_dom(cmd_queue_, texture_, x_, y_, item_array_) {
         var dom_sprite = new UISprite(this.id_pool.get_id(), cmd_queue_);
         this.id_bst.add(dom_sprite);
         dom_sprite.init_as_dom(x_, y_, item_array_[0], item_array_[1]);
@@ -217,8 +187,7 @@ class Asset {
     }
 
     // need validations
-    gen_item(entry_)
-    {
+    gen_item(entry_) {
         if (!entry_) { return 0; }
 
         for (var i = 0; i < entry_.length; ++i)
@@ -232,8 +201,7 @@ class Asset {
         return 1;
     }
 
-    gen_terrain(entry_)
-    {
+    gen_terrain(entry_) {
         if (!entry_) { return 0; }
 
         for (var i = 0; i < entry_.length; ++i)
@@ -247,8 +215,7 @@ class Asset {
         return this.terrain.length;
     }
 
-    gen_avatar(entry_)
-    {
+    gen_avatar(entry_) {
         if (!entry_) { return 0; }
 
         for (var i = 0; i < entry_.length; ++i)
@@ -263,8 +230,7 @@ class Asset {
         return this.avatar_template.length;
     }
 
-    gen_actor(entry_)
-    {
+    gen_actor(entry_) {
         if (!entry_) { return 0; }
 
         for (var i = 0; i < entry_.length; ++i)
@@ -282,9 +248,7 @@ class Asset {
         return this.actor_template.length;
     }
 
-
-    gen_level(entry_)
-    {
+    gen_level(entry_) {
         if (!entry_) { return 0; }
 
         for (var i = 0; i < entry_.length; ++i)
@@ -299,18 +263,10 @@ class Asset {
                 {
                     var base_avatar = clone(this.find_avatar_(avatar_type));
                     var newavatar = base_avatar.get_actor();
-                    var appearance = this.find_appearance_('humanoid');
-
-                    //                 appearance.texture = this.get_texture(131);
-                    //                 appearance.set_head(this.get_texture(131));
-
-                    // avatar and actors should have these (own) clones.
-                    //                 console.log(appearance);
-                    //                 console.log(appearance.slotContainers);
+                    var entity_sprite = this.gen_entitysprite_('humanoid');
 
                     newavatar.init(this.id_pool.get_id(), avatar_type,
-                                   //                                new EntitySprite(this.get_texture(131)),
-                                   appearance.get_spine(), // new PIXI.Sprite(this.get_texture(131)),
+                                   entity_sprite,
                                    parseInt(entry_[i].avatar[avatar_type][avtr].x),
                                    parseInt(entry_[i].avatar[avatar_type][avtr].y));
                     newavatar.set_next_tick(0);
@@ -324,10 +280,9 @@ class Asset {
                 for (var actr in entry_[i].actor[actor_type])
                 {
                     var newactor = clone(this.find_actor_(actor_type));
-                    var news = this.appearance_template['humanoid'].get_spine();
+                    var actor_sprite = this.gen_entitysprite_('humanoid');
                     newactor.init(this.id_pool.get_id(), actor_type,
-                                  news,
-                                  //                               new PIXI.Sprite(this.get_texture(128)),
+                                  actor_sprite,
                                   parseInt(entry_[i].actor[actor_type][actr].x),
                                   parseInt(entry_[i].actor[actor_type][actr].y), 3);
                     level.add_actor(newactor);
