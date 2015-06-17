@@ -15,6 +15,13 @@ class RRLL {
         // add the renderer view element to the DOM
         document.body.appendChild(this.renderer.view);
         PIXI.DOM.Setup(this.renderer, true);
+
+        // 
+        this.stats = new Stats();
+        this.stats.domElement.style.position = 'absolute';
+        this.stats.domElement.style.left = '' + RC.SCREEN_WIDTH - 80 + 'px';
+        this.stats.domElement.style.top = '0px';
+        document.body.appendChild(this.stats.domElement);
     }
 
     start()
@@ -44,7 +51,8 @@ class RRLL {
     }
 
     animate() {
-        requestAnimationFrame(this.animate.bind(this));
+        this.stats.begin();
+
 
         // normal tick
         if (this.ui.is_command_queued())
@@ -60,6 +68,9 @@ class RRLL {
 
         // render the stage
         this.renderer.render(this.gfx.get_root());
+        this.stats.end();
+
+        requestAnimationFrame(this.animate.bind(this));
     }
 }
 

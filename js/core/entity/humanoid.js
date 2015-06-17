@@ -1,32 +1,6 @@
 /// http://www.html5gamedevs.com/topic/7546-pixi-dragonbones/
-function Humanoid() {
-    PIXI.Sprite.apply(this, arguments);
-    this.sprite = PIXI.Sprite.prototype;
-//     EntitySprite.apply(this, arguments);
-//     this.entitysprite = EntitySprite.prototype;
-
-//     this.sprites = clone(spine_.slotContainer, false, 2);
-    console.log('humanoid found');
-};
-
-Humanoid.prototype = Object.create(PIXI.Sprite.prototype);
-Humanoid.prototype.constructor = Humanoid;
-
-Humanoid.prototype.init = function(spine_) {
-    this.spine = spine_;
-};
-
-Humanoid.prototype.get_spine = function() {
-    return this.spine;
-};
-
-
-// http://esotericsoftware.com/forum/viewtopic.php?f=3&t=1322
-Humanoid.prototype.flip_x = function() {
-    this.spine.skeleton.flipX = true;
-};
-
-// appearance of bones
+    // appearance of bones
+/*
 Humanoid.prototype.set_torso = function(texture_) {
     this.spine.skeleton.slots[0].sprites['torso'].texture = texture_;
 };
@@ -72,3 +46,4 @@ Humanoid.prototype.set_rightshod = function() {
 
 Humanoid.prototype.set_leftshod = function() {
 };
+*/
