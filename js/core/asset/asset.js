@@ -112,13 +112,6 @@ class Asset {
         if (src_.spineData != undefined) // src_ is spine
         {
             var spine = new PIXI.spine.Spine(src_.spineData);
-            // set current skin
-            spine.skeleton.setSlotsToSetupPose();
-            // play animation
-            spine.state.setAnimationByName(0, "walk", true);
-            spine.update(0);
-            spine.autoUpdate = false;
-
             this.appearance_template[name_] = new Appearance();
             this.appearance_template[name_].init(spine);
             return;
