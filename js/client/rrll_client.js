@@ -1,14 +1,16 @@
-class RRLL {
+class RRLLClient {
     constructor(asset_loc_) {
         this.asset_location = asset_loc_;
         this.poll_interval = null;
 
         this.gfx = new Gfx();
         this.sound = new Sound();
-        this.asset = new Asset("img/texture.png");
+        this.asset = new Asset("data/texture.png");
         this.ui = new UI();
 
         this.scene_stack = new SceneStack();
+
+        this.net = new Net();
 
         // create a renderer instance.
         this.renderer = PIXI.autoDetectRenderer(RC.SCREEN_WIDTH, RC.SCREEN_HEIGHT);
@@ -16,7 +18,7 @@ class RRLL {
         document.body.appendChild(this.renderer.view);
         PIXI.DOM.Setup(this.renderer, true);
 
-        // 
+        // stats.js
         this.stats = new Stats();
         this.stats.domElement.style.position = 'absolute';
         this.stats.domElement.style.left = '' + RC.SCREEN_WIDTH - 80 + 'px';
@@ -27,6 +29,7 @@ class RRLL {
     start()
     {
         this.asset.init(this.asset_location);
+        this.net.init();
 
         var self = this;
 
@@ -52,7 +55,7 @@ class RRLL {
 
     animate() {
         this.stats.begin();
-
+        this.net.tick();
 
         // normal tick
         if (this.ui.is_command_queued())

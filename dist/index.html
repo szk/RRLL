@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link href="dist/bootstrap.min.css" rel="stylesheet">
+    <link href="bootstrap.min.css" rel="stylesheet">
     <meta charset="utf-8">
     <title>RudeRogueLikeLike</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -59,11 +59,12 @@
   </head>
   <body>
     <div id="gameContainer"></div>
-    <script src="dist/rrll.min.js"></script>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="rrll_cl.min.js"></script>
     <script type="text/javascript">
       <!--
           // refer static file
-          var main = new RRLL("data/level.json");
+          var main = new RRLLClient("data/level.json");
           main.start();
         -->
     </script>

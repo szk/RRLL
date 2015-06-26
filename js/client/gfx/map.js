@@ -186,7 +186,7 @@ class Map {
         var y = center_y_;
         var r = radius_;
         var r2 = r * r;
-        var tile_tex = new PIXI.Texture.fromImage("img/null_tile.png");
+        var tile_tex = new PIXI.Texture.fromImage(CL.NULL_TILE_IMG);
 
         // check block pos
         this.tile_container.addChild(this.gen_dpy_sprite(tile_tex, x, y + r));

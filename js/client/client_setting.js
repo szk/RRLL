@@ -3,12 +3,20 @@
  */
 var RecursiveShadowcasting = null;
 
+
+var CL = CL || {};
+
+/*
+ * Fallback texture
+ */
+CL.NULL_TILE_IMG = "data/null_tile.png";
+
 /*
  * Global setting of the client
  */
-var ClientSetting = ClientSetting || {};
+
 
 /*
  * Network
  */
-ClientSetting.NET_MAX_RETRY_TIMES = 10;
+CL.NET_MAX_RETRY_TIMES = 10;

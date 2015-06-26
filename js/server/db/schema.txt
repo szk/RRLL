@@ -1,0 +1,58 @@
+GLOBAL:
+ MODE: ( "dev" / "debug" / "production" )
+ SERVERNAME: str
+ LEVELLIST: [...]
+ CLIENTLIMIT: n
+ IDLELIMIT: n
+ RANDOMSEED: n // use for level and entity_type generation
+
+LEVEL:
+ TICK: n
+ TERRAIN:
+  LOC[x][y]:
+   TILE: // tile_type
+   SEETHROUGH: boolean
+   PASSABLE: boolean
+   ENTITIES[id_list]
+ ENTITY[id]:
+  TYPE[entity_type_id]:
+  VISUAL_RANGE:
+  STATUS:
+   LOC:
+   DIR:
+  PART[]: // (texture id of bodypart or itempart)
+  ASSET[]:
+  SYNCED: // synced on clients' screens?
+   LOC: boolean (position was synced with other screen?) --These flags are used for synchronise with clients
+   DIR: boolean (direction was synced with other screen?)
+   APR: boolean (appearance was synced with other screen?) --
+
+TILE_TYPE[...]:
+ MATERIAL: // influence the impact sound and
+ APR:
+  MODE: (animation / illuminate / mono / cover)
+  PART[]: // texture id
+
+ENTITY_TYPE[...]:
+ SPEC: (actor, item, object)
+ STATBASE: (volume, weight, max hp, max mp, median hp, median mp, calorie, moisture)
+ APR:
+  MODE: (skeleton, animation, mono)
+  PART[]: // texture id of each parts
+
+CLIENT[id_list]:
+ NAME:
+ CONNECTED_TIME:
+ SOCKET:
+ PING:
+ PING_STDEV: // cheater finder
+ STATE: ( "living" / "dead" / "connecting" / "disconnecting" / "suspending" )
+ IDLE: n (tick)
+ AVATAR: (an id of entity)
+ VISIBLE_ENTITIES:[...]
+  SYNCED: // is synced other visible entities
+   LOC: boolean
+   DIR: boolean
+   APR: boolean
+
+ACCOUNT:
