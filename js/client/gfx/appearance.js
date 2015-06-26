@@ -49,12 +49,12 @@ class Appearance {
         case RC.APPEARANCE_TYPE.EMITTER:
             break;
         case RC.APPEARANCE_TYPE.SKELETON:
-            var new_sprite = new EntitySprite(PIXI.Texture.fromImage("img/null_tile.png"));
+            var new_sprite = new EntitySprite(PIXI.Texture.fromImage(CL.NULL_TILE_IMG));
             new_sprite.init(RC.APPEARANCE_TYPE.SKELETON, this.template);
             this.template.update(0.5);
             for (let s of this.template.children)
             {
-                let child_sprite = new EntitySprite(PIXI.Texture.fromImage("img/null_tile.png"));
+                let child_sprite = new EntitySprite(PIXI.Texture.fromImage(CL.NULL_TILE_IMG));
                 child_sprite.texture = s.children[0].texture;
                 child_sprite.position = s.position;
                 child_sprite.scale = s.scale;

@@ -1,4 +1,4 @@
-// type.js
+// common.js
 var RC = RC || {};
 RC.SCENE_MODE = {
     LOADING:0,
@@ -7,6 +7,7 @@ RC.SCENE_MODE = {
     GAMEOVER:3,
     RANKING:4
 };
+
 RC.ENTITY_TYPE = {
     ROOT:0, // for asset
     HUMANOID:1, MULTILEG:2, NOLEG:3, // for actor
@@ -117,6 +118,22 @@ RC.APPEARANCE_TYPE = {
     EMITTER: 2,
     SKELETON: 3,
     UNDEFINED: 4
+};
+
+//// Network
+// server to client
+RC.S2C = {
+    HEARTBEAT: 0,
+    STATE: 1,
+    SNAPSHOT: 2,
+    SERVER_CMD: 3,
+    DOWNLOAD: 4
+};
+// client to server
+RC.C2S = {
+    HEARTBEAT: 0,
+    MOVE: 1,
+    CLIENT_CMD: 2
 };
 
 //

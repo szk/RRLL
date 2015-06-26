@@ -4,186 +4,158 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON('package.json'),
 
         concat: {
-            files: {
-                options: {
-                    banner: "'use strict';\n"
-                },
-                src: ['js/core/client_setting.js',
-                      // libs
-                      'js/lib/*.js',
-                       // common type
-                      'js/core/type.js',
-                      'js/core/menu_content.js',
+            client: {
+                src: ['js/common.js', // common type
+                      'js/client/menu_content.js',
                       // entity
-                      'js/core/entity/entity.js',
-                      'js/core/entity/item.js',
-                      'js/core/entity/actor.js',
-                      'js/core/entity/humanoid.js',
-                      'js/core/entity/multileg.js',
-                      'js/core/entity/noleg.js',
+                      'js/client/entity/entity.js',
+                      'js/client/entity/item.js',
+                      'js/client/entity/actor.js',
+                      'js/client/entity/humanoid.js',
+                      'js/client/entity/multileg.js',
+                      'js/client/entity/noleg.js',
                       // level
-                      'js/core/level/tick_node.js',
-                      'js/core/level/tile.js',
-                      'js/core/level/terrain.js',
-                      'js/core/level/level.js',
+                      'js/client/level/tick_node.js',
+                      'js/client/level/tile.js',
+                      'js/client/level/terrain.js',
+                      'js/client/level/level.js',
                       // ui
-                      'js/core/ui/avatar.js',
-                      'js/core/ui/ui.js',
+                      'js/client/ui/avatar.js',
+                      'js/client/ui/ui.js',
                       // asset
-                      'js/core/asset/object_pool.js',
-                      'js/core/asset/id_pool.js',
-                      'js/core/asset/asset.js',
+                      'js/client/asset/object_pool.js',
+                      'js/client/asset/id_pool.js',
+                      'js/client/asset/asset.js',
                       // gfx
-                      'js/core/gfx/entity_sprite.js',
-                      'js/core/gfx/tile_sprite.js',
-                      'js/core/gfx/wall_sprite.js',
-                      'js/core/gfx/ui_sprite.js',
-                      'js/core/gfx/appearance.js',
-                      'js/core/gfx/overlay.js',
-                      'js/core/gfx/map.js',
-                      'js/core/gfx/gfx.js',
+                      'js/client/gfx/entity_sprite.js',
+                      'js/client/gfx/tile_sprite.js',
+                      'js/client/gfx/wall_sprite.js',
+                      'js/client/gfx/ui_sprite.js',
+                      'js/client/gfx/appearance.js',
+                      'js/client/gfx/overlay.js',
+                      'js/client/gfx/map.js',
+                      'js/client/gfx/gfx.js',
                       // sound
-                      'js/core/sound/sound.js',
+                      'js/client/sound/sound.js',
                       // game scenes
-                      'js/core/scene/scene.js',
-                      'js/core/scene/loading.js',
-                      'js/core/scene/intro.js',
-                      'js/core/scene/playing.js',
-                      'js/core/scene/sandbox.js',
-                      'js/core/scene/menu.js',
-                      'js/core/scene/gameover.js',
-                      'js/core/scene/ranking.js',
-                      'js/core/scene/scene_stack.js',
-                      // main
-                      'js/core/main.js'],
-                dest: 'js/build/client.js'
+                      'js/client/scene/scene.js',
+                      'js/client/scene/loading.js',
+                      'js/client/scene/intro.js',
+                      'js/client/scene/playing.js',
+                      'js/client/scene/sandbox.js',
+                      'js/client/scene/menu.js',
+                      'js/client/scene/gameover.js',
+                      'js/client/scene/ranking.js',
+                      'js/client/scene/scene_stack.js',
+                      // network
+                      'js/client/net/net.js',
+                      // bootstrap and mainloop
+                      'js/client/rrll_client.js'],
+                dest: 'js/build/client.es6.js'
             },
-
-            core: {
-                src: [// common type
-                      'js/core/type.js',
-                      'js/core/menu_content.js',
-                      // entity
-                      'js/core/entity/entity.js',
-                      'js/core/entity/item.js',
-                      'js/core/entity/actor.js',
-                      'js/core/entity/humanoid.js',
-                      'js/core/entity/multileg.js',
-                      'js/core/entity/noleg.js',
-                      // level
-                      'js/core/level/tick_node.js',
-                      'js/core/level/tile.js',
-                      'js/core/level/terrain.js',
-                      'js/core/level/level.js',
-                      // ui
-                      'js/core/ui/avatar.js',
-                      'js/core/ui/ui.js',
-                      // asset
-                      'js/core/asset/object_pool.js',
-                      'js/core/asset/id_pool.js',
-                      'js/core/asset/asset.js',
-                      // gfx
-                      'js/core/gfx/entity_sprite.js',
-                      'js/core/gfx/tile_sprite.js',
-                      'js/core/gfx/wall_sprite.js',
-                      'js/core/gfx/ui_sprite.js',
-                      'js/core/gfx/appearance.js',
-                      'js/core/gfx/overlay.js',
-                      'js/core/gfx/map.js',
-                      'js/core/gfx/gfx.js',
-                      // sound
-                      'js/core/sound/sound.js',
-                      // game scenes
-                      'js/core/scene/scene.js',
-                      'js/core/scene/loading.js',
-                      'js/core/scene/intro.js',
-                      'js/core/scene/playing.js',
-                      'js/core/scene/sandbox.js',
-                      'js/core/scene/menu.js',
-                      'js/core/scene/gameover.js',
-                      'js/core/scene/ranking.js',
-                      'js/core/scene/scene_stack.js',
-                      // main
-                      'js/core/main.js'],
-                dest: 'js/build/core.es6.js'
-            },
-
-            bundle: {
-                src: ['js/core/client_setting.js',
-                      'js/lib/*.js',
-                      'js/build/core.es5.js'],
-                dest: 'js/build/client.es5.js'
-            },
-
-            dist: {
-                options: {
-                    banner: "'use strict';\n"
-                },
+            client_bundle: {
                 src: ['LICENSE',
-                      'js/build/client.min.js'],
-                dest: 'dist/rrll.min.js'
+                      'js/client/client_setting.js',
+                      'js/lib/*.js',
+                      'js/build/client.es5.js'],
+                dest: 'js/build/client_bdl.es5.js'
+            },
+
+            server: {
+                src: ['js/common.js',
+                      // db
+                      'js/server/db/db.js',
+                      // procedural content generator
+                      'js/server/pcg/pcg.js',
+                      // net
+                      'js/server/net/socket.js',
+                      'js/server/net/web.js',
+                      'js/server/net/net.js',
+                      // bootstrap and mainloop
+                      'js/server/rrll_server.js'],
+                dest: 'js/build/server.es6.js'
+            },
+            server_bundle: {
+                src: ['LICENSE',
+                      'js/server/server_setting.js',
+                      // 'js/lib/*.js',
+                      'js/build/server.es5.js'],
+                dest: 'js/build/server_bdl.es5.js'
             }
         },
 
         // ES6
         babel: {
             options: {
-                sourceMap: true
-//                 compact: false
+                // sourceMap: true
+                // compact: false
             },
             dist: {
                 files: {
-                    "js/build/core.es5.js": "js/build/core.es6.js"
+                    "js/build/client.es5.js": "js/build/client.es6.js",
+                    "js/build/server.es5.js": "js/build/server.es6.js"
                 }
             }
         },
 
         uglify: {
             options: {
+                preserveComments: 'some',
+                sourceMap: true,
                 mangle: true,
-//                 compress: true,
-                preserveComments: 'some'
+                compress: { drop_console: true }
             },
-            min: {
+            es5: {
+                options: { banner: "'use strict';" },
                 files: {
-                    'js/build/client.min.js': 'js/build/client.js'
-                }
-            },
-            es6: {
-                files: {
-                    'js/build/client.min.js': 'js/build/client.es5.js'
+                    'dist/rrll_cl.min.js': 'js/build/client_bdl.es5.js',
+                    'dist/rrll_sv.min.js': 'js/build/server_bdl.es5.js'
                 }
             }
         },
         watch: {
+            options: {
+                // spawn: false
+                livereload: true
+            },
             scripts: {
-                files: ['js/core/*/*.js', 'js/core/*.js'],
+                files: ['js/*.js',
+                        'js/client/*/*.js', 'js/client/*.js',
+                        'js/server/*/*.js', 'js/server/*.js'],
                 tasks: ['build']
-                // tasks: ['concat:files', 'uglify', 'concat:dist'] es5
             }
         },
+        shell: {
+            start: {
+                command: 'npm start'
+            }
+        },
+
         jasmine: {
             pivotal: {
-                src: 'js/build/client.js',
+                src: 'js/build/rrll_cl.js',
                 options: {
                     specs: 'js/test/test_*.js',
-                    // keepRunner: true,
                     summary: true
+                    // keepRunner: true,
 	        }
             }
         }
     });
 
     grunt.loadNpmTasks('grunt-babel');
+    grunt.loadNpmTasks('grunt-shell');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jasmine');
 
-    grunt.registerTask('default', ['concat:files', 'uglify', 'concat:dist', 'jasmine']);
-    grunt.registerTask('es5', ['concat:files', 'uglify', 'concat:dist']);
+    grunt.registerTask('default', ['concat:client', 'babel:dist', 'concat:client_bundle', 'uglify:es5',
+                                   'jasmine']);
+    grunt.registerTask('build',
+                       ['concat:client', 'concat:server', 'babel:dist',
+                        'concat:client_bundle', 'concat:server_bundle',
+                        'uglify:es5']);
 
-    grunt.registerTask('build', ['concat:core', 'babel:dist', 'concat:bundle', 'uglify:es6', 'concat:dist']);
-
-    grunt.registerTask('start', ['watch']);
+    grunt.registerTask('start', ['shell:start', 'watch']);
 };

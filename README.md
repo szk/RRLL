@@ -3,10 +3,10 @@ Roguelike game on HTML5. [LIVEDEMO](http://szk.github.io/RRLL/)
 **IMPORTANT: Early version, this is not playable as a game.**
 
 ## Current features
-- Simple Client-Server model
 - Isometric view
+- Spine animation
+- Simple Client-Server model (Express + Socket.io + Redis)
 - Multiplatform (on HTML5/WebGL compliant browsers)  
-
 More > [RRLL Wiki](https://github.com/szk/RRLL/wiki/)
 
 ## How to build / play on your computer
@@ -21,12 +21,10 @@ Clone master branch or [download archive](https://github.com/szk/RRLL/archive/ma
         $ grunt build
 
 ### For playing
-1. Install Python 2.5+ or 3.x.
 1. Type from command prompt:
 
     <!-- language: sh -->
-        $ cd py
-        $ python index.py
+        $ npm start
 1. Access ```http://localhost:8080/``` with web browser (IE 11+, FF 15+, Chrome 11+, Safari 5.1+, Opera 19+).
 
 ## License
