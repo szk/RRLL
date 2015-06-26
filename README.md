@@ -1,5 +1,5 @@
 # RudeRogueLikeLike
-Roguelike game on HTML5. [LIVEDEMO](http://szk.github.io/RRLL/)  
+Roguelike game on HTML5. [LIVEDEMO](http://szk.github.io/RRLL/dist/)  
 **IMPORTANT: Early version, this is not playable as a game.**
 
 ## Current features
