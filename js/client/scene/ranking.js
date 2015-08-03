@@ -8,7 +8,7 @@ class RankingScene extends Scene {
         return true;
     }
 
-    activate()
+    activate(ui_)
     {
     }
 

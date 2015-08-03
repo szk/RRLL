@@ -2,9 +2,9 @@
   "name": "RudeRogueLikeLike",
   "version": "0.0.0",
   "description": "Rude Rogue Like Like game on the web",
-  "main": "client.min.js",
+  "main": "dist/rrll_sv.min.js",
   "scripts": {
-    "start": "node js/build/server_bdl.es5.js"
+    "start": "node dist/rrll_sv.min.js"
   },
   "author": "Tatsuhiko Suzuki <s@vram.org> (http://vram.org/)",
   "license": "MIT",
@@ -15,6 +15,7 @@
     "grunt-contrib-jasmine": "^0.8.2",
     "grunt-contrib-uglify": "^0.7.0",
     "grunt-contrib-watch": "^0.6.1",
+    "grunt-jsdoc": "^0.6.7",
     "grunt-shell": "^1.1.2"
   },
   "dependencies": {

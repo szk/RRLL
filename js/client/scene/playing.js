@@ -2,9 +2,11 @@ class PlayingScene extends Scene {
     constructor() {
         super();
         this.panels = [];
+        this.ui = null;
     }
 
     init(asset_, ui_) {
+        this.ui = ui_;
         // initialize terrain
         this.terrain = asset_.find_terrain("defaultmap");
         this.terrain.init();
@@ -42,7 +44,7 @@ class PlayingScene extends Scene {
         this.panels.push(move_panel);
 
         var inventry_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 824, 400,
-                                              [['inv', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.INVENTRY], 0, 0, 200, 200,
+                                              [['inv', [RC.CMD_ACTOR_ACT.CHANGE_SCENE, RC.NEXT_SCENE.MAINMENU], 0, 0, 200, 200,
                                                 asset_.get_texture(3)]]);
         ui_.add_sprite(inventry_panel.get_sprite());
         this.panels.push(inventry_panel);
@@ -56,7 +58,7 @@ class PlayingScene extends Scene {
         this.panels.push(automation_panel);
 
         var menu_panel = asset_.gen_panel(ui_.command_queue, asset_.get_texture(1), 0, 0,
-                                          [['menu', [RC.CMD_ACTOR_ACT.MENU, RC.CMD_MENU_TYPE.MAIN], 0, 0, 50, 50,
+                                          [['menu', [RC.CMD_ACTOR_ACT.CHANGE_SCENE, RC.NEXT_SCENE.MAINMENU], 0, 0, 50, 50,
                                             asset_.get_texture(3)]]);
         ui_.add_sprite(menu_panel.get_sprite());
         this.panels.push(menu_panel);
@@ -69,6 +71,23 @@ class PlayingScene extends Scene {
     activate()
     {
         console.log('activate playing scene');
+        this.ui.set_keybinding([
+            // wait
+            {"keys": "s", "this": this, "on_keydown": function() { this.ui.command_queue.add([RC.CMD_ACTOR_ACT.WAIT, RC.CMD_ACTOR_DIR.LEFT]); }},
+            // move
+            {"keys": "q", "this": this, "on_keydown" : function() { this.ui.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.LEFT]); }},
+            {"keys": "z", "this": this, "on_keydown" : function() { this.ui.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWN]); }},
+            {"keys": "e", "this": this, "on_keydown" : function() { this.ui.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UP]); }},
+            {"keys": "c", "this": this, "on_keydown" : function() { this.ui.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.RIGHT]); }},
+            {"keys": "w", "this": this, "on_keydown" : function() { this.ui.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPLEFT]); }},
+            {"keys": "d", "this": this, "on_keydown" : function() { this.ui.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.UPRIGHT]); }},
+            {"keys": "a", "this": this, "on_keydown" : function() { this.ui.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNLEFT]); }},
+            {"keys": "x", "this": this, "on_keydown" : function() { this.ui.command_queue.add([RC.CMD_ACTOR_ACT.MOVE, RC.CMD_ACTOR_DIR.DOWNRIGHT]); }},
+            // menus
+            {"keys": "esc", "this": this, "on_keydown" : function() { this.ui.command_queue.add([RC.CMD_ACTOR_ACT.CHANGE_SCENE, RC.NEXT_SCENE.MAINMENU]); }},
+            {"keys": "enter", "this": this, "on_keydown" : function() { this.ui.command_queue.add([RC.CMD_ACTOR_ACT.CHANGE_SCENE, RC.NEXT_SCENE.TALKMENU]); }},
+            {"keys": "i", "this": this, "on_keydown" : function() { this.ui.command_queue.add([RC.CMD_ACTOR_ACT.CHANGE_SCENE, RC.NEXT_SCENE.ABOUTMENU]); }}
+        ]);
     }
 
     deactivate()
@@ -85,17 +104,10 @@ class PlayingScene extends Scene {
             return RC.NEXT_SCENE.CONTINUE;
         }
 
-        if (cmd[0] == RC.CMD_ACTOR_ACT.MENU)
+        if (cmd[0] == RC.CMD_ACTOR_ACT.CHANGE_SCENE)
         {
-            var next_menu = cmd[1];
             ui_.clear_command_queue();
-            switch (next_menu)
-            {
-            case RC.CMD_MENU_TYPE.MAIN: return RC.NEXT_SCENE.MAINMENU;
-            case RC.CMD_MENU_TYPE.SETTING: return RC.NEXT_SCENE.SETTINGMENU;
-            case RC.CMD_MENU_TYPE.INFO: return RC.NEXT_SCENE.INFO;
-            }
-            return RC.NEXT_SCENE.CONTINUE;
+            return cmd[1];
         }
 
         this.level.update(ui_.get_command_queue());

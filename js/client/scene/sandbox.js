@@ -31,28 +31,23 @@ class SandboxScene extends Scene {
             //         this.panels[i].terminate();
             //         this.asset.free(this.panels[i]);
         }
-
     }
 
     update(ui_) {
         var cmd = ui_.get_command_queue().peek();
         ui_.clear_command_queue();
-        if (!cmd && !cmd[0] && !cmd[1])
-        {
+        if (!cmd && !cmd[0] && !cmd[1]) { return RC.NEXT_SCENE.CONTINUE; }
 
-            return RC.NEXT_SCENE.CONTINUE;
-        }
-
-        if (cmd[0] == RC.CMD_ACTOR_ACT.MENU)
+        if (cmd[0] == RC.CMD_ACTOR_ACT.CHANGE_SCENE)
         {
             var pressed_button = cmd[1];
             ui_.clear_command_queue();
             switch (pressed_button)
             {
-            case RC.CMD_MENU_TYPE.CANCEL:
+            case RC.NEXT_SCENE.RETURN:
                 console.log('cancel clicked'); return RC.NEXT_SCENE.RETURN;
-            case RC.CMD_MENU_TYPE.OK:
-                console.log('ok clicked'); return RC.NEXT_SCENE.RETURN;
+            case RC.NEXT_SCENE.ACCEPT:
+                console.log('ok clicked'); return RC.NEXT_SCENE.ACCEPT;
             }
             console.log('clicked: ' + cmd[1]);
             return cmd[1];

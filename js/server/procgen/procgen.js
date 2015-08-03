@@ -1,0 +1,7 @@
+class ProcGen {
+    constructor() {
+    }
+
+    init() {
+    }
+}

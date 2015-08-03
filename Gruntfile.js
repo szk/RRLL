@@ -58,7 +58,7 @@ module.exports = function(grunt) {
                       'js/client/client_setting.js',
                       'js/lib/*.js',
                       'js/build/client.es5.js'],
-                dest: 'js/build/client_bdl.es5.js'
+                dest: 'dist/rrll_cl.js'
             },
 
             server: {
@@ -66,11 +66,14 @@ module.exports = function(grunt) {
                       // db
                       'js/server/db/db.js',
                       // procedural content generator
-                      'js/server/pcg/pcg.js',
+                      'js/server/procgen/proclevel.js',
+                      'js/server/procgen/procgen.js',
                       // net
                       'js/server/net/socket.js',
                       'js/server/net/web.js',
                       'js/server/net/net.js',
+                      // world
+                      'js/server/world/world.js',
                       // bootstrap and mainloop
                       'js/server/rrll_server.js'],
                 dest: 'js/build/server.es6.js'
@@ -80,7 +83,7 @@ module.exports = function(grunt) {
                       'js/server/server_setting.js',
                       // 'js/lib/*.js',
                       'js/build/server.es5.js'],
-                dest: 'js/build/server_bdl.es5.js'
+                dest: 'dist/rrll_sv.js'
             }
         },
 
@@ -101,15 +104,15 @@ module.exports = function(grunt) {
         uglify: {
             options: {
                 preserveComments: 'some',
-                sourceMap: true,
-                mangle: true,
-                compress: { drop_console: true }
+                sourceMap: true
+                // mangle: true
+                // compress: { drop_console: true }
             },
             es5: {
                 options: { banner: "'use strict';" },
                 files: {
-                    'dist/rrll_cl.min.js': 'js/build/client_bdl.es5.js',
-                    'dist/rrll_sv.min.js': 'js/build/server_bdl.es5.js'
+                    'dist/rrll_cl.min.js': 'dist/rrll_cl.js',
+                    'dist/rrll_sv.min.js': 'dist/rrll_sv.js'
                 }
             }
         },

@@ -73,15 +73,13 @@ class Asset {
         var o = this;
 
         // refer http://pixijs.github.io/examples/index.html
-        function on_base_loaded(loader_, res_)
-        {
+        function on_base_loaded(loader_, res_) {
             // XXX dirty
             if (res_.base_json.isJson) { builder_.apply(o, [base_json_name, res_.base_json]); }
             else { builder_.apply(o, [JSON.parse(res_.base_json.data)]); }
         }
 
-        function on_base_completed()
-        {
+        function on_base_completed() {
             this.load_base_completed = true;
             //         console.log('next_assets');
             this.load_variable(var_json_url_, loader_, this.build_variable);
@@ -97,8 +95,7 @@ class Asset {
 
         var o = this;
         //begin load
-        function on_var_loaded(loader_, res_)
-        {
+        function on_var_loaded(loader_, res_) {
             // XXX dirty
             if (res_.var_json.isJson) { builder_.apply(o, [res_.var_json.data]); }
             else { builder_.apply(o, [JSON.parse(res_.var_json.data)]); }

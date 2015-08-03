@@ -68,6 +68,5 @@
             "actor": {"dog": [{"y": "5", "x": "10", "name": "jiro"}],
                       "human": [{"y": "4", "x": "5", "name": "taro"}]},
             "height": "54", "width": "54",
-            "avatar": {"defaultavatar": [{"y": "12", "x": "12"}]}},
-           {"width": "54", "texture_id": "1", "name": "moge", "height": "54"}]}
+            "avatar": {"defaultavatar": [{"y": "12", "x": "12"}]}}]}
 

@@ -54,7 +54,7 @@ class RRLLClient {
     }
 
     animate() {
-        this.stats.begin();
+        this.stats.begin(); // for Stats
         this.net.tick();
 
         // normal tick
@@ -64,6 +64,12 @@ class RRLLClient {
             else { this.scene_stack.update_top(this.ui); }
         }
 
+        // network
+        this.net.set_tx(this.scene_stack.get_local_cmd());
+        this.scene_stack.set_remote_cmd(this.net.get_rx());
+        this.scene_stack.sync_local();
+
+        // draw
         this.gfx.update(this.scene_stack.get_top_level());
 
         //     TODO: should own animations

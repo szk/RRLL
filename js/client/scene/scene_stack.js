@@ -4,6 +4,7 @@ class SceneStack {
         this.top = null;
         this.asset = null;
         this.ui = null;
+        this.stat_queue = new buckets.Queue();
     }
 
     init(asset_, ui_) {
@@ -11,25 +12,35 @@ class SceneStack {
         this.ui = ui_;
 
         // menus
-        this.mainmenu_scene = new MenuScene();
+        this.mainmenu_scene = new MenuScene(this.stat_queue);
         this.mainmenu_scene.init(this.asset, this.ui, 384, 64, MENU.MAIN['tag'], MENU.MAIN['command']);
-        this.settingmenu_scene = new MenuScene();
+        this.settingmenu_scene = new MenuScene(this.stat_queue);
         this.settingmenu_scene.init(this.asset, this.ui, 0, 0, MENU.SETTING['tag'], MENU.SETTING['command']);
-        this.aboutmenu_scene = new MenuScene();
+        this.aboutmenu_scene = new MenuScene(this.stat_queue);
         this.aboutmenu_scene.init(this.asset, this.ui, 0, 0, MENU.ABOUT['tag'], MENU.ABOUT['command']);
+        this.talkmenu_scene = new MenuScene(this.stat_queue);
+        this.talkmenu_scene.init(this.asset, this.ui, 0, 0, MENU.TALK['tag'], MENU.TALK['command']);
+
         // playing
         this.loading_scene = new LoadingScene();
+        this.loading_scene.init(this.asset, this.ui);
         this.intro_scene = new IntroScene();
+        this.intro_scene.init(this.asset, this.ui);
         this.playing_scene = new PlayingScene();
         this.playing_scene.init(this.asset, this.ui);
+        this.sandbox_scene = new SandboxScene();
+        // this.sandbox_scene.init(this.asset, this.ui);
         this.gameover_scene = new GameoverScene();
+        this.gameover_scene.init(this.asset, this.ui);
         this.ranking_scene = new RankingScene();
+        this.ranking_scene.init(this.asset, this.ui);
 
         this.push_(this.playing_scene);
-        this.ui.set_keybinding();
     }
 
     update_top(ui_) {
+        this.stat_queue.clear();
+
         var result = this.top.update(ui_);
         this.result_check_(result, ui_);
     }
@@ -45,6 +56,17 @@ class SceneStack {
             --i;
         }
         return null;
+    }
+
+    get_local_cmd() {
+        return this.stat_queue;
+    }
+
+    set_remote_cmd(queue_) {
+    }
+
+    sync_local() {
+        this.stat_queue.clear();
     }
 
     push_(scene_) {
@@ -78,11 +100,15 @@ class SceneStack {
         case RC.NEXT_SCENE.ABOUTMENU:
             console.log("result check says next is about");
             this.push_(this.aboutmenu_scene); break;
+        case RC.NEXT_SCENE.TALKMENU:
+            console.log("result check says next is talk");
+            this.push_(this.talkmenu_scene); break;
             // controller
         case RC.NEXT_SCENE.GAMEOVER: this.push_(this.gameover_scene); break;
         case RC.NEXT_SCENE.INTRO: this.push_(this.intro_scene); break;
         case RC.NEXT_SCENE.LOADING: this.push_(this.loading_scene); break;
         case RC.NEXT_SCENE.PLAYING: this.push_(this.playing_scene); break;
+        case RC.NEXT_SCENE.SANDBOX: this.push_(this.sandbox_scene); break;
         case RC.NEXT_SCENE.RANKING: this.push_(this.ranking_scene); break;
         case RC.NEXT_SCENE.RETURN: this.pop_(); break;
         }

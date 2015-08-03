@@ -29,7 +29,8 @@ class UISprite {
                 {
                     if (tgt.id == events_[i][0])
                     {
-                        console.log(tgt.id);
+                        // console.log(tgt.id);
+                        // console.log(tgt.value);
                         this.global_command.add(events_[i][1]);
                     }
                 }

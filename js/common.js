@@ -1,22 +1,13 @@
 // common.js
 var RC = RC || {};
-RC.SCENE_MODE = {
-    LOADING:0,
-    INTRO:1, // including title
-    PLAYING:2,
-    GAMEOVER:3,
-    RANKING:4
-};
 
+//// Level
 RC.ENTITY_TYPE = {
     ROOT:0, // for asset
     HUMANOID:1, MULTILEG:2, NOLEG:3, // for actor
     EQUIPMENT:4, ITEM:5, // for item
     WALL:6, STRUCTURE:7 // for terrain
 };
-
-RC.TILE_SCREEN_WIDTH = 45.0;
-RC.TILE_SCREEN_HEIGHT = 22.5;
 
 RC.TERRAIN_WIDTH = 50;
 RC.TERRAIN_HEIGHT = 50;
@@ -28,54 +19,28 @@ RC.TERRAIN_WALL_DIR = {
     WEST:8
 };
 
-RC.TEXTURE_CATEGORY = {
-    HEAD:0,
-    TORSO:1,
-    ARM:2,
-    LEG:3,
-    PART:4,
-    BODY:5,
-    WEAPON:6,
-    ARMOR:7,
-    CONSUMABLE:8,
-    TOOL:9
-};
-
+//// scene control
 RC.NEXT_SCENE = {
     CONTINUE: 0,
     MAINMENU: 1,
     SETTINGMENU: 2,
     ABOUTMENU: 3,
-    SANDBOX: 4,
-    GAMEOVER: 5,
-    INTRO: 6,
-    LOADING: 7,
-    PLAYING: 8,
-    RANKING: 9,
-    RETURN: 10
+    TALKMENU: 4,
+    SANDBOX: 5,
+    GAMEOVER: 6,
+    INTRO: 7,
+    LOADING: 8,
+    PLAYING: 9,
+    RANKING: 10,
+    RETURN: 11,
+    ACCEPT: 12
 };
 
+//// client commands
 RC.CMD_SYS = {
     NEXT_SCENE: 0,
     POP_SCENE: 1,
     RESTART_SCENE: 2
-};
-
-RC.CMD_MENU_TYPE = {
-    MAIN: 1,
-    SETTING: 2,
-    ABOUT: 3,
-    INVENTRY: 4,
-    CANCEL: 5,
-    OK: 6
-};
-
-/// bitmask test (not using)
-RC.CMD_TYPE = {
-    ACTOR:    0x10000000,
-    CLIENT:   0x20000000,
-    NETWORK:  0x40000000,
-    RESERVED: 0x80000000
 };
 
 RC.CMD_ACTOR_ACT = {
@@ -105,11 +70,29 @@ RC.CMD_ACTOR_DIR = {
     DOWNLEFT: 7
 };
 
-RC.UI_SPRITE_TYPE = {
-    MENU: 0,
-    DOM: 1,
-    BUTTON: 2,
-    UNDEFINED: 9
+// bitmask test (not using)
+RC.CMD_TYPE = {
+    ACTOR:    0x10000000,
+    CLIENT:   0x20000000,
+    NETWORK:  0x40000000,
+    RESERVED: 0x80000000
+};
+
+//// Visual
+RC.TILE_SCREEN_WIDTH = 45.0;
+RC.TILE_SCREEN_HEIGHT = 22.5;
+
+RC.TEXTURE_CATEGORY = {
+    HEAD:0,
+    TORSO:1,
+    ARM:2,
+    LEG:3,
+    PART:4,
+    BODY:5,
+    WEAPON:6,
+    ARMOR:7,
+    CONSUMABLE:8,
+    TOOL:9
 };
 
 RC.APPEARANCE_TYPE = {
@@ -118,6 +101,13 @@ RC.APPEARANCE_TYPE = {
     EMITTER: 2,
     SKELETON: 3,
     UNDEFINED: 4
+};
+
+RC.UI_SPRITE_TYPE = {
+    MENU: 0,
+    DOM: 1,
+    BUTTON: 2,
+    UNDEFINED: 9
 };
 
 //// Network

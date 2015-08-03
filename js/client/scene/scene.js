@@ -1,22 +1,19 @@
 class Scene {
-    constructor() {
+    constructor(stat_) {
         this.avatar = null;
         this.level = null;
         this.initialized = false;
         this.panels = [];
         this.ui = null;
+
+        this.stat = stat_;
     }
 
     init(asset_, ui_) {
         this.initialized = true;
+        this.asset = asset_;
         this.ui = ui_;
         return true;
-    }
-
-    activate() {
-    }
-
-    deactivate() {
     }
 
     activate() {
