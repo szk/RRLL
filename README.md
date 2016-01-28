@@ -17,6 +17,7 @@ Clone master branch or [download archive](https://github.com/szk/RRLL/archive/ma
 1. Type from command prompt:
 
     <!-- language: sh -->
+        # npm install -g grunt-cli
         $ npm install
         $ grunt build
 
